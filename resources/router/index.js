@@ -1,8 +1,11 @@
 import Router from "vue-router";
 import Vue from "vue";
+import { getToken, getUser, clearAuth } from '../js/auth';
 
+const Login = () => import('../js/components/Login');
 const Container = () => import('../js/components/containers/Container');
 const Dashboard = () => import('../js/components/Dashboard');
+const InvestorPortal = () => import('../js/components/InvestorPortal');
 const InwardQuality = () => import('../js/components/InwardQuality/InwardQualityContainer');
 const SellQuality = () => import('../js/components/SellQuality/SellQualityContainer');
 const Broker = () => import('../js/components/Broker/BrokerContainer');
@@ -23,15 +26,46 @@ const ManageChallanInvoice = () => import('../js/components/Invoice/ManageChalla
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
     mode: 'hash',
     linkActiveClass: 'active',
     scrollBehavior: () => ({ y: 0 }),
     routes: configRoutes()
-})
+});
+
+router.beforeEach((to, from, next) => {
+    const publicPages = ['/login'];
+    const authRequired = !publicPages.includes(to.path);
+    const loggedIn = !!getToken();
+    const user = getUser();
+
+    if (to.path === '/login' && loggedIn) {
+        if (user && user.role === 'investor') {
+            return next('/investor');
+        }
+        return next('/dashboard');
+    }
+
+    if (authRequired && !loggedIn) {
+        return next('/login');
+    }
+
+    if (user && user.role === 'investor' && !to.path.startsWith('/investor') && to.path !== '/login') {
+        return next('/investor');
+    }
+
+    next();
+});
+
+export default router;
 
 function configRoutes() {
     return [
+        {
+            path: '/login',
+            name: 'Login',
+            component: Login,
+        },
         {
             path: '/',
             redirect: "/dashboard",
@@ -42,6 +76,11 @@ function configRoutes() {
                     path: "dashboard",
                     name: "Dashboard",
                     component: Dashboard
+                },
+                {
+                    path: "investor",
+                    name: "InvestorPortal",
+                    component: InvestorPortal
                 },
                 {
                     path: "inwardquality",
