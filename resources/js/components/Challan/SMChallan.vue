@@ -1,0 +1,1648 @@
+<!--
+DESCRIPTION
+    This modules helps user to search the challan and able to edit and delete and also able to
+    generate pdf and download or print the pdf of the challan.
+NOTES
+    Version         : 1.0
+    Date            : 2/10/2021
+    Author          : Uddhav Savani
+
+    Initial Release : v1.0: Initial Release
+-->
+
+<template>
+    <div>
+        <aside></aside>
+        <div class="content-wrapper">
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12 mt-3">
+
+                            <!-- Filter And Challan Table Card Starts -->
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        S&M Challan
+                                    </h3>
+                                    <div class="card-tools">
+                                        <button
+                                            type="button"
+                                            class="btn btn-tool"
+                                            data-card-widget="collapse"
+                                        >
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body table-responsive">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <label for="from-date" class="text-md">From Date</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" class="form-control" id="from-date" v-model="fromDate"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <label for="to-date" class="text-md">To Date</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" class="form-control" id="to-date" v-model="toDate"/>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <label for="company-name" class="text-md">Company Name</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select :options="compniesForFilter" v-model="selectedCompanyForFilter" placeholder="Select Company">
+                                            </model-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-2">
+                                        <div class="col-md-1">
+                                            <label for="" class="text-md">Category</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select :options="categoriesForFilter"
+                                                v-model="selectedCategoryForFilter"
+                                                placeholder="Select Category">
+                                            </model-select>
+                                        </div>
+
+                                        <div class="col-md-1">
+                                            <label for="" class="text-md">Quality</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select
+                                                :options="qualitiesForFilter"
+                                                v-model="selectedQualityForFilter"
+                                                placeholder="Select Quality"
+                                            >
+                                            </model-select>
+                                        </div>
+
+                                        <div class="col-md-1">
+                                            <label for="" class="text-md">Broker</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select
+                                                :options="brokersForFilter"
+                                                v-model="selectedBrokerForFilter"
+                                                placeholder="Select Broker"
+                                            >
+                                            </model-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-4">
+                                        <div class="col-md-1">
+                                            <label for="" class="text-md">Per Page</label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select v-model="paginate" class="form-control">
+                                                <option value="10">10</option>
+                                                <option value="20">20</option>
+                                                <option value="30">30</option>
+                                            </select>
+                                        </div>
+                                    <!-- <div class="col-md-5"></div>
+                                        <div class="col-md-3 form-group">
+                                            <input v-model="search" type="search" class="form-control "
+                                                placeholder="Search By ..." />
+                                        </div> -->
+                                    </div>
+
+                                    <div class="p-0 mt-3">
+                                        <table class="table table-hover table-bordered table-striped table-sm">
+                                            <thead class="text-md">
+                                                <tr>
+                                                    <th width="12%">
+                                                        <a href="#" @click.prevent="updateSorting('challan_date')">Date</a>
+                                                        <span v-if="sort_field == 'challan_date'?1:0">
+                                                            <span v-if=" sort_direction == 'asc' ? 1 : 0 " >&uarr;</span>
+                                                            <span v-if=" sort_direction == 'desc' ? 1 : 0 " >&darr;</span>
+                                                        </span>
+                                                    </th>
+                                                    <th>
+                                                        <a href="#"  @click.prevent="updateSorting('challan_no')">Challan No</a>
+                                                        <span v-if=" sort_field == 'challan_no'?1:0">
+                                                            <span v-if=" sort_direction == 'asc'? 1: 0">&uarr;</span>
+                                                            <span v-if="sort_direction =='desc'? 1: 0">&darr;</span>
+                                                        </span>
+                                                    </th>
+                                                    <th>Company</th>
+                                                    <th>Broker</th>
+                                                    <th>Quality</th>
+                                                    <th>Category</th>
+                                                    <th>Qty</th>
+                                                    <th width="18%">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-md">
+                                                <tr
+                                                    v-for="challan in challans.data"
+                                                    v-bind:key="
+                                                        challan.challan_id
+                                                    "
+                                                >
+                                                    <td> {{ challan.challan_date }}</td>
+                                                    <td>{{ challan.challan_no }}</td>
+                                                    <td>{{ challan.customer_company_name }}</td>
+                                                    <td>{{ challan.broker_name }}</td>
+                                                    <td>{{ challan.quality_name }}</td>
+                                                    <td>{{ challan.sell_category_name }}</td>
+                                                    <td class="text-right">{{ challan.totalqty }}</td>
+                                                    <td class="text-center">
+                                                        <a :href="'challan/pdf/'+challan.challan_mst_id" target="_blank" class="btn btn-danger btn-sm text-md" ><i class="fas fa-file-pdf" style="font-size: 20px;"></i></a>
+                                                        <button class="btn btn-info btn-sm text-md" @click="viewChallan(challan.challan_mst_id, challan.challan_no)"><i class="fas fa-eye"></i></button>
+                                                        <button class="btn btn-primary btn-sm text-md" @click="editChallan(challan.challan_mst_id)"><i class="fas fa-pen"></i></button>
+                                                        <button class="btn btn-danger btn-sm text-md" @click="confirmChallandeletation(challan.challan_mst_id, challan.challan_no )"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="row mt-4">
+                                        <div class="col-sm-6 offset-5">
+                                            <pagination
+                                                :data="challans"
+                                                @pagination-change-page="
+                                                    getChallans
+                                                "
+                                            ></pagination>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <!-- <div class="col-md-5"></div> -->
+                                        <div class="col-md-9 text-right">
+                                            <label for="" class="mt-2 text-md">
+                                                Total Amount of this page :
+                                            </label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input
+                                                type="text"
+                                                class="form-control text-right"
+                                                v-model="totalAmountOfPage"
+                                                disabled
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Filter And Challan Table Card Ends -->
+
+                            <!-- Edit Challan Form Card Starts -->
+                            <div v-if="challanIdToBeEdit != -1 ? 1:0" class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">Edit Challan</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                                        <button type="button" class="btn btn-tool" @click="cancelEdit" ><i class="fas fa-times"></i></button>        
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="challanDate" class="text-md col-form-label">Date <span
+                                                    class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" id="challanDate" v-model="challanDate"
+                                                class="form-control text-md">
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label for="challanNo" class="text-md col-form-label">Challan Number <span
+                                                    class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" class="text-md form-control" v-model="challanNo">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="companyName" class="text-md col-form-label">Company Name <span
+                                                    class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select :options="companyNames" v-model="selectedCompanyName"
+                                                @blur="getFromSelectedCompany" placeholder="Select a Company Name">
+                                            </model-select>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label for="brokerName" class="text-md col-form-label">Broker Name <span
+                                                    class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select :options="brokerNames" v-model="selectedBrokerName"
+                                                placeholder="Select a Broker Name">
+                                            </model-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="companyContactNo" class="text-md col-form-label">Company Contact
+                                                No. <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="text-md form-control" v-model="companyContactNo"
+                                                disabled>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label for="companyGSTNo" class="text-md col-form-label">Company GST No.
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="text-md form-control" v-model="companyGSTNo"
+                                                disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="productCategory" class="text-md col-form-label">Product Category
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select :options="productCategories" v-model="selectedProductCategory"
+                                                @blur="resetQualities" placeholder="Select a Product Category">
+                                            </model-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="productQuality" class="text-md col-form-label">Product Quality
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <model-select :options="productQualities" v-model="selectedProductQuality"
+                                                placeholder="Select a Product Quality">
+                                            </model-select>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label for="Unit" class="text-md col-form-label">Unit
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="text" class="text-md form-control" v-model="unit" disabled>
+                                        </div>
+                                    </div>
+
+                                    
+                                            <div class="row overflow-auto mt-5" style="max-height: 300px; min-height: 300px;">
+                                                <div class="col-md-6 table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <thead class="table-secondary text-md text-dark">
+                                                            <th >Sr. No.</th>
+                                                            <th >No</th>
+                                                            <th >Qty</th>
+                                                            <th width="20%"></th>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr v-for="(data, index) in allData" :key="index">
+                                                                <td v-if="index % 2 ? 0 : 1">{{index + 1}}</td>
+                                                                <td v-if="index % 2 ? 0 : 1">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        :disabled="data.isDisabled"
+                                                                        v-model="data.no" 
+                                                                        :ref="'takano'+index">
+                                                                </td>
+                                                                <td v-if="index % 2 ? 0 : 1">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        v-model="data.qty" 
+                                                                        @blur="sumTotalQuantity"
+                                                                        @click="selectQuantity(index)"
+                                                                        @keydown.tab.prevent="tranferCursor(index)"
+                                                                        :disabled="data.isDisabled"
+                                                                        :ref="'qty'+index">
+                                                                </td>
+                                                                <td v-if="index % 2 ? 0 : 1" class="text-center">
+                                                                    <button class="btn btn-success text-md" @click="data.isDisabled == true ? editChallanDetailsEntry(index, data.challanDetailsId, data.no, data.qty):cancelEditChallanDetailsEntry(index)"><i
+                                                                        class="fas" :class="data.isDisabled == true?'fa-pen':'fa-times'"></i></button>
+                                                                    <button class="btn btn-danger text-md" @click="deleteChallanDetailsId(index, data.challanDetailsId)"><i
+                                                                        class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="col-md-6 table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <thead class="table-secondary text-md text-dark">
+                                                            <th >Sr. No.</th>
+                                                            <th >No</th>
+                                                            <th >Qty</th>
+                                                            <th width="20%"></th>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr v-for="(data, index) in allData" :key="index">
+                                                                <td v-if="index % 2 ? 1 : 0">
+                                                                    {{index + 1}}
+                                                                </td>
+                                                                <td v-if="index % 2 ? 1 : 0">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        v-model="data.no" 
+                                                                        :disabled="data.isDisabled"
+                                                                        :ref="'takano'+index">
+                                                                </td>
+                                                                <td v-if="index % 2 ? 1 : 0">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        v-model="data.qty" 
+                                                                        @blur="sumTotalQuantity"
+                                                                        @click="selectQuantity(index)"
+                                                                        @keydown.tab.prevent="tranferCursor(index)"
+                                                                        :disabled="data.isDisabled"
+                                                                        :ref="'qty'+index">
+                                                                </td>
+                                                                <td v-if="index % 2? 1 : 0" class="text-center">
+                                                                    <button class="btn btn-success text-md" @click="data.isDisabled == true? editChallanDetailsEntry(index, data.challanDetailsId, data.no, data.qty):cancelEditChallanDetailsEntry(index)"><i
+                                                                        class="fas" :class="data.isDisabled == true?'fa-pen':'fa-times'"></i></button>
+                                                                    <button class="btn btn-danger text-md" @click="deleteChallanDetailsId(index, data.challanDetailsId)"><i
+                                                                        class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Quantity
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" class="text-md form-control mt-3 text-right"
+                                                v-model="totalQty" disabled>
+                                        </div>
+                                    </div>
+
+                                    
+
+                                            <h4 class="mt-5">Add New Details</h4>
+                                            <div class="row overflow-auto mt-5  " style="max-height: 300px; min-height: 300px;" :style="isNewProductDetailsFull?'border: 2px solid red':''">
+                                                <div class="col-md-6 table-responsive border-danger" >
+                                                    <table class="table table-bordered">
+                                                        <thead class="table-secondary text-md text-dark">
+                                                            <th >Sr. No.</th>
+                                                            <th >No</th>
+                                                            <th >Qty</th>
+                                                            <th width="20%"></th>
+                                                        </thead>
+                                                        <tbody class="text-md">
+                                                            <tr v-for="(data, index) in newProductDetails" :key="index">
+                                                                <td v-if="index % 2 ? 0 : 1">{{allData.length + index + 1}}</td>
+                                                                <td v-if="index % 2 ? 0 : 1">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        v-model="data.no" :ref="'newtakano'+index">
+                                                                </td>
+                                                                <td v-if="index % 2 ? 0 : 1">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        v-model="data.qty"
+                                                                        @click="selectQuantity(index, 'newqty')"
+                                                                        @blur="sumNewTotalQuantity"
+                                                                        @keydown.tab.prevent="tranferCursor(index, 'newtakano')"
+                                                                        @keyup.enter="enterPressed(index)" :ref="'newqty'+index">
+                                                                </td>
+                                                                <td v-if="index % 2 ? 0 : 1" class="text-center">
+                                                                    <button class="btn btn-danger text-md" @click="deleteNewChallanDetailsId(index)"><i
+                                                                        class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="col-md-6 table-responsive">
+                                                    <table class="table table-bordered text-md">
+                                                        <thead class="table-secondary text-md text-dark">
+                                                            <th >Sr. No.</th>
+                                                            <th >No</th>
+                                                            <th >Qty</th>
+                                                            <th width="20%"></th>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr v-for="(data, index) in newProductDetails" :key="index">
+                                                                <td v-if="index % 2 ? 1 : 0">
+                                                                    {{allData.length + index + 1}}
+                                                                </td>
+                                                                <td v-if="index % 2 ? 1 : 0">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        :disabled="data.isDisabled"
+                                                                        v-model="data.no" :ref="'newtakano'+index">
+                                                                </td>
+                                                                <td v-if="index % 2 ? 1 : 0">
+                                                                    <input type="number" class="form-control text-right"
+                                                                        v-model="data.qty" 
+                                                                        @blur="sumNewTotalQuantity"
+                                                                        :disabled="data.isDisabled"
+                                                                        @click="selectQuantity(index, 'newqty')"
+                                                                        @keydown.tab.prevent="tranferCursor(index, 'newtakano')"
+                                                                        @keyup.enter="enterPressed(index)" :ref="'newqty'+index">
+                                                                </td>
+                                                                <td v-if="index % 2? 1 : 0" class="text-center">
+                                                                    <button class="btn btn-danger text-md" @click="deleteNewChallanDetailsId(index)"><i
+                                                                        class="fas fa-trash"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                    
+                                            <button class="btn btn-primary text-md mt-3" @click="addRow">Add Product</button>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Quantity(New)
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" class="text-md form-control mt-3 text-right"
+                                                v-model="totalNewQty" disabled>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label mt-3">Total Quantity(Net)
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" class="text-md form-control mt-3 text-right"
+                                                v-model="netTotalQty" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-footer">
+                                    <button v-on:click="updateChallan"
+                                        class="btn btn-primary text-md">Update</button>
+                                </div>
+                            </div>
+                            <!-- Edit Challan Form Card Ends -->
+                            
+                            <!-- View Challan Form Card Starts -->
+                            <div v-if="challanToView.challanIdToBeViewd != -1 ? 1:0" class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">Viewing Challan No: {{challanToView.challanNoToView}}</h3>
+                                    <span class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                                        <button type="button" class="btn btn-tool" @click="closeView" ><i class="fas fa-times"></i></button>        
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Challan Date
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.challanDate" disabled>
+                                        </div>
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Challan No
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.challanNo" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Company
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.company" disabled>
+                                        </div>
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Broker
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.broker" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Quality
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.quality" disabled>
+                                        </div>
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Category
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.category" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <label class="col-md-2 mt-2 text-md">
+                                            Unit
+                                        </label>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" v-model="challanToView.unit" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-4">
+                                            <table class="table table-hover table-bordered table-striped table-sm">
+                                                <thead class="text-md">
+                                                    <th width="15%">Sr. No.</th>
+                                                    <th class="text-center">No</th>
+                                                    <th class="text-center">Qty</th>
+                                                </thead>
+                                                <tbody class="text-md">
+                                                    <tr v-for="(product, index) in challanToView.products.productPart1" v-bind:key="index">
+                                                        <td class="text-right">{{index+1}}</td>
+                                                        <td class="text-right">{{product.no}}</td>
+                                                        <td class="text-right">{{product.qty}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <table class="table table-hover table-bordered table-striped table-sm">
+                                                <thead class="text-md">
+                                                    <th width="15%">Sr. No.</th>
+                                                    <th class="text-center">No</th>
+                                                    <th class="text-center">Qty</th>
+                                                </thead>
+                                                <tbody class="text-md">
+                                                    <tr v-for="(product, index) in challanToView.products.productPart2" v-bind:key="index">
+                                                        <td class="text-right">{{index+17}}</td>
+                                                        <td class="text-right">{{product.no}}</td>
+                                                        <td class="text-right">{{product.qty}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <table class="table table-hover table-bordered table-striped table-sm">
+                                                <thead class="text-md">
+                                                    <th width="15%">Sr. No.</th>
+                                                    <th class="text-center">No</th>
+                                                    <th class="text-center">Qty</th>
+                                                </thead>
+                                                <tbody class="text-md">
+                                                    <tr v-for="(product, index) in challanToView.products.productPart3" v-bind:key="index">
+                                                        <td class="text-right">{{index+33}}</td>
+                                                        <td class="text-right">{{product.no}}</td>
+                                                        <td class="text-right">{{product.qty}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-2 mt-2 text-right text-md">
+                                            <label class="text-md">Total</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="text-right form-control" v-model="challanToView.totalQty.totalQtyProductPart1" disabled="disabled">
+                                        </div>
+                                        <div class="col-md-2 mt-2 text-right text-md">
+                                            <label class="text-md">Total</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="text-right form-control" v-model="challanToView.totalQty.totalQtyProductPart2" disabled="disabled">
+                                        </div>
+                                        <div class="col-md-2 mt-2 text-right text-md">
+                                            <label class="text-md">Total</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="text-right form-control" v-model="challanToView.totalQty.totalQtyProductPart3" disabled="disabled">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-10 text-right text-md">
+                                            <label for="" class="text-md">Net Total Qty</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class='form-control text-right' v-model="challanToView.totalQty.totalQty"  disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- View Challan Form Card Ends -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</template>
+
+<script>
+
+// importing required plugins
+import toastr from "toastr";
+import swal from "sweetalert2";
+import { ModelSelect } from "vue-search-select"; // plugin for combobox-Searchable Select Menu
+
+export default {
+    name: "SMChallan",
+    data() {
+        return {
+            compniesForFilter: [], // Options Array Of Companies For Filter
+            selectedCompanyForFilter: "", // selected Company For Filter
+
+            categoriesForFilter: [],    // Options Array Of Categories For Filter
+            selectedCategoryForFilter: "", // selected Category For Filter
+
+            qualitiesForFilter: [], // Options Array Of Qualities For Filter
+            selectedQualityForFilter: "", // selected quality For Filter
+
+            brokersForFilter: [], // Options Array Of brokers For Filter
+            selectedBrokerForFilter: "", // selected broker For Filter
+
+            paginate: "10",  // Entries Per Page For Pagination
+
+            challans: {}, // Challans Object To Store Recieved Challans Data From API call
+                          // is showed In table
+
+            days: 10, // default days to set from date
+            search: "", // search term to be search
+            sort_direction: "desc", // sort direction of field to be sort for challans datatabel
+            sort_field: "challan_date", // field name according to which challans need to be serch
+            fromDate: this.getTodaysDate(), // From date to set for getting challans
+            toDate: this.getDateBeforeDays(), // to date to set for getting challans
+
+            totalAmountOfPage: (0).toFixed(2),  // Total amount of one page in challans datatable
+
+            challanIdToBeEdit: -1, // challan id which need to be edit
+
+
+            //section for Challan to be edit
+            challanDate: "", // challan date
+            challanNo: "", // challan No
+            oldChallanNo: '', // old challan no for api references
+
+            challanDate: "",
+            oldChallanDate: "",
+            challanNo: "",
+            oldChallanNo: '',
+            companyNames: [], // options array of companies for update
+            selectedCompanyName: "", // selected company for update
+
+            brokerNames: [], // options array for brokers for update
+            selectedBrokerName: "", // selected broker for update
+
+            companyContactNo: '', // company contact no which will be loaded as company is selected
+            companyGSTNo: "", // company GST no which will be loaded as comapany is selected
+
+            productCategories: [], // options array for categories to update
+            selectedProductCategory: '', // selected category for update
+
+            productQualities: [], // options array for qualities to update
+            selectedProductQuality: '', // selected quality to update
+
+            unit: '', // unit of product measure
+
+            allData: [], // all the data recived of challan details
+
+            totalQty: (0).toFixed(2), // total qty of already added products
+            totalNewQty: (0).toFixed(2), // total quantity which is added at time of update
+            netTotalQty: (0).toFixed(2), // total of new and old qty
+
+            editedChallanDetailsIds: new Set(), // set to store challanDetailsIds which are updated
+            challanDetailsIdToBeDeleted: new Set(), // set to store challanDetailsIds which need to be deleted
+
+            newProductDetails: [], // array of new products
+            isNewProductDetailsFull: false, // flag to check whether new products details is full or not
+
+
+            // Challan Details of CHallan to be viewd
+            challanToView : {
+                challanIdToBeViewd: -1, // challan Mst Id
+                challanNoToView: -1, // Challan no
+                challanDate: '', // challan date
+                challanNo: '', // challan no
+                company: "", // company(customer)
+                broker: "", // broker
+                quality: "", // quality
+                category: "", // category
+                unit: "", // unit
+                products: {
+                    productPart1:[], // product in table 1
+                    productPart2:[], // product in table 2
+                    productPart3:[]  // product in table 3
+                },
+                totalQty: {
+                    totalQtyProductPart1: (0).toFixed(2), // total qty of table 1
+                    totalQtyProductPart2: (0).toFixed(2), // total qty of table 2
+                    totalQtyProductPart3: (0).toFixed(2), // total qty of table 3
+                    totalQty: (0).toFixed(2) // total of 3 table qtys
+                }
+            }
+        };
+    },
+    mounted() {
+
+        // on mount load data
+        this.fromDate = this.getDateBeforeDays(), // set from date
+        this.toDate = this.getTodaysDate(); // set to date
+        this.getChallans(); // call api to load challans
+        this.loadQualityCategoriesForFilter(); // load categories for filter
+        this.loadQualitiesOfCategoryForFilter(); // load qualities for filter
+        this.getCustomersList(); // load customers list for filter
+        this.getBrokersList(); // load brokers list for filter
+        this.editedChallanDetailsIds = new Set(); // initilize set of challanDetailsId edited
+        this.challanDetailsIdToBeDeleted = new Set(); // initilize set of challanDetailsIds need to be deleted
+        this.sumNewTotalQuantity(); // calculate total qty of newlu added products
+        this.sumTotalQuantity(); // calculate total qty of newlu added products
+        this.sumNetTotalQty(); // calculate total qty of new and old products
+    },
+    watch: {
+
+        // parameters need to be watch for change
+
+        //will trigger whenever category is changed
+        selectedCategoryForFilter: function() {
+            this.loadQualitiesOfCategoryForFilter();
+            this.getChallans();
+        },
+
+        fromDate: function() { // will triger when from date is changed
+            this.getChallans();
+        },
+
+        toDate: function() { // will trigger when to date is changed
+            this.getChallans();
+        },
+
+        selectedCompanyForFilter: function() { // will triger when company is changed
+            this.getChallans();
+        },
+
+        selectedQualityForFilter: function() { // will trigger when qualities for filter is changed
+            this.getChallans();
+        },
+
+        selectedBrokerForFilter: function() { // will triggered when broker for filter is changed
+            this.getChallans();
+        },
+
+        selectedProductCategory: function() { // will trigger when category for edit changes
+            this.loadFromSelectedCategory();
+        },
+
+        newProductDetails: function() { // will triger when new product is added
+            this.sumNewTotalQuantity();
+            if(this.newProductDetails.length + this.allData.length < 48){
+                this.isNewProductDetailsFull = false;
+            }
+            else{
+                this.isNewProductDetailsFull = true;
+            }
+        },
+
+        allData: function() { // will trigger when challan details changes
+            if(this.newProductDetails.length + this.allData.length < 48){
+                this.isNewProductDetailsFull = false;
+            }
+            else{
+                this.isNewProductDetailsFull = true;
+            }
+        },
+
+        totalQty: function() {
+            this.sumNetTotalQty();
+        },
+
+        totalNewQty: function() {
+            this.sumNetTotalQty();
+        }
+
+    },
+    methods: {
+        getChallans: function(page = 1) { // method to load challans in the table
+            axios
+                .get(
+                    "/api/challans?page=" +
+                        page +
+                        "&company=" +
+                        this.selectedCompanyForFilter +
+                        "&category=" +
+                        this.selectedCategoryForFilter +
+                        "&quality=" +
+                        this.selectedQualityForFilter +
+                        "&broker=" +
+                        this.selectedBrokerForFilter +
+                        "&search=" +
+                        this.search +
+                        "&sortfield=" +
+                        this.sort_field +
+                        "&sortdirection=" +
+                        this.sort_direction +
+                        "&fromdate=" +
+                        this.fromDate +
+                        "&todate=" +
+                        this.toDate
+                )
+                .then(result => {
+                    this.challans = result.data;
+                    let totalAmountOfPage = 0;
+                    for (let i = 0; i < this.challans.data.length; i++) {
+                        this.challans.data[i]["totalqty"] = this.challans.data[i]["totalqty"].toFixed(2);
+                        totalAmountOfPage += parseFloat(
+                            this.challans.data[i]["totalqty"]
+                        );
+                    }
+                    this.totalAmountOfPage = totalAmountOfPage.toFixed(2);
+                })
+                .catch(err => {
+                    console.log("Err in Fetching Challans");
+                    toastr.error("Something Went Wrong, Please Refrash");
+                });
+        },
+
+        getTodaysDate: function() { // will return todays date in YYYY-MM-DD formate
+            let d = new Date();
+            let month = "" + (d.getMonth() + 1);
+            let day = "" + d.getDate();
+            let year = d.getFullYear();
+            if (month < 10) {
+                month = "0" + month;
+            }
+
+            if (day < 10) {
+                day = "0" + day;
+            }
+
+            return year + "-" + month + "-" + day;
+        },
+
+        getDateBeforeDays: function() { // will return date of day before todays date
+            let date = new Date();
+            let last = new Date(
+                date.getTime() - this.days * 24 * 60 * 60 * 1000
+            );
+            let day = "" + last.getDate();
+            let month = "" + (last.getMonth() + 1);
+            let year = "" + last.getFullYear();
+
+            if (day < 10) {
+                day = "0" + day;
+            }
+
+            if (month < 10) {
+                month = "0" + month;
+            }
+            return year + "-" + month + "-" + day;
+        },
+
+        getStdDate: function(date){ // will return date in YYYY-MM-DD formate of the date given in DD-MM-YYYY formate
+            date = date.split("-");
+            return (date[2]+"-"+date[1]+"-"+date[0]);
+        },
+
+        getCustomersList: function() { // will load customers list
+            axios
+                .get("/api/customerlist")
+                .then(result => {
+                    let allEntry = [{ value: "", text: "All" }];
+                    let individualEntry = result.data.map(company => {
+                        return {
+                            text: company.customer_company_name,
+                            value: company.customer_id
+                        };
+                    });
+
+                    this.compniesForFilter = allEntry.concat(individualEntry);
+                })
+                .catch(err => {
+                    console.log("Err In Fetching Customers List For Filter");
+                    toastr.error(
+                        "Something Went Wrong!, Please Refresh The Page"
+                    );
+                });
+        },
+
+        loadQualityCategoriesForFilter: function() { // will load categories 
+            axios
+                .get("/api/sellqualitycategories")
+                .then(response => {
+                    let allEntry = [{ text: "All", value: "" }];
+                    let individualEntry = response.data.qualityCategories.map(
+                        category => {
+                            return {
+                                value: category.qualityCategoryId,
+                                text: category.qualityCategoryName
+                            };
+                        }
+                    );
+                    this.categoriesForFilter = allEntry.concat(individualEntry);
+                })
+                .catch(err => {
+                    console.log("Err in Fetching Sell Quality Categories");
+                    console.log(err);
+                    toastr["error"](
+                        "Something went Wrong! Please refresh The Page"
+                    );
+                });
+        },
+
+        loadQualitiesOfCategoryForFilter: function() { // will load qualities of selected category
+            if (this.selectedCategoryForFilter == "") {
+                let allEntry = [{ text: "All", value: "" }];
+                this.qualitiesForFilter = allEntry;
+                this.selectedQualityForFilter = "";
+                return;
+            }
+
+            axios
+                .get(
+                    "/api/sellqualityofcategory/" +
+                        this.selectedCategoryForFilter
+                )
+                .then(response => {
+                    let allEntry = [{ text: "All", value: "" }];
+                    let individualEntry = response.data.map(quality => {
+                        return {
+                            text: quality.quality_name,
+                            value: quality.sell_quality_id
+                        };
+                    });
+
+                    this.qualitiesForFilter = allEntry.concat(individualEntry);
+                    this.selectedQualityForFilter = "";
+                })
+                .catch(err => {
+                    console.log(
+                        "Err in Fetching Sell Quality Of Selected Categories"
+                    );
+                    toastr["error"](
+                        "Something went Wrong! Please refresh The Page"
+                    );
+                });
+        },
+
+        resetQualities: function(){
+            this.selectedProductQuality = "";
+        },
+
+        getBrokersList: function() { // will load brokers for filter
+            axios
+                .get("/api/brokerslist")
+                .then(response => {
+                    let allEntry = [{ value: "", text: "All" }];
+                    let individualEntry = response.data.map(broker => {
+                        return {
+                            text: broker.broker_name,
+                            value: broker.broker_id
+                        };
+                    });
+
+                    this.brokersForFilter = allEntry.concat(individualEntry);
+                })
+                .catch(err => {});
+        },
+
+        closeUpdateExpenseBtn: function() {
+            this.expenseId = -1;
+            this.resetUpdateExpenseForm();
+        },
+
+        updateSorting: function(field) { // will update sorting
+            if (this.sort_field == field) {
+                this.sort_direction = this.sort_direction == "asc" ? "desc" : "asc";
+            } else {
+                this.sort_field = field;
+            }
+            this.getChallans(this.challans.current_page);
+        },
+
+        editChallan: async function(challan_id) { // will set form of challan to be edited
+
+            this.resetChallanEditing();
+            axios
+                .get("/api/challan/"+challan_id)
+                .then((response)=>{
+                    let challan = response.data;
+                    this.challanDate = this.getStdDate(challan.challandate);  
+                    this.oldChallanDate = this.challanDate; 
+                    this.challanNo = challan.challanno;
+                    this.oldChallanNo = challan.challanno;
+
+                    this.loadCompanyName();
+                    this.selectedCompanyName = challan.customer.customer_id;
+                    this.getFromSelectedCompany();
+
+                    this.loadBrokerName();
+                    this.selectedBrokerName = challan.broker.broker_id;
+
+                    this.loadQualityCategories();
+                    this.selectedProductCategory = challan.quality.category.sell_quality_category_id;
+
+                    this.loadFromSelectedCategory();
+                    this.selectedProductQuality = challan.quality.sell_quality_id;
+
+                    let challanDetails = challan.challandetails;
+
+                    for(let i=0; i<challanDetails.length; i++){
+                        this.allData.push({
+                            no: challanDetails[i].no,
+                            qty: challanDetails[i].qty,
+                            challanDetailsId: challanDetails[i].challan_details_id,
+                            isDisabled: true
+                        });
+                    }
+
+                    this.sumTotalQuantity();
+
+                    this.challanIdToBeEdit = challan_id;
+                })
+                .catch((err)=>{
+                    console.log(err);
+                    console.log("Err In Getting Challan Data For Updating");
+                    toastr.error("Something Went Wrong");
+                })
+
+
+            
+            
+            
+        },
+
+        editChallanDetailsEntry: function(index, challanDetailsId, no, qty) { // edit challan details entry
+            this.allData[index].isDisabled = false; 
+            this.editedChallanDetailsIds.add(challanDetailsId);         
+        },
+
+        disableField: function(index){ // will disable the field of challan details entry after edit
+            this.allData[index].isDisabled = true;
+        },
+
+        cancelEditChallanDetailsEntry: function(index){ // cancel edit of challan details entry
+            this.allData[index].isDisabled = true;
+        },
+
+        getFromSelectedCompany: function () { // will load contact no and gst no of selected company
+            if (this.selectedCompanyName == '' || typeof (this.selectedCompanyName) === 'undefined') {
+                this.companyContactNo = '';
+                this.companyGSTNo = '';
+                return;
+            }
+
+            axios.get('../api/selectedcustomerdata/' + this.selectedCompanyName).then(response => {
+                this.companyContactNo = response.data.customer_contact_no;
+                this.companyGSTNo = response.data.customer_gst_no;
+            }).catch(err => {
+                console.log(err);
+                toastr["error"]("Something went Wrong.")
+            })
+        },
+
+        loadFromSelectedCategory: function () { // will load qualities of selected category
+            if (this.selectedProductCategory == '' || typeof (this.selectedProductCategory) === 'undefined') {
+                this.unit = '';
+                this.productQualities = [];
+                this.selectedProductQuality = '';
+                return;
+            }
+
+            axios.get('../api/sellqualityofcategory/' + this.selectedProductCategory).then(response => {
+                this.productQualities = response.data.map(quality => {
+                    return {
+                        value: quality.sell_quality_id,
+                        text: quality.quality_name
+                    }
+                })
+
+                if (this.selectedProductCategory == '1') {
+                    this.unit = "Meters";
+                } else if (this.selectedProductCategory == '2' || this.selectedProductCategory == '3') {
+                    this.unit = "Kg.";
+                }
+            }).catch(err => {
+                console.log(err);
+                toastr["error"]("Something went Wrong.")
+            })
+        },
+
+        addRow: function () { // will add row in new challan detials entry
+            if (this.allData.length < 48) {
+                if((this.allData.length + this.newProductDetails.length) < 48){
+                    this.newProductDetails.push({
+                        no: "",
+                        qty: (0).toFixed(2)
+                    });
+                }
+                // else{
+                //     toastr.warning("Limit Exeeds, Only 48 Entries Are Allowed");
+                // }
+
+            } 
+            // else {
+            //     toastr["warning"]("Already 48 Entries Are There");
+            // }
+        },
+
+        enterPressed: function (index = -1) { // will add new row when enter is pressed in the last challan details entry
+            if (this.newProductDetails.length == (index + 1)) {
+                this.addRow();
+            }
+        },
+
+        deleteChallanDetailsId: function (index, challanDetailsId) { // will insert challanDetialsId in the challanDetailsIdsToDeleted
+            this.challanDetailsIdToBeDeleted.add(challanDetailsId);
+            this.allData.splice(index, 1);
+            this.sumTotalQuantity();
+        },
+
+        tranferCursor: function (index, prefix = 'takano') { // will transfer cusrsor to next cell when TAB is pressed
+            
+            if (prefix === "takano" && this.allData.length == (index + 1)) {
+                return;
+            }
+            
+            if(prefix === "newtakano" && this.newProductDetails.length == (index + 1)) {
+                return;
+
+            }
+            this.$refs[prefix + (index + 1)][0].focus();
+        },
+
+        loadCompanyName() { // will load company names
+            axios.get('../api/customerlist').then((response) => {
+                this.companyNames = response.data.map(company => {
+                    return {
+                        value: company.customer_id,
+                        text: company.customer_company_name + ' - ' + company.customer_contact_no
+                    }
+                });
+            }).catch(err => {
+                console.log(err);
+                toastr["error"]("Something went Wrong.")
+            })
+        },
+
+        loadBrokerName() { // will load brokers names
+            axios.get('../api/brokerslist').then((response) => {
+                this.brokerNames = response.data.map(broker => {
+                    return {
+                        value: broker.broker_id,
+                        text: broker.broker_name + ' - ' + broker.broker_contact_no
+                    }
+                });
+            }).catch(err => {
+                console.log(err);
+                toastr["error"]("Something went Wrong.")
+            })
+        },
+
+        loadQualityCategories() { // will load vcategories of product
+            axios.get('../api/sellqualitycategories').then((response) => {
+                this.productCategories = response.data.qualityCategories.map(category => {
+                    return {
+                        value: category.qualityCategoryId,
+                        text: category.qualityCategoryName
+                    }
+                });
+            }).catch(err => {
+                console.log(err);
+                toastr["error"]("Something went Wrong");
+            })
+        },
+
+
+        // method to validate challans
+        validateChallanDate: function(){ // validates Challan Date 
+            if(this.challanDate == ""){
+                toastr.info("Challan Date Is Required");
+                return false;
+            }
+
+            return true;
+        },
+
+        validateChallanNo: function(){ // validates challan no
+            if(this.challanNo == ''){
+                toastr.info("Challan No Is Required");
+                return false;
+            }
+            return true;
+        },
+
+        validateCompany: function(){ // validates company
+            if(this.selectedCompanyName == ""){
+                toastr.info("Company Name Is Required");
+                return false;
+            }
+            return true;
+        },
+
+        validateBroker: function(){ // validates broker
+            if(this.selectedBrokerName == ""){
+                toastr.info("Broker Name Is Required");
+                return false;
+            }
+            return true;
+        },
+
+        validateCategory: function(){ // validates category
+            if(typeof this.selectedProductCategory === 'undefined' || this.selectedProductCategory===''){
+                toastr.info("Product Category Is Required");
+                return false;
+            }
+            return true;
+        },
+
+        validateQuality: function(){ // validates quality
+            if(typeof this.selectedProductQuality === 'undefined' || this.selectedProductQuality === ''){
+                toastr.info("Product Quality Is Required");
+                return false;
+            }
+            return true;
+        },
+
+        updateChallan: function() { // updates challan when update btn is pressed
+
+            if((this.allData.length + this.newProductDetails.length) < 1 ) {
+                toastr["info"]("Min 1 Entry is required");
+                return;
+            }
+
+            if(this.challanMstId == -1 || !this.validateChallanDate() || !this.validateChallanNo() || !this.validateCompany() || !this.validateBroker() || !this.validateCategory() || !this.validateQuality()){
+                return;
+            }
+            
+            let payload = {
+                challanMstId: this.challanIdToBeEdit,
+                challandate: this.challanDate,
+                oldChallanDate: this.challanDate,
+                challanNo: this.challanNo,
+                oldChallanNo: this.oldChallanNo,
+                company: this.selectedCompanyName,
+                broker: this.selectedBrokerName,
+                category: this.selectedProductCategory,
+                quality: this.selectedProductQuality,
+                unit: this.unit,
+                challanDetails: this.allData,
+                newProductDetails: this.newProductDetails,
+                challanDetailsIdsToBeDeleted: Array.from(this.challanDetailsIdToBeDeleted)
+            }
+            
+
+            axios
+                .put("/api/challan", payload)
+                .then((response) => {
+                    if(response.data.status == 1){
+                        swal
+                            .fire({
+                                    title: "Success",
+                                    html:  "<h5 style='color:#9C9794'>Challan Updated Successfully</h5>",
+                                    icon: "success",
+                                    allowOutsideClick: false
+
+                            })
+                            .then(() => {
+                                this.getChallans();
+                                this.resetChallanEditing();
+                            });
+                    }
+                    else if(response.data.status == -1){
+
+                        if(response.data.statuscode == 1){
+                            let errorString = "";
+                            let errors = response.data.errors;
+
+                            for(let field in errors){
+                                for(let i=0; i<errors[field].length; i++){
+                                    errorString += "<li>"+errors[field][i]+"</li>";
+                                }
+                            };
+
+                            toastr.error(errorString, response.data.message , {timeOut: 20000, "closeButton": true})
+                        }
+                        else if(response.data.statuscode == 2){
+                            let errMsg = "";
+                            let notValidInEditing = response.data.notValidInEditing;  
+                            let notValidInNew = response.data.notValidInNew; 
+
+                            notValidInEditing.forEach((srno) => {
+                                errMsg += `${1 + srno}, `;
+                            });
+
+                            notValidInNew.forEach((srno) => {                  
+                                errMsg += `${this.allData.length + srno + 1}, `;
+                            });
+
+                            swal
+                                .fire({
+                                    title: "Error",
+                                    html:  "<h5 style='color:#9C9794'>Following Sr No. Fields Are Empty</h5><br><p style='color:#9C9794'>"+errMsg+"</p>",
+                                    icon: "error"
+                                })
+                                .then(() => {
+                                    
+                                });
+                        }
+                        else if(response.data.statuscode == 3){
+                            toastr.error("Challan No Alredy Exists");
+                        }
+                        else if(response.data.statuscode == 4){
+                            let noExists = response.data.noExists;
+                            let noError = response.data.noError;
+
+                            if(noError.length > 0){
+                                console.log("One Or More Challan Detials Entries Updation Failed");
+                                toastr.error("Something Went Wrong")
+                            }
+                            else if(noExists.length > 0){
+                                let errMsg = "";
+                                noExists.forEach((no)=>{
+                                    errMsg += `${no}, `;
+                                });
+
+                                swal
+                                    .fire({
+                                        title: "Error",
+                                        html:  "<h5 style='color:#9C9794'>Following Taka No/Beam No Already Exists</h5><br><p style='color:#9C9794'>"+errMsg+"</p>",
+                                        icon: "error",
+                                        allowOutsideClick: false
+                                    })
+
+                            }
+                            else{
+                                console.log("Err In Update Challan With Status Code: ", response.data.statuscode);
+                                toastr.error("Something Went Wrong");
+                            }
+
+                        }
+                        else if(response.data.statuscode == 5){
+                            console.log("Exception Generated On Server Side");
+                            toastr.error("Something Went Wrong");
+                        }
+                    }
+                    else{
+                        console.log("Other Then Expected Error Found In Challan Updation");
+                        toast.error("Something Went Wrong");
+                    }
+                })
+                .catch((error) => {
+                    console.log("Err In Challan Updation API Calls");
+                    toastr.error("Something Went Wrong"); 
+                })
+        },
+
+        deleteNewChallanDetailsId: function(index) { // willl delete new challan details entry from new products
+            this.newProductDetails.splice(index, 1);
+            
+        },
+
+        resetFields() { // will resets fields
+            this.challanDate = this.getTodaysDate();
+            this.challanNo = '',
+            this.companyContactNo = '',
+            this.companyGSTNo = '',
+            this.selectedCompanyName = '',
+            this.selectedBrokerName = '',
+            this.unit = '',
+            this.selectedProductQuality = '',
+            this.selectedProductCategory = '',
+            this.allData = [],
+            this.totalQty = (0).toFixed(2)
+
+        },
+
+        resetChallanEditing: function(){ // reset data which is loaded when any challan is set to edit
+            this.challanDate = "";
+            this.oldChallanDate="";
+            this.challanNo = "";
+            this.oldChallanNo = "";
+            this.companyNames = [];
+            this.selectedCompanyName = "";
+            this.brokerNames = [];
+            this.companyContactNo = '';
+            this.companyGSTNo = "";
+            this.productCategories = [];
+            this.selectedProductCategory = '';
+
+            this.productQualities = [];
+            this.selectedProductQuality = '';
+
+            this.unit = '';
+
+            this.allData = [];
+
+            this.totalQty = (0).toFixed(2);
+            this.totalNewQty = (0).toFixed(2);
+            this.netTotalQty = (0).toFixed(2);
+
+            this.editedChallanDetailsIds = new Set();
+            this.challanDetailsIdToBeDeleted = new Set(),
+
+            this.newProductDetails = [];
+            this.isNewProductDetailsFull = false;
+
+            this.challanIdToBeEdit = -1;
+        },
+
+        selectQuantity(index, prefix = 'qty') { // will select figure when ever user clicks inside text field
+            this.$refs[prefix + (index)][0].select();
+        },
+
+        cancelEdit: function() { // cancel editing of challan
+            this.resetChallanEditing();
+        },
+
+        sumTotalQuantity: function () { // sum of total quantity
+            this.totalQty = (0).toFixed(2);
+            for (let i = 0; i < this.allData.length; i++) {
+                this.totalQty = parseFloat(this.totalQty) + parseFloat(this.allData[i].qty);
+            }
+            if (this.totalQty != 0.00) {
+                this.totalQty = this.totalQty.toFixed(2);
+            }
+        },
+
+        sumNewTotalQuantity: function () { // sum of new quantity
+            this.totalNewQty = (0).toFixed(2);
+            for (let i = 0; i < this.newProductDetails.length; i++) {
+                this.totalNewQty = parseFloat(this.totalNewQty) + parseFloat(this.newProductDetails[i].qty);
+            }
+            if (this.totalNewQty != 0.00) {
+                this.totalNewQty = this.totalNewQty.toFixed(2);
+            }
+        },
+
+        sumNetTotalQty: function () { // calculates net quantity
+            this.netTotalQty = parseFloat(this.totalQty) + parseFloat(this.totalNewQty);
+            this.netTotalQty = parseFloat(this.netTotalQty).toFixed(2);
+            
+        },
+
+        confirmChallandeletation: function(challanMstId, challanNo){ // will confirms challab deletation before deleting it.
+
+            swal
+                .fire({
+                    title: `<h5 style='color:#9C9794'>Are you sure to delete Challan No: ${challanNo} ?</h5>`,
+                    html: `<h5 style='color:#9C9794'>Once Challan Is Deleted It can not be undo.</h5>`,
+                    icon: "info",
+                    allowOutsideClick: false,
+                    showDenyButton: true,
+                    confirmButtonText: 'Yes, Delete',
+                    denyButtonText: `No`,
+                })
+                .then((result) => {
+                    if(result.isConfirmed){
+                        this.deleteChallan(challanMstId);
+                    }
+                    else if(result.isDenied){
+                        toastr.info("Challan Deletation Canceled");
+                    }
+                })
+        },
+
+        deleteChallan: function(challanMstId){ // calls api to delete challan
+            axios
+                .delete("/api/challan/"+challanMstId)
+                .then((res) => {
+
+                    if(res.data.status == 1){
+                        swal
+                            .fire({
+                                title: "Success",
+                                html:  `<h5 style='color:#9C9794'>Challan No: ${res.data.challanNo} Deleted Successfully</h5>`,
+                                icon: "success",
+                                allowOutsideClick: false
+                            })
+                            .then(() => {
+                                this.getChallans();
+                            });
+                    }
+                    else if(res.data.status == -1){
+                        console.log("Err In Delete Challan API Server Side");
+                        toastr.error("Something Went wrong");
+                    }
+                    else{
+                        console.log("Unexpected Respose Recived In Delete Challan API Call");
+                        toastr.error("Something Went wrong");           
+                    }
+                    
+                })
+                .catch((err) => {
+                    console.log("Err In Delete Challan API");
+                    toastr.error("Something Went wrong");
+                    
+                })
+        },
+
+        viewChallan: function(challanMstId, challanNo){ // will load challan card to be viewd
+            
+            this.resetProductsArrayAndTotalQty();
+            
+            axios
+                .get("/api/challan/"+challanMstId)
+                .then((response) => {
+                    this.challanToView.challanDate = response.data.challandate;
+                    this.challanToView.challanNo = response.data.challanno;
+                    this.challanToView.company = response.data.customer.customer_company_name;
+                    this.challanToView.broker = response.data.broker.broker_name;
+                    this.challanToView.quality = response.data.quality.quality_name;
+                    this.challanToView.category = response.data.quality.category.sell_category_name;
+                    this.challanToView.unit = response.data.unit;
+
+                    let products = response.data.challandetails;
+                    
+                    let totalQtyPart1 = 0;
+                    for(let i=0; i<products.length && i<16; i++){
+                        
+                        totalQtyPart1 += products[i].qty;
+
+                        this.challanToView.products.productPart1.push({
+                            no: products[i].no,
+                            qty: (products[i].qty).toFixed(2)
+                        }); 
+                    }
+
+                    let totalQtyPart2 = 0;
+                    for(let i=16; i<products.length && i<32; i++){
+                        
+                        totalQtyPart2 += products[i].qty;
+                        
+                        this.challanToView.products.productPart1.push({
+                            no: products[i].no,
+                            qty: (products[i].qty).toFixed(2)
+                        });
+                    }
+
+                    let totalQtyPart3 = 0;
+                    for(let i=32; i<products.length && i<48; i++){
+                        
+                        totalQtyPart3 += products[i].qty;
+                        
+                        this.challanToView.products.productPart1.push({
+                            no: products[i].no,
+                            qty: (products[i].qty).toFixed(2)
+                        });
+                    }
+
+                    this.challanToView.totalQty.totalQtyProductPart1 = totalQtyPart1.toFixed(2);
+                    this.challanToView.totalQty.totalQtyProductPart2 = totalQtyPart2.toFixed(2);
+                    this.challanToView.totalQty.totalQtyProductPart3 = totalQtyPart3.toFixed(2);
+                    this.challanToView.totalQty.totalQty = (totalQtyPart1+totalQtyPart2+totalQtyPart3).toFixed(2);
+                    this.challanToView.challanIdToBeViewd = challanMstId;
+                    this.challanToView.challanNoToView = challanNo;
+                })
+                .catch((err)=>{
+                    console.log("Err In View Challan API Call");
+                    toastr.error("Something Went Wrong");
+                })
+        },
+
+        closeView: function(){ // will close challan view
+            this.challanToView.challanIdToBeViewd = -1;
+            this.challanToView.challanNoToView = -1;
+            this.challanToView.challanDate = '';
+            this.challanToView.challanNo = '';
+            this.challanToView.company = "";
+            this.challanToView.broker = "";
+            this.challanToView.quality = "";
+            this.challanToView.category = "";
+            this.challanToView.unit = "";
+            this.resetProductsArrayAndTotalQty();
+
+        },
+
+        resetProductsArrayAndTotalQty: function(){ // reset all product table array
+            this.challanToView.products.productPart1 = [];
+            this.challanToView.products.productPart2 = [];
+            this.challanToView.products.productPart3 = [];
+            this.challanToView.totalQty.totalQtyProductPart1 = (0).toFixed(2);
+            this.challanToView.totalQty.totalQtyProductPart2 = (0).toFixed(2);
+            this.challanToView.totalQty.totalQtyProductPart3 = (0).toFixed(2);
+            this.challanToView.totalQty.totalQty = (0).toFixed(2);
+        }
+    },
+    components: {
+        ModelSelect
+    }
+};
+</script>
+
+<style scoped>
+
+    /* Code for removing arrows from number text fields*/
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
