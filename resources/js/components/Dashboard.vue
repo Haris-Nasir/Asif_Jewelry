@@ -6,12 +6,32 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-3 col-6 mt-3">
-                            <!-- small card -->
+                            <div class="small-box bg-warning">
+                                <div class="inner">
+                                    <h3>{{ goldWeight }}<sup style="font-size: 16px">g</sup></h3>
+                                    <p>Gold Stock</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="nav-icon fas fa-coins"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 mt-3">
+                            <div class="small-box bg-secondary">
+                                <div class="inner">
+                                    <h3>{{ silverWeight }}<sup style="font-size: 16px">g</sup></h3>
+                                    <p>Silver (Chandi) Stock</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="nav-icon fas fa-ring"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 mt-3">
                             <div class="small-box bg-info">
                                 <div class="inner">
                                     <h3 v-html="inward"></h3>
-
-                                    <p>Inwards</p>
+                                    <p>Purchases</p>
                                     <p style="margin-top: -1rem; margin-bottom: -0.5rem">
                                         <b>{{ financialYear }}</b>
                                     </p>
@@ -24,14 +44,11 @@
                                 </router-link>
                             </div>
                         </div>
-                        <!-- ./col -->
                         <div class="col-lg-3 col-6 mt-3">
-                            <!-- small card -->
                             <div class="small-box bg-success">
                                 <div class="inner">
                                     <h3 v-html="invoice"></h3>
-
-                                    <p>Invoices</p>
+                                    <p>Sales Bills</p>
                                     <p style="margin-top: -1rem; margin-bottom: -0.5rem">
                                         <b>{{ financialYear }}</b>
                                     </p>
@@ -44,13 +61,10 @@
                                 </router-link>
                             </div>
                         </div>
-                        <!-- ./col -->
                         <div class="col-lg-3 col-6 mt-3">
-                            <!-- small card -->
                             <div class="small-box bg-warning">
                                 <div class="inner">
                                     <h3 v-html="credit"></h3>
-
                                     <p>Credit</p>
                                     <p style="margin-top: -1rem; margin-bottom: -0.5rem">
                                         <b>{{ financialYear }}</b>
@@ -64,13 +78,10 @@
                                 </router-link>
                             </div>
                         </div>
-                        <!-- ./col -->
                         <div class="col-lg-3 col-6 mt-3">
-                            <!-- small card -->
                             <div class="small-box bg-danger">
                                 <div class="inner">
                                     <h3 v-html="expense"></h3>
-
                                     <p>Expense</p>
                                     <p style="margin-top: -1rem; margin-bottom: -0.5rem">
                                         <b>{{ financialYear }}</b>
@@ -84,7 +95,6 @@
                                 </router-link>
                             </div>
                         </div>
-                        <!-- ./col -->
                     </div>
                 </div>
             </section>
@@ -93,7 +103,6 @@
 </template>
 
 <script>
-
     export default {
         name: "Dashboard",
         data() {
@@ -103,10 +112,13 @@
                 financialYear: "",
                 credit: "",
                 expense: "",
+                goldWeight: "0.000",
+                silverWeight: "0.000",
             };
         },
         mounted() {
             this.loadCalculations();
+            this.loadMetalBalances();
         },
         methods: {
             loadCalculations: function () {
@@ -124,7 +136,23 @@
                     })
                     .catch((err) => {
                         console.log(err);
-                        toastr.err("Something Went Wrong!");
+                        toastr.error("Something Went Wrong!");
+                    });
+            },
+
+            loadMetalBalances: function () {
+                axios
+                    .get("api/stock/balances")
+                    .then((res) => {
+                        if (res.data.gold) {
+                            this.goldWeight = parseFloat(res.data.gold.total_weight_grams).toFixed(3);
+                        }
+                        if (res.data.silver) {
+                            this.silverWeight = parseFloat(res.data.silver.total_weight_grams).toFixed(3);
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err);
                     });
             },
 
