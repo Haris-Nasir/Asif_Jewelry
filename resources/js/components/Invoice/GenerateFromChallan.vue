@@ -9,7 +9,7 @@
                         <div class="col-md-12 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Generate Invoice From Challan</h3>
+                                    <h3 class="card-title">Generate Invoice From Sales Bill</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
                                                 class="fas fa-minus"></i></button>
@@ -43,7 +43,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="challanNo" class="text-md col-form-label">Challan No
+                                            <label for="challanNo" class="text-md col-form-label">Sales Bill No
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -52,7 +52,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="challanDate" class="text-md col-form-label">Challan Date
+                                            <label for="challanDate" class="text-md col-form-label">Sales Bill Date
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -144,6 +144,17 @@
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control"
                                                 v-model="totalQuantity" @change="calcAmount" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label for="weightGrams" class="text-md col-form-label">Weight (g)
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="text-md text-right form-control"
+                                                v-model="weightGrams" disabled>
                                         </div>
                                     </div>
 
@@ -320,6 +331,7 @@
                 productQuality: '',
                 totalPieces: '',
                 totalQuantity: '',
+                weightGrams: '',
 
                 invoiceDate: '',
                 dueDate: '',
@@ -423,6 +435,7 @@
                         this.address = response.data[1]["customer_address"];
                         this.productQuality = response.data[1]["quality_name"];
                         this.totalQuantity = response.data[1]["total_qty"];
+                        this.weightGrams = response.data[1]["weight_grams"] || '';
 
                         axios.get('../api/getstate/' + this.code).then(response => {
                             this.state = response.data.state_name;
@@ -453,6 +466,7 @@
                 this.productQuality = '';
                 this.totalPieces = '';
                 this.totalQuantity = '';
+                this.weightGrams = '';
 
                 this.rate = '';
                 this.amount = '';
@@ -575,9 +589,10 @@
                                 } else if (response.data.status == 0) {
                                     toastr["warning"](response.data.message);
                                 } else if (response.data.status == 1) {
+                                    const profit = response.data.profit != null ? parseFloat(response.data.profit).toFixed(2) : '0.00';
                                     swal.fire({
                                         title: 'Success',
-                                        html: "<h5 style='color:#9C9794'>Invoice Created Successfully!</h5>",
+                                        html: "<h5 style='color:#9C9794'>Invoice created successfully.</h5><p>Profit recorded: ₹" + profit + "</p>",
                                         icon: 'success'
                                     }).then((result) => {
                                         this.resetFields();

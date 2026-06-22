@@ -43,6 +43,13 @@
                         </li>
 
                         <li class="nav-item">
+                            <router-link to="/stock" class="nav-link">
+                                <i class="nav-icon fas fa-boxes"></i>
+                                <p class="text-md">Stock Ledger</p>
+                            </router-link>
+                        </li>
+
+                        <li class="nav-item">
                             <router-link to="/vendor" class="nav-link">
                                 <i class="nav-icon far bi bi-person-circle"></i>
                                 <p class="text-md">Supplier</p>

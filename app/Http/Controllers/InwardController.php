@@ -17,10 +17,19 @@ use Illuminate\Support\Facades\Validator;
 
 // Using the Carbon for manupulation of Date and its formats
 use Carbon\Carbon;
+use App\Services\StockService;
+use App\Models\tbl_sell_quality;
 
 // InwardContoller Class
 class InwardController extends Controller
 {
+    protected StockService $stockService;
+
+    public function __construct(StockService $stockService)
+    {
+        $this->stockService = $stockService;
+    }
+
     // function to add new Inward in the database
     public function addNewInward(Request $request)
     {
@@ -28,10 +37,13 @@ class InwardController extends Controller
         $validated = validator($request->all(),[
             'date' => 'required | date_format:Y-m-d',
             'invoiceNo' => 'required | max:20',
-            'unit' => 'required | max:10',
-            'quantity' => 'required | numeric',
+            'unit' => 'nullable | max:10',
+            'quantity' => 'nullable | numeric',
             'rate' => 'required | numeric',
-            'gstPercentage' => 'required'
+            'gstPercentage' => 'required',
+            'metalType' => 'required | in:gold,silver',
+            'weightGrams' => 'required | numeric | min:0.001',
+            'itemTypeId' => 'required | numeric',
         ]);
 
         /* If any data is not in proper format then change the status to -1 and
@@ -52,10 +64,13 @@ class InwardController extends Controller
         $companyName = $request->input("companyName");
         $brokerName = $request->input("brokerName");
         $productQuality = $request->input("productQuality");
-        $unit = $request->input("unit");
-        $quantity = $request->input("quantity");
+        $unit = $request->input("unit", "pcs");
+        $quantity = $request->input("quantity", 1);
         $rate = $request->input("rate");
         $gstPercentage = $request->input("gstPercentage");
+        $metalType = $request->input("metalType");
+        $weightGrams = (float) $request->input("weightGrams");
+        $itemTypeId = (int) $request->input("itemTypeId");
 
         /*Check in the DB if the Vendor Company Name available in DB. If
         No, then change the status to -1 and then display message that vendor not available*/
@@ -75,12 +90,10 @@ class InwardController extends Controller
             ));
         }
 
-        /*Check in the DB if the product quality available in DB. If
-        No, then change the status to -1 and then display message that quality not available*/
-        if(!tbl_inward_quality::isThereProductQualityWithQualityId($productQuality)){
+        if(!tbl_sell_quality::where('sell_quality_id', $itemTypeId)->where('sell_quality_status', 1)->exists()){
             return response()->json(array(
                 "status" => -1,
-                "message" => "Inward Product Quality Not Available!"
+                "message" => "Jewelry item type not available!"
             ));
         }
         
@@ -111,32 +124,46 @@ class InwardController extends Controller
             $inward_mst->inward_mst_gst_percentage = $gstPercentage;
             $inward_mst->save();
 
-            $mst_id = $inward_mst->id;
+            $mst_id = $inward_mst->inward_mst_id;
 
             $inward_detail = new tbl_inward_details();
-            $inward_detail->inward_quality_id = $productQuality;
+            $inward_detail->sell_quality_id = $itemTypeId;
+            $inward_detail->metal_type = $metalType;
+            $inward_detail->weight_grams = $weightGrams;
             $inward_detail->qty = $quantity;
             $inward_detail->qty_unit = $unit;
             $inward_detail->rate = $rate;
             $inward_detail->inward_mst_id = $mst_id;
             $inward_detail->save();
 
+            $purchaseAmount = round($weightGrams * $rate, 2);
+            $this->stockService->addPurchase(
+                $metalType,
+                $itemTypeId,
+                $weightGrams,
+                (int) $quantity,
+                (float) $rate,
+                $purchaseAmount,
+                'purchase',
+                $inward_detail->inward_details_id,
+                optional($request->user())->id
+            );
+
             DB::commit();
 
             $res = array(
                 "status" => 1,
-                "message" => "Inward Details Added Successfully.",
+                "message" => "Purchase record added and stock updated successfully.",
                 "errors" => null
             );
 
             return response()->json($res, 200);
         }
-        catch(QueryException $e){
-            // If any error occurs inbetween then rollback and change the status to -1 and display errors and proper messages
+        catch(\Exception $e){
             DB::rollBack();
             $res = array(
                 "status" => -1,
-                "message" => "Server Error!",
+                "message" => $e->getMessage() ?: "Server Error!",
                 "errors" => "Exception Generated!"
             );
             return response()->json($res, 500);
@@ -182,9 +209,9 @@ class InwardController extends Controller
         return (tbl_inward_details::join('tbl_inward_msts','tbl_inward_details.inward_mst_id',"=","tbl_inward_msts.inward_mst_id")
         ->join('tbl_vendors','tbl_inward_msts.inward_mst_vendor_id','=','tbl_vendors.vendor_id')
         ->join('tbl_brokers','tbl_inward_msts.inward_mst_broker_id','=','tbl_brokers.broker_id')
-        ->join('tbl_inward_qualities','tbl_inward_details.inward_quality_id',"=",'tbl_inward_qualities.inward_quality_id')
-        ->join('tbl_inward_quality_categories', 'tbl_inward_qualities.inward_quality_category_id', "=", 'tbl_inward_quality_categories.inward_quality_category_id')
-        ->select('tbl_inward_details.inward_mst_id', 'inward_mst_date','inward_mst_invoice_no','vendor_company_name','broker_name','quality_name','qty','rate','inward_mst_gst_percentage', 'tbl_inward_quality_categories.inward_category_name')
+        ->join('tbl_sell_qualities', 'tbl_inward_details.sell_quality_id', '=', 'tbl_sell_qualities.sell_quality_id')
+        ->join('tbl_sell_quality_categories', 'tbl_sell_qualities.sell_quality_category_id', '=', 'tbl_sell_quality_categories.sell_quality_category_id')
+        ->select('tbl_inward_details.inward_mst_id', 'inward_mst_date','inward_mst_invoice_no','vendor_company_name','broker_name','tbl_sell_qualities.quality_name','tbl_inward_details.weight_grams','tbl_inward_details.metal_type','qty','rate','inward_mst_gst_percentage', 'tbl_sell_quality_categories.sell_category_name')
         ->where('tbl_inward_msts.inward_mst_status', '=', 1)
         ->where('tbl_inward_details.inward_details_status', '=', 1)
         ->whereBetween('tbl_inward_msts.inward_mst_date', [$from_date, $to_date])
@@ -203,10 +230,10 @@ class InwardController extends Controller
             $query->where('tbl_inward_msts.inward_mst_vendor_id', $vendorId);
         })
         ->when($categoryId, function($query) use ($categoryId) {
-            $query->where('tbl_inward_qualities.inward_quality_category_id', $categoryId);
+            $query->where('tbl_sell_qualities.sell_quality_category_id', $categoryId);
         })
         ->when($qualityId, function($query) use ($qualityId) {
-            $query->where('tbl_inward_details.inward_quality_id', $qualityId);
+            $query->where('tbl_inward_details.sell_quality_id', $qualityId);
         })
         ->when($brokerId, function($query) use ($brokerId) {
             $query->where('tbl_inward_msts.inward_mst_broker_id', $brokerId);

@@ -62,6 +62,20 @@
                             </div>
                         </div>
                         <div class="col-lg-3 col-6 mt-3">
+                            <div class="small-box bg-primary">
+                                <div class="inner">
+                                    <h3 v-html="profit"></h3>
+                                    <p>Profit (FY)</p>
+                                    <p style="margin-top: -1rem; margin-bottom: -0.5rem">
+                                        <b>{{ financialYear }}</b>
+                                    </p>
+                                </div>
+                                <div class="icon">
+                                    <i class="nav-icon fas fa-chart-line"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 mt-3">
                             <div class="small-box bg-warning">
                                 <div class="inner">
                                     <h3 v-html="credit"></h3>
@@ -112,6 +126,7 @@
                 financialYear: "",
                 credit: "",
                 expense: "",
+                profit: "",
                 goldWeight: "0.000",
                 silverWeight: "0.000",
             };
@@ -133,6 +148,7 @@
                             this.printDate(res.data[0]["toDate"]);
                         this.credit = "₹" + res.data[3];
                         this.expense = "₹" + res.data[4];
+                        this.profit = "₹" + (res.data[5] || 0);
                     })
                     .catch((err) => {
                         console.log(err);

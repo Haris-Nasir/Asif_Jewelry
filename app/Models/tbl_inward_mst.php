@@ -10,6 +10,8 @@ class tbl_inward_mst extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'inward_mst_id';
+
     public function getInwardMstDateAttribute($value){
         return (Carbon::parse($value)->format('d-m-Y'));
     }

@@ -10,9 +10,17 @@ use App\Models\tbl_invoice_mst;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\StockService;
 
 class InvoiceController extends Controller
 {
+    protected StockService $stockService;
+
+    public function __construct(StockService $stockService)
+    {
+        $this->stockService = $stockService;
+    }
+
     public function getFromInvoiceNo(Request $request, $invoiceNo){
         $challanDateQuery = tbl_challan_mst::select('challan_date')->where('challan_no', '=', $invoiceNo)->where('challan_mst_status', '=',1)->get();
         $financialYears = array();
@@ -65,7 +73,7 @@ class InvoiceController extends Controller
             $invoiceDataQuery = tbl_challan_mst::join('tbl_brokers', 'tbl_challan_msts.broker_id', '=', 'tbl_brokers.broker_id')
             ->join('tbl_customers', 'tbl_customers.customer_id', '=', 'tbl_challan_msts.customer_id')
             ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id', '=', 'tbl_challan_msts.sell_quality_id')
-            ->select('tbl_challan_msts.challan_no','tbl_challan_msts.challan_date', 'tbl_challan_msts.total_qty', 
+            ->select('tbl_challan_msts.challan_no','tbl_challan_msts.challan_date', 'tbl_challan_msts.total_qty', 'tbl_challan_msts.weight_grams',
             'tbl_brokers.broker_name', 'tbl_customers.customer_company_name', 'tbl_customers.customer_gst_no', 
             'tbl_customers.customer_gst_code', 'tbl_customers.customer_address', 'tbl_sell_qualities.quality_name')
             ->where('tbl_challan_msts.challan_no', '=', $invoiceNo)
@@ -137,25 +145,66 @@ class InvoiceController extends Controller
 
         DB::beginTransaction();
         try{
+            $challan = tbl_challan_mst::where('challan_mst_id', $invoiceId)
+                ->where('challan_mst_status', 1)
+                ->first();
 
-            // tbl_invoice_mst::find()
+            if (!$challan) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Sales bill not found for this invoice.',
+                ]);
+            }
+
+            $weightGrams = (float) $challan->weight_grams;
+            if ($weightGrams <= 0) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Sales bill has no weight recorded. Edit the sales bill and add weight in grams.',
+                ]);
+            }
+
+            $metalType = $this->stockService->resolveMetalTypeFromCategory((int) $challan->challan_type);
+            $baseAmount = round((float) $challan->total_qty * (float) $rate, 2);
+            $gstAmount = round($baseAmount * ((float) $gstPercentage / 100), 2);
+            $soldAmount = round($baseAmount + $gstAmount, 2);
+            $pieces = tbl_challan_details::where('challan_mst_id', $invoiceId)
+                ->where('challan_details_status', 1)
+                ->count() ?: 1;
+
+            $saleSummary = $this->stockService->recordSale(
+                $metalType,
+                (int) $challan->sell_quality_id,
+                $weightGrams,
+                $pieces,
+                $soldAmount,
+                'sale_challan',
+                (int) $invoiceId,
+                optional($request->user())->id
+            );
 
             $invoice = new tbl_invoice_mst();
             $invoice->invoice_mst_id = $invoiceId;  
             $invoice->invoice_date = $invoiceDate;
-            $invoice->no_of_units = 0;
+            $invoice->no_of_units = $pieces;
             $invoice->rate = $rate;
+            $invoice->weight_grams = $weightGrams;
+            $invoice->cost_amount = $saleSummary['cost_amount'];
+            $invoice->sold_amount = $soldAmount;
+            $invoice->profit_amount = $saleSummary['profit_amount'];
             $invoice->gst_percentage = $gstPercentage;
             $invoice->bank_details_id = $bankId;
             $invoice->due_date = $dueDate;
 
             $invoice->save();
 
-        }catch(Exception $e){
+        }catch(\Exception $e){
             DB::rollBack();
             $res = array(
                 "status" => -1,
-                "message" => "Server Error",
+                "message" => $e->getMessage() ?: "Server Error",
                 "errors" => "Exception Generated"
             );
             return response()->json($res, 500);
@@ -165,7 +214,8 @@ class InvoiceController extends Controller
 
         $res = array(
             "status" => 1,
-            "message" => "Invoice Added Successfully.",
+            "message" => "Invoice created, stock updated, profit recorded.",
+            "profit" => $saleSummary['profit_amount'] ?? 0,
             "errors" => null
         );
 
@@ -253,7 +303,7 @@ class InvoiceController extends Controller
             $query->where('tbl_challan_msts.broker_id', $broker);
         })
         ->orderBy($sortField, $sortDirection)
-        ->select('invoice_mst_id', 'invoice_date', 'due_date','challan_no','quality_name',  'tbl_challan_msts.customer_id', 'customer_company_name', 'tbl_challan_msts.broker_id', 'broker_name', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.total_qty', 'tbl_invoice_msts.rate', 'tbl_invoice_msts.gst_percentage')
+        ->select('invoice_mst_id', 'invoice_date', 'due_date','challan_no','quality_name',  'tbl_challan_msts.customer_id', 'customer_company_name', 'tbl_challan_msts.broker_id', 'broker_name', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.total_qty', 'tbl_challan_msts.weight_grams', 'tbl_invoice_msts.rate', 'tbl_invoice_msts.gst_percentage', 'tbl_invoice_msts.sold_amount', 'tbl_invoice_msts.profit_amount')
         ->paginate($paginate);
     }
 
@@ -475,7 +525,8 @@ class InvoiceController extends Controller
             "unit" => "required",
             'noOfUnits' => "required | numeric",
             'rate' => "required | numeric",
-            'gstPercentage' => "required | numeric"
+            'gstPercentage' => "required | numeric",
+            'weightGrams' => 'required | numeric | min:0.001',
         ]);
 
         if($validated->fails()){
@@ -499,6 +550,7 @@ class InvoiceController extends Controller
         $noOfUnits = $req->input('noOfUnits');
         $rate = $req->input('rate');
         $gstPercentage = $req->input('gstPercentage');
+        $weightGrams = (float) $req->input('weightGrams');
 
         $financialYear = $this->getFinancialYearOfDate($invoiceDate);
 
@@ -509,9 +561,16 @@ class InvoiceController extends Controller
             )); 
         }
 
+        $bankDetailsId = DB::table('tbl_bank_details')->where('bank_details_status', 1)->value('bank_details_id') ?? 1;
+
         DB::beginTransaction();
 
         try{
+            $metalType = $this->stockService->resolveMetalTypeFromCategory((int) $categoryId);
+            $baseAmount = round($noOfUnits * $rate, 2);
+            $gstAmount = round($baseAmount * ($gstPercentage / 100), 2);
+            $soldAmount = round($baseAmount + $gstAmount, 2);
+
             $challanMst = new tbl_challan_mst();
             $challanMst->challan_no = $invoiceNo;
             $challanMst->challan_date = $invoiceDate;
@@ -519,18 +578,34 @@ class InvoiceController extends Controller
             $challanMst->sell_quality_id = $qualityId;
             $challanMst->qty_unit = $unit;
             $challanMst->total_qty = $qty;
+            $challanMst->weight_grams = $weightGrams;
             $challanMst->broker_id = $brokerId;
             $challanMst->challan_type = $categoryId;
             $challanMst->is_direct = 1;
 
             $challanMst->save();
 
+            $saleSummary = $this->stockService->recordSale(
+                $metalType,
+                (int) $qualityId,
+                $weightGrams,
+                (int) $noOfUnits,
+                $soldAmount,
+                'sale',
+                $challanMst->challan_mst_id,
+                optional($req->user())->id
+            );
+
             $invoiceMst = new tbl_invoice_mst();
             $invoiceMst->invoice_mst_id = $challanMst->challan_mst_id;
             $invoiceMst->invoice_date = $invoiceDate;
             $invoiceMst->no_of_units = $noOfUnits;
             $invoiceMst->rate = $rate;
-            $invoiceMst->bank_details_id = 1;
+            $invoiceMst->weight_grams = $weightGrams;
+            $invoiceMst->cost_amount = $saleSummary['cost_amount'];
+            $invoiceMst->sold_amount = $soldAmount;
+            $invoiceMst->profit_amount = $saleSummary['profit_amount'];
+            $invoiceMst->bank_details_id = $bankDetailsId;
             $invoiceMst->gst_percentage = $gstPercentage;
 
             $invoiceMst->save();
@@ -539,14 +614,16 @@ class InvoiceController extends Controller
 
             return response()->json(array(
                 "status" => 1,
-                "message" => "Invoice Added Successfully"
+                "message" => "Sale bill created, stock updated, profit recorded.",
+                "profit" => $saleSummary['profit_amount'],
+                "sold_amount" => $soldAmount,
             ));
         }
-        catch(Exception $e){
+        catch(\Exception $e){
             DB::rollback();
             return response()->json(array(
                 'status' => -1,
-                "message" => "Something Went Wrong While Generating Invoice"
+                "message" => $e->getMessage() ?: "Something Went Wrong While Generating Invoice"
             ));
         }
 
@@ -601,7 +678,7 @@ class InvoiceController extends Controller
             $query->where('tbl_challan_msts.broker_id', $broker);
         })
         ->orderBy($sortField, $sortDirection)
-        ->select('invoice_mst_id', 'invoice_date', 'challan_no','quality_name',  'tbl_challan_msts.customer_id', 'customer_company_name', 'tbl_challan_msts.broker_id', 'broker_name', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.total_qty', 'tbl_invoice_msts.rate', 'tbl_invoice_msts.gst_percentage')
+        ->select('invoice_mst_id', 'invoice_date', 'challan_no','quality_name',  'tbl_challan_msts.customer_id', 'customer_company_name', 'tbl_challan_msts.broker_id', 'broker_name', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.total_qty', 'tbl_challan_msts.weight_grams', 'tbl_invoice_msts.rate', 'tbl_invoice_msts.gst_percentage', 'tbl_invoice_msts.sold_amount', 'tbl_invoice_msts.profit_amount')
         ->paginate($paginate);
     }
 

@@ -64,8 +64,8 @@ class ChallanController extends Controller
             $query->where('tbl_challan_msts.broker_id', $broker);
         })
         ->orderBy($sort_field, $sort_direction)
-        ->select('tbl_challan_msts.challan_mst_id', 'tbl_challan_msts.challan_no','tbl_challan_msts.challan_date','customer_company_name','tbl_brokers.broker_name',DB::raw("SUM(tbl_challan_details.qty) as totalqty"), 'tbl_sell_qualities.quality_name', 'tbl_sell_quality_categories.sell_category_name')
-        ->groupBy('tbl_challan_msts.challan_mst_id', 'tbl_customers.customer_company_name', 'tbl_brokers.broker_name', 'tbl_sell_qualities.quality_name', 'tbl_challan_msts.challan_date','tbl_challan_msts.challan_no', 'tbl_sell_quality_categories.sell_category_name')->paginate($paginate);
+        ->select('tbl_challan_msts.challan_mst_id', 'tbl_challan_msts.challan_no','tbl_challan_msts.challan_date','customer_company_name','tbl_brokers.broker_name',DB::raw("SUM(tbl_challan_details.qty) as totalqty"), 'tbl_challan_msts.weight_grams', 'tbl_sell_qualities.quality_name', 'tbl_sell_quality_categories.sell_category_name')
+        ->groupBy('tbl_challan_msts.challan_mst_id', 'tbl_customers.customer_company_name', 'tbl_brokers.broker_name', 'tbl_sell_qualities.quality_name', 'tbl_challan_msts.challan_date','tbl_challan_msts.challan_no', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.weight_grams')->paginate($paginate);
 
         return $data;
     }
@@ -192,6 +192,7 @@ class ChallanController extends Controller
             'sellQualityId' => 'required | numeric',
             'qtyUnit' => 'required |  max:10',
             'totalQty' => 'required | numeric',
+            'weightGrams' => 'required | numeric | min:0.001',
             'brokerId' => 'required | numeric',
         ]);
 
@@ -212,12 +213,13 @@ class ChallanController extends Controller
         $sellQualityId = $request->input("sellQualityId");
         $qtyUnit = $request->input("qtyUnit");
         $totalQty = $request->input("totalQty");
+        $weightGrams = (float) $request->input("weightGrams");
         $brokerId = $request->input("brokerId");
         $fromDate = $request->input("fromDate");
         $toDate = $request->input("toDate");
         $allData = $request->input("allData");
 
-        if($sellCategoryId == 1 || $sellCategoryId == 2){
+        if(count($allData) > 0){
             for($i=0; $i<count($allData); $i++){
                 if(tbl_challan_mst::join('tbl_challan_details','tbl_challan_msts.challan_mst_id', '=', 'tbl_challan_details.challan_mst_id')
                 ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id', '=', 'tbl_challan_msts.sell_quality_id')
@@ -247,6 +249,7 @@ class ChallanController extends Controller
             $challanMst->sell_quality_id = $sellQualityId;
             $challanMst->qty_unit = $qtyUnit;
             $challanMst->total_qty = $totalQty;
+            $challanMst->weight_grams = $weightGrams;
             $challanMst->broker_id = $brokerId;
             $challanMst->challan_type = $sellCategoryId;
             $challanMst->is_direct = 0;
@@ -279,7 +282,7 @@ class ChallanController extends Controller
 
         $res = array(
             "status" => 1,
-            "message" => "Sell Quality Added Successfully.",
+            "message" => "Sales bill added successfully.",
             "errors" => null
         );
 

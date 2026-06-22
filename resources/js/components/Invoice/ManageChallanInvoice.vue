@@ -125,9 +125,12 @@
                                                     </th>
                                                     <th>Company</th>
                                                     <th>Broker</th>
-                                                    <th>Quality</th>
+                                                    <th>Item Type</th>
                                                     <th>Category</th>
-                                                    <th>Net Amount</th>
+                                                    <th class="text-right">Weight (g)</th>
+                                                    <th class="text-right">Sold Amount</th>
+                                                    <th class="text-right">Profit</th>
+                                                    <th class="text-right">Net Amount</th>
                                                     <th width="15%">Action</th>
                                                 </tr>
                                             </thead>
@@ -142,6 +145,9 @@
                                                     <td>{{ invoice.broker_name }}</td>
                                                     <td>{{ invoice.quality_name }}</td>
                                                     <td>{{ invoice.sell_category_name }}</td>
+                                                    <td class="text-right">{{ invoice.weight_grams || '-' }}</td>
+                                                    <td class="text-right">{{ invoice.sold_amount || invoice.netAmount }}</td>
+                                                    <td class="text-right">{{ invoice.profit_amount != null ? invoice.profit_amount : '-' }}</td>
                                                     <td class="text-right">{{ invoice.netAmount }}</td>
                                                     <td class="text-center">
                                                         <a :href="'/invoice/pdf/'+invoice.invoice_mst_id"

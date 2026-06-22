@@ -34,13 +34,15 @@ NODE_OPTIONS=--openssl-legacy-provider npm run dev
 
 ---
 
-## Phase 2 — Core jewelry operations (next)
+## Phase 2 — Core jewelry operations ✅
 
-- Purchase flow: gold/silver weight, rate per gram, stock increment
-- Sales bill: deduct stock on sale, sold price, profit per bill
-- Item-wise stock tracking
-- Bill count on dashboard
-- Rename/adapt purchase & sales UI labels fully
+- Purchase flow records gold/silver weight (grams), rate per gram, item type
+- Stock ledger + metal balances update automatically on purchase
+- Direct sales bill deducts stock and calculates cost / profit
+- Sales bill (challan) flow records weight; invoice-from-sales-bill deducts stock and records profit
+- Stock Ledger UI with filters (metal type, transaction type)
+- List views show weight, sold amount, and profit where applicable
+- Dashboard shows purchases, sales bills, profit, gold/silver stock
 
 ---
 

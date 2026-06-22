@@ -22,7 +22,7 @@ NOTES
                             <div class="card card-primary">
                                 <!-- card Header of  New Challan -->
                                 <div class="card-header">
-                                    <h3 class="card-title">New Challan</h3>
+                                    <h3 class="card-title">New Sales Bill</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
                                                 class="fas fa-minus"></i></button>
@@ -210,7 +210,15 @@ NOTES
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Quantity
+                                            <label for="weightGrams" class="text-md col-form-label mt-3">Total Weight (g)
+                                                <span class="required-mark" style="color: red;">*</span></label>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" step="0.001" class="text-md form-control mt-3 text-right"
+                                                v-model="weightGrams" placeholder="Weight in grams">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Pieces
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -275,6 +283,7 @@ NOTES
                 unit: '',
                 allData: [],
                 totalQty: (0).toFixed(2),
+                weightGrams: '',
                 status: null,
                 message: null,
                 errors: null
@@ -437,11 +446,7 @@ NOTES
                         }
                     })
 
-                    if (this.selectedProductCategory == '1') {
-                        this.unit = "Meters";
-                    } else if (this.selectedProductCategory == '2' || this.selectedProductCategory == '3') {
-                        this.unit = "Kg.";
-                    }
+                    this.unit = "pcs";
                 }).catch(err => {
                     console.log(err);
                     toastr["error"]("Something went Wrong.")
@@ -503,6 +508,7 @@ NOTES
                 addData["sellQualityId"] = this.selectedProductQuality;
                 addData["qtyUnit"] = this.unit;
                 addData["totalQty"] = this.totalQty;
+                addData["weightGrams"] = this.weightGrams;
                 addData["brokerId"] = this.selectedBrokerName;
                 addData["allData"] = this.allData;//this contains an array of table value of no and quantity values
 
@@ -510,8 +516,8 @@ NOTES
                     addData["fromDate"] = response.data.fromDate;
                     addData["toDate"] = response.data.toDate;
                     //here it will check if any of the field is empty or not
-                    if (this.challanNo == '' || this.challanDate == '' || this.selectedCompanyName == '' || this.selectedProductQuality == '' || this.unit == '' || this.totalQty === '' || this.selectedBrokerName == '') {
-                        toastr["error"]('All Fields are Required');
+                    if (this.challanNo == '' || this.challanDate == '' || this.selectedCompanyName == '' || this.selectedProductQuality == '' || this.unit == '' || this.totalQty === '' || this.weightGrams === '' || parseFloat(this.weightGrams) <= 0 || this.selectedBrokerName == '') {
+                        toastr["error"]('All Fields are Required (including weight in grams)');
                     } else if (this.allData.length == 0) {//here it will check whether we have entered 1 product or not
                         toastr["error"]("Insert Product.");
                     } else {
@@ -626,7 +632,7 @@ NOTES
                 this.selectedProductCategory = '',
                 this.allData = [],
                 this.totalQty = (0).toFixed(2)
-
+                this.weightGrams = ''
             },
 
             //this function is used when we click an input field of the quantity in the table and select all data of that field

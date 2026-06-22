@@ -20,6 +20,7 @@ class StockController extends Controller
 
     public function ledger(Request $request)
     {
+        $paginate = (int) $request->input('paginate', 20);
         $query = tbl_stock_ledger::with('item:sell_quality_id,quality_name')
             ->orderByDesc('created_at');
 
@@ -27,6 +28,10 @@ class StockController extends Controller
             $query->where('metal_type', $request->metal_type);
         }
 
-        return response()->json($query->paginate(20));
+        if ($request->filled('transaction_type')) {
+            $query->where('transaction_type', $request->transaction_type);
+        }
+
+        return response()->json($query->paginate($paginate));
     }
 }

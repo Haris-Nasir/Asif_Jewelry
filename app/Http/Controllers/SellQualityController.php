@@ -17,7 +17,8 @@ class SellQualityController extends Controller
         foreach ($qualityCategoryQuery as $qualityCategories){
             array_push($response, array(
                 'qualityCategoryId' => $qualityCategories->sell_quality_category_id,
-                'qualityCategoryName' => $qualityCategories->sell_category_name
+                'qualityCategoryName' => $qualityCategories->sell_category_name,
+                'metalType' => $qualityCategories->metal_type ?? 'gold',
             ));
         }
         return response()->json(["qualityCategories"=>$response]);
