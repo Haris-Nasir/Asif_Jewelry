@@ -9,6 +9,7 @@ use App\Models\tbl_invoice_mst;
 use App\Models\tbl_credit;
 use App\Models\tbl_expense;
 use App\Models\tbl_metal_balance;
+use App\Models\tbl_lab_job;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -41,6 +42,17 @@ class DashboardController extends Controller
             'gold' => $goldBalance ? (float) $goldBalance->total_weight_grams : 0,
             'silver' => $silverBalance ? (float) $silverBalance->total_weight_grams : 0,
         ]);
+
+        $labJobCount = tbl_lab_job::whereBetween('job_date', [$financialYear['fromDate'], $financialYear['toDate']])
+            ->where('lab_job_status', true)
+            ->count();
+        array_push($data, $labJobCount);
+
+        $labProfit = tbl_lab_job::whereBetween('job_date', [$financialYear['fromDate'], $financialYear['toDate']])
+            ->where('lab_job_status', true)
+            ->where('job_status', 'sold')
+            ->sum('profit_amount');
+        array_push($data, $labProfit);
 
         return $data;
     }

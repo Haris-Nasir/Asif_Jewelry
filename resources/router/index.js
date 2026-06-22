@@ -7,6 +7,7 @@ const Container = () => import('../js/components/containers/Container');
 const Dashboard = () => import('../js/components/Dashboard');
 const InvestorPortal = () => import('../js/components/InvestorPortal');
 const ManageInvestors = () => import('../js/components/Investor/ManageInvestors');
+const LabJobContainer = () => import('../js/components/Laboratory/LabJobContainer');
 const StockLedger = () => import('../js/components/Stock/StockLedger');
 const InwardQuality = () => import('../js/components/InwardQuality/InwardQualityContainer');
 const SellQuality = () => import('../js/components/SellQuality/SellQualityContainer');
@@ -93,6 +94,11 @@ function configRoutes() {
                     path: "manageinvestors",
                     name: "ManageInvestors",
                     component: ManageInvestors
+                },
+                {
+                    path: "laboratory",
+                    name: "Laboratory",
+                    component: LabJobContainer
                 },
                 {
                     path: "inwardquality",

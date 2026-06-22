@@ -121,6 +121,57 @@
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    <h5 class="mt-4">Laboratory Jobs</h5>
+                                    <div class="row mb-3" v-if="labSummary">
+                                        <div class="col-md-3">
+                                            <p><strong>Total Jobs:</strong> {{ labSummary.total_jobs }}</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p><strong>Open:</strong> {{ labSummary.open_jobs }}</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p><strong>Lab Profit:</strong> ₹{{ formatMoney(labSummary.total_lab_profit) }}</p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p><strong>Weight:</strong> {{ labSummary.total_weight_grams }}g</p>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Ref</th>
+                                                    <th>Metal</th>
+                                                    <th class="text-right">Weight (g)</th>
+                                                    <th class="text-right">Base (₹)</th>
+                                                    <th class="text-right">Cash (₹)</th>
+                                                    <th class="text-right">Refinery (₹)</th>
+                                                    <th class="text-right">Sold (₹)</th>
+                                                    <th class="text-right">Profit (₹)</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="job in labJobs.data" :key="job.lab_job_id">
+                                                    <td>{{ job.job_date }}</td>
+                                                    <td>{{ job.job_reference || '-' }}</td>
+                                                    <td>{{ job.metal_type }}</td>
+                                                    <td class="text-right">{{ job.weight_grams }}</td>
+                                                    <td class="text-right">{{ formatMoney(job.base_price) }}</td>
+                                                    <td class="text-right">{{ formatMoney(job.cash_amount) }}</td>
+                                                    <td class="text-right">{{ formatMoney(job.refinery_cost) }}</td>
+                                                    <td class="text-right">{{ job.sold_amount != null ? formatMoney(job.sold_amount) : '-' }}</td>
+                                                    <td class="text-right">{{ job.profit_amount != null ? formatMoney(job.profit_amount) : '-' }}</td>
+                                                    <td>{{ job.job_status }}</td>
+                                                </tr>
+                                                <tr v-if="!labJobs.data || !labJobs.data.length">
+                                                    <td colspan="10" class="text-center text-muted">No laboratory jobs in this period.</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 <div class="card-body" v-else>
                                     <p>Loading investor data...</p>
@@ -140,6 +191,8 @@ export default {
     data() {
         return {
             summary: null,
+            labSummary: null,
+            labJobs: { data: [] },
             filters: {
                 period: 'monthly',
                 date: this.getTodaysDate(),
@@ -166,11 +219,32 @@ export default {
                 })
                 .then((res) => {
                     this.summary = res.data;
+                    this.loadLabData();
                 })
                 .catch((err) => {
                     console.log(err);
                     toastr.error(err.response?.data?.message || 'Unable to load investor summary.');
                 });
+        },
+        loadLabData() {
+            if (!this.summary) {
+                return;
+            }
+            const params = {
+                from_date: this.summary.period.from_date,
+                to_date: this.summary.period.to_date,
+            };
+            axios.get('/api/lab/summary', { params })
+                .then((res) => {
+                    this.labSummary = res.data;
+                })
+                .catch((err) => console.log(err));
+
+            axios.get('/api/lab/jobs', { params: { ...params, paginate: 50 } })
+                .then((res) => {
+                    this.labJobs = res.data;
+                })
+                .catch((err) => console.log(err));
         },
         formatMoney(value) {
             return parseFloat(value || 0).toFixed(2);

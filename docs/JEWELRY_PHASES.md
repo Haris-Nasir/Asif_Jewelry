@@ -57,11 +57,14 @@ NODE_OPTIONS=--openssl-legacy-provider npm run dev
 
 ---
 
-## Phase 4 — Laboratory module
+## Phase 4 — Laboratory module ✅
 
-- Lab jobs (gold + rupees)
-- Base price, refinery cost, sold price, profit
-- Linked to investors
+- Lab jobs with gold weight + cash (rupees) amounts
+- Base price, refinery cost, sold price, auto-calculated profit
+- Jobs linked to investors
+- Admin/worker: create, edit, delete lab jobs (`/laboratory`)
+- Investor portal shows linked lab jobs and profit
+- Dashboard shows FY lab job count and lab profit
 
 ---
 

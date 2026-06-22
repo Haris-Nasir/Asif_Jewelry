@@ -18,6 +18,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ChallanController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LabJobController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -30,13 +31,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/investor/summary', [InvestorController::class, 'summary'])->middleware('role:investor,admin');
     Route::get('/investor/transactions', [InvestorController::class, 'transactions'])->middleware('role:investor,admin');
+    Route::get('/investor/list', [InvestorController::class, 'index'])->middleware('role:admin,worker');
 
     Route::middleware('role:admin')->prefix('investor')->group(function () {
-        Route::get('/list', [InvestorController::class, 'index']);
         Route::post('/create', [InvestorController::class, 'store']);
         Route::put('/update/{investorId}', [InvestorController::class, 'update']);
         Route::post('/transaction', [InvestorController::class, 'addTransaction']);
         Route::delete('/transaction/{transactionId}', [InvestorController::class, 'deleteTransaction']);
+    });
+
+    Route::get('/lab/jobs', [LabJobController::class, 'index'])->middleware('role:admin,worker,investor');
+    Route::get('/lab/summary', [LabJobController::class, 'summary'])->middleware('role:admin,worker,investor');
+
+    Route::middleware('role:admin,worker')->prefix('lab')->group(function () {
+        Route::post('/jobs', [LabJobController::class, 'store']);
+        Route::put('/jobs/{labJobId}', [LabJobController::class, 'update']);
+        Route::delete('/jobs/{labJobId}', [LabJobController::class, 'destroy']);
     });
 
     Route::middleware('role:admin,worker')->group(function () {
