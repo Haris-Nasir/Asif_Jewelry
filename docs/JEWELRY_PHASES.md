@@ -46,12 +46,14 @@ NODE_OPTIONS=--openssl-legacy-provider npm run dev
 
 ---
 
-## Phase 3 — Investor module
+## Phase 3 — Investor module ✅
 
-- Investor deposits (₹), gold purchase at rate, sale at rate
-- Profit calculation after shared expenses
-- Selectable profit share %
-- PDF reports: daily, monthly, quarterly
+- Investor deposits (₹), withdrawals, gold buy/sell at rate
+- `tbl_investor_transactions` for all investor capital movements
+- Profit calculation: gross sales profit − shared expenses × profit share %
+- Admin: manage investors, set profit share %, record transactions
+- Investor portal: period summary, holdings, transaction list
+- PDF reports: daily, monthly, quarterly (financial year supported)
 
 ---
 

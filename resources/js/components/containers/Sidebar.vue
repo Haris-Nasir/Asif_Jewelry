@@ -186,7 +186,7 @@
                         </li>
 
                         <li class="nav-item" v-if="isAdmin">
-                            <router-link to="/investor" class="nav-link">
+                            <router-link to="/manageinvestors" class="nav-link">
                                 <i class="nav-icon fas fa-hand-holding-usd"></i>
                                 <p>Investors</p>
                             </router-link>

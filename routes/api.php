@@ -29,6 +29,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stock/ledger', [StockController::class, 'ledger'])->middleware('role:admin,worker');
 
     Route::get('/investor/summary', [InvestorController::class, 'summary'])->middleware('role:investor,admin');
+    Route::get('/investor/transactions', [InvestorController::class, 'transactions'])->middleware('role:investor,admin');
+
+    Route::middleware('role:admin')->prefix('investor')->group(function () {
+        Route::get('/list', [InvestorController::class, 'index']);
+        Route::post('/create', [InvestorController::class, 'store']);
+        Route::put('/update/{investorId}', [InvestorController::class, 'update']);
+        Route::post('/transaction', [InvestorController::class, 'addTransaction']);
+        Route::delete('/transaction/{transactionId}', [InvestorController::class, 'deleteTransaction']);
+    });
 
     Route::middleware('role:admin,worker')->group(function () {
         Route::get('/dashboarddata', [DashboardController::class, 'dashboardCalculations']);
