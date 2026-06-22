@@ -28,3 +28,17 @@ export function hasRole(...roles) {
     const user = getUser();
     return user && roles.includes(user.role);
 }
+
+export function hasPermission(permission) {
+    const user = getUser();
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    return Array.isArray(user.permissions) && user.permissions.includes(permission);
+}
+
+export function pdfUrl(path) {
+    const token = getToken();
+    if (!token) return path;
+    const separator = path.includes('?') ? '&' : '?';
+    return `${path}${separator}token=${encodeURIComponent(token)}`;
+}

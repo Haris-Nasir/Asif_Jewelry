@@ -19,15 +19,25 @@ use App\Http\Controllers\ChallanController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LabJobController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuditLogController;
 
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
     Route::get('/stock/balances', [StockController::class, 'balances']);
-    Route::get('/stock/ledger', [StockController::class, 'ledger'])->middleware('role:admin,worker');
+    Route::get('/stock/ledger', [StockController::class, 'ledger'])
+        ->middleware(['role:admin,worker', 'permission:stock']);
+
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/users/workers', [UserController::class, 'workers']);
+        Route::post('/users/workers', [UserController::class, 'storeWorker']);
+        Route::put('/users/workers/{userId}/permissions', [UserController::class, 'updatePermissions']);
+        Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    });
 
     Route::get('/investor/summary', [InvestorController::class, 'summary'])->middleware('role:investor,admin');
     Route::get('/investor/transactions', [InvestorController::class, 'transactions'])->middleware('role:investor,admin');
@@ -44,14 +54,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lab/summary', [LabJobController::class, 'summary'])->middleware('role:admin,worker,investor');
 
     Route::middleware('role:admin,worker')->prefix('lab')->group(function () {
-        Route::post('/jobs', [LabJobController::class, 'store']);
-        Route::put('/jobs/{labJobId}', [LabJobController::class, 'update']);
-        Route::delete('/jobs/{labJobId}', [LabJobController::class, 'destroy']);
+        Route::post('/jobs', [LabJobController::class, 'store'])->middleware('permission:laboratory');
+        Route::put('/jobs/{labJobId}', [LabJobController::class, 'update'])->middleware('permission:laboratory');
+        Route::delete('/jobs/{labJobId}', [LabJobController::class, 'destroy'])->middleware('permission:laboratory_delete');
     });
 
     Route::middleware('role:admin,worker')->group(function () {
-        Route::get('/dashboarddata', [DashboardController::class, 'dashboardCalculations']);
+        Route::get('/brokerslist', [BrokerController::class, 'getBrokersList']);
+        Route::get('/getBrokers', [BrokerController::class, 'getBrokers']);
+        Route::get('/customerlist', [CustomerController::class, 'getCustomersList']);
+        Route::get('/selectedcustomerdata/{customer_id}', [CustomerController::class, 'getSelectedCustomerData']);
+        Route::get('/vendorcompanies', [VendorController::class, 'getCompanyNames']);
+        Route::get('/selectedvendordata/{vendor_id}', [VendorController::class, 'getSelectedVendorData']);
+        Route::get('/sellqualitycategories', [SellQualityController::class, 'getQualityCategories']);
+        Route::get('/sellqualityofcategory/{sell_quality_category_id}', [SellQualityController::class, 'getSellQualityOfGivenCategory']);
+        Route::get('/expensecategorieslist', [ExpenseCategoryControler::class, 'getAllExpenseCategoriesList']);
+    });
 
+    Route::middleware(['role:admin,worker', 'permission:dashboard'])->get('/dashboarddata', [DashboardController::class, 'dashboardCalculations']);
+
+    Route::middleware(['role:admin,worker', 'permission:masters'])->group(function () {
         Route::get('/inwardqualitycategories', [InwardQualityController::class, 'getQualityCategories']);
         Route::get('/inwardqualities', [InwardQualityController::class, 'getAllInwardQualities']);
         Route::get('/productqualitycategories', [InwardQualityController::class, 'getProductQualityCategories']);
@@ -62,13 +84,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/delete/{inward_quality_id}', [InwardQualityController::class, 'deleteInwardQuality']);
         });
 
-        Route::post('/inward', [InwardController::class, 'addNewInward']);
-        Route::get('/inwards', [InwardController::class, 'getAllInwards']);
-        Route::get('/inward/view/{inward_mst_id}', [InwardController::class, 'viewInwardDetails']);
-        Route::put('/inward/update/{inward_details_id}', [InwardController::class, 'updateInward']);
-        Route::delete('/inward/delete/{inward_details_id}', [InwardController::class, 'deleteInward']);
-        Route::delete('/inward/delete/{inward_mst_id}', [InwardController::class, 'deleteInward']);
-
         Route::get('/sellqualitycategories', [SellQualityController::class, 'getQualityCategories']);
         Route::get('/sellqualities', [SellQualityController::class, 'getAllSellQualities']);
         Route::prefix('/sellquality')->group(function () {
@@ -76,75 +91,53 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/update/{sell_quality_id}', [SellQualityController::class, 'updateSellQuality']);
             Route::delete('/delete/{sell_quality_id}', [SellQualityController::class, 'deleteSellQuality']);
         });
-        Route::get('/sellqualityofcategory/{sell_quality_category_id}', [SellQualityController::class, 'getSellQualityOfGivenCategory']);
 
         Route::get('/brokers', [BrokerController::class, 'getAllBrokers']);
-        Route::get('/getBrokers', [BrokerController::class, 'getBrokers']);
         Route::prefix('/broker')->group(function () {
             Route::post('/insert', [BrokerController::class, 'insertBroker']);
             Route::put('/update/{broker_id}', [BrokerController::class, 'updateBroker']);
             Route::delete('/delete/{broker_id}', [BrokerController::class, 'deleteBroker']);
         });
-        Route::get('/brokerslist', [BrokerController::class, 'getBrokersList']);
 
         Route::post('/customer', [CustomerController::class, 'addNewCustomer']);
         Route::get('/customers', [CustomerController::class, 'getAllCustomers']);
         Route::put('/customer/update/{customer_id}', [CustomerController::class, 'updateCustomer']);
         Route::delete('/customer/delete/{customer_id}', [CustomerController::class, 'deleteCustomer']);
-        Route::get('/customerlist', [CustomerController::class, 'getCustomersList']);
-        Route::get('/selectedcustomerdata/{customer_id}', [CustomerController::class, 'getSelectedCustomerData']);
+        Route::get('/customers', [CustomerController::class, 'getAllCustomers']);
 
         Route::post('/vendor', [VendorController::class, 'addNewVendor']);
         Route::get('/vendors', [VendorController::class, 'getAllVendors']);
-        Route::get('/vendorcompanies', [VendorController::class, 'getCompanyNames']);
-        Route::get('/selectedvendordata/{vendor_id}', [VendorController::class, 'getSelectedVendorData']);
         Route::put('/vendor/update/{vendor_id}', [VendorController::class, 'updateVendor']);
         Route::delete('/vendor/delete/{vendor_id}', [VendorController::class, 'deleteVendor']);
+    });
 
-        Route::prefix('/bankdetails')->group(function () {
-            Route::post('/insert', [BankDetailsController::class, 'insertBankDetails']);
-        });
-        Route::get('/bankinfo', [BankDetailsController::class, 'getBankInfo']);
-        Route::get('/bankbranch/{bankId}', [BankDetailsController::class, 'getBankBranch']);
+    Route::middleware(['role:admin,worker', 'permission:purchases'])->group(function () {
+        Route::post('/inward', [InwardController::class, 'addNewInward']);
+        Route::get('/inwards', [InwardController::class, 'getAllInwards']);
+        Route::get('/inward/view/{inward_mst_id}', [InwardController::class, 'viewInwardDetails']);
+        Route::put('/inward/update/{inward_details_id}', [InwardController::class, 'updateInward']);
+    });
+    Route::delete('/inward/delete/{inward_details_id}', [InwardController::class, 'deleteInward'])
+        ->middleware(['role:admin,worker', 'permission:purchases_delete']);
+    Route::delete('/inward/delete/{inward_mst_id}', [InwardController::class, 'deleteInward'])
+        ->middleware(['role:admin,worker', 'permission:purchases_delete']);
 
-        Route::prefix('/credit')->group(function () {
-            Route::post('/insert', [CreditController::class, 'insertCredit']);
-        });
-
-        Route::get('/bankdetails', [BankDetailsController::class, 'getAllBankDetails']);
-        Route::get('/credits', [CreditController::class, 'getAllCreditDetails']);
-
-        Route::put('/bankdetail/update/{bank_details_id}', [BankDetailsController::class, 'updateBankDetail']);
-        Route::put('/credit/update/{credit_id}', [CreditController::class, 'updateCreditDetail']);
-
-        Route::delete('/bankdetail/delete/{bank_details_id}', [BankDetailsController::class, 'deleteBankDetail']);
-        Route::delete('/credit/delete/{credit_id}', [CreditController::class, 'deleteDetail']);
-
-        Route::get('/expensecategories', [ExpenseCategoryControler::class, 'getAllExpenseCategories']);
-        Route::get('/expensecategorieslist', [ExpenseCategoryControler::class, 'getAllExpenseCategoriesList']);
-        Route::put('/expensecategory/update/{expense_category_id}', [ExpenseCategoryControler::class, 'updateExpenseCategory']);
-        Route::post('/expensecategory', [ExpenseCategoryControler::class, 'addNewCategory']);
-        Route::delete('/expensecategory/{expense_category_id}', [ExpenseCategoryControler::class, 'deleteCategory']);
-
-        Route::post('/expense', [ExpenseController::class, 'addExpense']);
-        Route::get('/expense', [ExpenseController::class, 'getExpenses']);
-        Route::put('/expense', [ExpenseController::class, 'updateExpenses']);
-        Route::delete('/expense/{expenseid}', [ExpenseController::class, 'deleteExpenses']);
-        Route::get('/totalexpenseamount', [ExpenseController::class, 'getTotalAmountOfGivenDateRangeAndCategory']);
-
+    Route::middleware(['role:admin,worker', 'permission:sales'])->group(function () {
         Route::get('/getfinancialyear/{challandate}', [ChallanController::class, 'getFinancialYearOfChallanDate']);
         Route::get('/verifychallan/{challanno}/{fromdate}/{todate}', [ChallanController::class, 'verifyChallanNumber']);
         Route::post('/challan/insert', [ChallanController::class, 'addNewChallan']);
         Route::get('/challans', [ChallanController::class, 'getChallans']);
         Route::get('/challan/{challanid}', [ChallanController::class, 'getChallanDataOfChallanId']);
         Route::put('/challan', [ChallanController::class, 'updateChallan']);
-        Route::delete('/challan/{challanId}', [ChallanController::class, 'deleteChallan']);
+    });
+    Route::delete('/challan/{challanId}', [ChallanController::class, 'deleteChallan'])
+        ->middleware(['role:admin,worker', 'permission:sales_delete']);
 
+    Route::middleware(['role:admin,worker', 'permission:invoices'])->group(function () {
         Route::post('/directinvoice', [InvoiceController::class, 'addNewDirectInvoice']);
         Route::get('/directinvoices', [InvoiceController::class, 'getAllDirectInvoices']);
         Route::get('/directinvoice/{invoiceid}', [InvoiceController::class, 'getDirectInvoiceOfInvoiceId']);
         Route::put('/directinvoice', [InvoiceController::class, 'updateDirectInvoice']);
-        Route::delete('/directinvoice/{invoiceMstId}', [InvoiceController::class, 'deleteDirectInvoice']);
 
         Route::get('/invoice/getfinancialyear/{invoiceno}', [InvoiceController::class, 'getFromInvoiceNo']);
         Route::get('/invoice/challandata/{invoiceno}/{fromdate}/{todate}', [InvoiceController::class, 'getFromInvoiceNoAndFinancialYear']);
@@ -156,4 +149,40 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/invoice/{invoiceid}', [InvoiceController::class, 'getChallanInvoiceOfInvoiceid']);
         Route::put('/invoice', [InvoiceController::class, 'updateInvoiceForChallan']);
     });
+    Route::delete('/directinvoice/{invoiceMstId}', [InvoiceController::class, 'deleteDirectInvoice'])
+        ->middleware(['role:admin,worker', 'permission:invoices_delete']);
+
+    Route::middleware(['role:admin,worker', 'permission:expenses'])->group(function () {
+        Route::get('/expensecategories', [ExpenseCategoryControler::class, 'getAllExpenseCategories']);
+        Route::get('/expensecategorieslist', [ExpenseCategoryControler::class, 'getAllExpenseCategoriesList']);
+        Route::post('/expense', [ExpenseController::class, 'addExpense']);
+        Route::get('/expense', [ExpenseController::class, 'getExpenses']);
+        Route::put('/expense', [ExpenseController::class, 'updateExpenses']);
+        Route::get('/totalexpenseamount', [ExpenseController::class, 'getTotalAmountOfGivenDateRangeAndCategory']);
+    });
+    Route::middleware('role:admin')->group(function () {
+        Route::put('/expensecategory/update/{expense_category_id}', [ExpenseCategoryControler::class, 'updateExpenseCategory']);
+        Route::post('/expensecategory', [ExpenseCategoryControler::class, 'addNewCategory']);
+        Route::delete('/expensecategory/{expense_category_id}', [ExpenseCategoryControler::class, 'deleteCategory']);
+
+        Route::prefix('/bankdetails')->group(function () {
+            Route::post('/insert', [BankDetailsController::class, 'insertBankDetails']);
+        });
+        Route::get('/bankdetails', [BankDetailsController::class, 'getAllBankDetails']);
+        Route::put('/bankdetail/update/{bank_details_id}', [BankDetailsController::class, 'updateBankDetail']);
+        Route::delete('/bankdetail/delete/{bank_details_id}', [BankDetailsController::class, 'deleteBankDetail']);
+
+        Route::prefix('/credit')->group(function () {
+            Route::post('/insert', [CreditController::class, 'insertCredit']);
+        });
+        Route::get('/credits', [CreditController::class, 'getAllCreditDetails']);
+        Route::put('/credit/update/{credit_id}', [CreditController::class, 'updateCreditDetail']);
+        Route::delete('/credit/delete/{credit_id}', [CreditController::class, 'deleteDetail']);
+    });
+    Route::get('/bankinfo', [BankDetailsController::class, 'getBankInfo'])
+        ->middleware(['role:admin,worker', 'permission:invoices']);
+    Route::get('/bankbranch/{bankId}', [BankDetailsController::class, 'getBankBranch'])
+        ->middleware(['role:admin,worker', 'permission:invoices']);
+    Route::delete('/expense/{expenseid}', [ExpenseController::class, 'deleteExpenses'])
+        ->middleware(['role:admin,worker', 'permission:expenses_delete']);
 });

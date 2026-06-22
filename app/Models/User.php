@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'permissions',
     ];
 
     /**
@@ -41,7 +42,38 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'permissions' => 'array',
     ];
+
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        if ($this->role !== 'worker') {
+            return false;
+        }
+
+        return in_array($permission, $this->resolvedPermissions(), true);
+    }
+
+    public function resolvedPermissions(): array
+    {
+        if ($this->role === 'admin') {
+            return array_keys(config('permissions.labels', []));
+        }
+
+        if ($this->role !== 'worker') {
+            return [];
+        }
+
+        if (is_array($this->permissions) && count($this->permissions) > 0) {
+            return $this->permissions;
+        }
+
+        return config('permissions.worker_defaults', []);
+    }
 
     public function isAdmin(): bool
     {

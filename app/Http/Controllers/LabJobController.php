@@ -6,9 +6,11 @@ use App\Models\tbl_investor;
 use App\Models\tbl_lab_job;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Concerns\AuditsActions;
 
 class LabJobController extends Controller
 {
+    use AuditsActions;
     public function index(Request $request)
     {
         $validated = $request->validate([
@@ -79,6 +81,8 @@ class LabJobController extends Controller
             'created_by' => optional($request->user())->id,
             'lab_job_status' => true,
         ]);
+
+        $this->audit('create', 'laboratory', $job->lab_job_id, 'Lab job created for investor #' . $validated['investor_id']);
 
         return response()->json([
             'status' => 1,

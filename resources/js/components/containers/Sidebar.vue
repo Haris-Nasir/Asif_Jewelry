@@ -28,42 +28,42 @@
                     </template>
 
                     <template v-else>
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('dashboard')">
                             <router-link to="/dashboard" class="nav-link">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p class="text-md">Dashboard</p>
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('masters')">
                             <router-link to="/sellquality" class="nav-link">
                                 <i class="nav-icon far bi bi-gem"></i>
                                 <p class="text-md">Item Types</p>
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('stock')">
                             <router-link to="/stock" class="nav-link">
                                 <i class="nav-icon fas fa-boxes"></i>
                                 <p class="text-md">Stock Ledger</p>
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('masters')">
                             <router-link to="/vendor" class="nav-link">
                                 <i class="nav-icon far bi bi-person-circle"></i>
                                 <p class="text-md">Supplier</p>
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('masters')">
                             <router-link to="/customer" class="nav-link">
                                 <i class="nav-icon far bi bi-person-circle"></i>
                                 <p class="text-md">Customer</p>
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('purchases')">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon nav-icon far bi bi-box-arrow-in-right"></i>
                                 <p class="text-md">
@@ -87,7 +87,7 @@
                             </ul>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('sales')">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon nav-icon far bi bi-receipt"></i>
                                 <p class="text-md">
@@ -111,7 +111,7 @@
                             </ul>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('invoices')">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon nav-icon far bi bi-receipt-cutoff"></i>
                                 <p class="text-md">
@@ -154,7 +154,7 @@
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('expenses')">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon far bi bi-dash-circle"></i>
                                 <p class="text-md">
@@ -192,10 +192,24 @@
                             </router-link>
                         </li>
 
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="can('laboratory')">
                             <router-link to="/laboratory" class="nav-link">
                                 <i class="nav-icon fas fa-flask"></i>
                                 <p class="text-md">Laboratory</p>
+                            </router-link>
+                        </li>
+
+                        <li class="nav-item" v-if="isAdmin">
+                            <router-link to="/workers" class="nav-link">
+                                <i class="nav-icon fas fa-users-cog"></i>
+                                <p>Workers</p>
+                            </router-link>
+                        </li>
+
+                        <li class="nav-item" v-if="isAdmin">
+                            <router-link to="/auditlogs" class="nav-link">
+                                <i class="nav-icon fas fa-clipboard-list"></i>
+                                <p>Audit Logs</p>
                             </router-link>
                         </li>
                     </template>
@@ -206,7 +220,7 @@
 </template>
 
 <script>
-import { getUser } from '../../auth';
+import { getUser, hasPermission } from '../../auth';
 
 export default {
     name: "Sidebar",
@@ -219,6 +233,11 @@ export default {
         },
         isInvestor() {
             return this.user && this.user.role === 'investor';
+        },
+    },
+    methods: {
+        can(permission) {
+            return hasPermission(permission);
         },
     },
 };

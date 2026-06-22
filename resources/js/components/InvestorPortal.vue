@@ -186,6 +186,8 @@
 </template>
 
 <script>
+import { pdfUrl } from '../auth';
+
 export default {
     name: 'InvestorPortal',
     data() {
@@ -257,7 +259,7 @@ export default {
                 return '#';
             }
             const date = this.filters.date ? `?date=${this.filters.date}` : '';
-            return `/investor/pdf/${this.summary.investor.investor_id}/${period}${date}`;
+            return pdfUrl(`/investor/pdf/${this.summary.investor.investor_id}/${period}${date}`);
         },
     },
 };

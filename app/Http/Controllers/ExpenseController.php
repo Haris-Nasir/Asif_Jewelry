@@ -7,12 +7,12 @@ use App\Models\tbl_expense;
 use App\Models\tbl_expense_category;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Http\Controllers\Concerns\AuditsActions;
 
 
 class ExpenseController extends Controller
 {
-    //
-  
+    use AuditsActions;
 
     function addExpense(Request $req){
 
@@ -52,6 +52,7 @@ class ExpenseController extends Controller
         $newExpense->expense_amount = $expenseAmount;
 
         if($newExpense->save()){
+            $this->audit('create', 'expense', $newExpense->expense_id, 'Expense added: ₹' . $newExpense->expense_amount);
             return response()->json(array(
                 "status" => 1,
                 "message" => "Expense Added Succesfully"

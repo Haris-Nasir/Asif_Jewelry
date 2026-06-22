@@ -19,10 +19,12 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Services\StockService;
 use App\Models\tbl_sell_quality;
+use App\Http\Controllers\Concerns\AuditsActions;
 
 // InwardContoller Class
 class InwardController extends Controller
 {
+    use AuditsActions;
     protected StockService $stockService;
 
     public function __construct(StockService $stockService)
@@ -150,6 +152,8 @@ class InwardController extends Controller
             );
 
             DB::commit();
+
+            $this->audit('create', 'purchase', (int) $mst_id, 'Purchase recorded: invoice ' . $invoiceNo);
 
             $res = array(
                 "status" => 1,
