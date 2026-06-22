@@ -93,6 +93,37 @@
                             </div>
                         </div>
                         <div class="col-lg-3 col-6 mt-3">
+                            <div class="small-box bg-dark">
+                                <div class="inner">
+                                    <h3 v-html="labJobs"></h3>
+                                    <p>Lab Jobs (FY)</p>
+                                    <p style="margin-top: -1rem; margin-bottom: -0.5rem">
+                                        <b>{{ financialYear }}</b>
+                                    </p>
+                                </div>
+                                <div class="icon">
+                                    <i class="nav-icon fas fa-flask"></i>
+                                </div>
+                                <router-link to="/laboratory" class="nav-link small-box-footer">
+                                    More info <i class="fas fa-arrow-circle-right"></i>
+                                </router-link>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 mt-3">
+                            <div class="small-box bg-teal">
+                                <div class="inner">
+                                    <h3 v-html="labProfit"></h3>
+                                    <p>Lab Profit (FY)</p>
+                                    <p style="margin-top: -1rem; margin-bottom: -0.5rem">
+                                        <b>{{ financialYear }}</b>
+                                    </p>
+                                </div>
+                                <div class="icon">
+                                    <i class="nav-icon fas fa-vial"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-6 mt-3">
                             <div class="small-box bg-danger">
                                 <div class="inner">
                                     <h3 v-html="expense"></h3>
@@ -127,6 +158,8 @@
                 credit: "",
                 expense: "",
                 profit: "",
+                labJobs: "",
+                labProfit: "",
                 goldWeight: "0.000",
                 silverWeight: "0.000",
             };
@@ -149,6 +182,8 @@
                         this.credit = "₹" + res.data[3];
                         this.expense = "₹" + res.data[4];
                         this.profit = "₹" + (res.data[5] || 0);
+                        this.labJobs = res.data[7] || 0;
+                        this.labProfit = "₹" + (res.data[8] || 0);
                     })
                     .catch((err) => {
                         console.log(err);

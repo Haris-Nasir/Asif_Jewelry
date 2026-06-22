@@ -191,6 +191,13 @@
                                 <p>Investors</p>
                             </router-link>
                         </li>
+
+                        <li class="nav-item">
+                            <router-link to="/laboratory" class="nav-link">
+                                <i class="nav-icon fas fa-flask"></i>
+                                <p class="text-md">Laboratory</p>
+                            </router-link>
+                        </li>
                     </template>
                 </ul>
             </nav>

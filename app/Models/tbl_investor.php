@@ -32,4 +32,9 @@ class tbl_investor extends Model
     {
         return $this->hasMany(tbl_investor_transaction::class, 'investor_id', 'investor_id');
     }
+
+    public function labJobs()
+    {
+        return $this->hasMany(tbl_lab_job::class, 'investor_id', 'investor_id');
+    }
 }
