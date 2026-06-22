@@ -22,7 +22,7 @@ NOTES
               <div class="card card-primary">
               <!--Card header of SM Inward-->
                 <div class="card-header">
-                  <h3 class="card-title">Search and Manage Inward</h3>
+                  <h3 class="card-title">Search and Manage Purchases</h3>
                   <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                       <i class="fas fa-minus"></i>
@@ -124,9 +124,12 @@ NOTES
                           <th>Invoice No.</th>
                           <th>Company</th>
                           <th>Broker</th>
-                          <th>Quality</th>
+                          <th>Item Type</th>
+                          <th>Metal</th>
+                          <th class="text-right">Weight (g)</th>
+                          <th class="text-right">Rate/g</th>
                           <th>Category</th>
-                          <th>Net Amount</th>
+                          <th class="text-right">Net Amount</th>
                           <th width="15%">Action</th>
                         </tr>
                       </thead>
@@ -141,7 +144,10 @@ NOTES
                           <td>{{ inward.vendor_company_name }}</td>
                           <td>{{ inward.broker_name }}</td>
                           <td>{{ inward.quality_name }}</td>
-                          <td>{{ inward.inward_category_name }}</td>
+                          <td>{{ inward.metal_type || '-' }}</td>
+                          <td class="text-right">{{ inward.weight_grams || inward.qty }}</td>
+                          <td class="text-right">{{ inward.rate }}</td>
+                          <td>{{ inward.sell_category_name }}</td>
                           <td>
                             {{ inward.nettotal }}
                           </td>
@@ -791,7 +797,8 @@ NOTES
             this.inwards = result.data;
             let totalAmountOfPage = 0;
             for (let i = 0; i < this.inwards.data.length; i++) {
-              let total = this.inwards.data[i].qty * this.inwards.data[i].rate;
+              let weight = parseFloat(this.inwards.data[i].weight_grams || this.inwards.data[i].qty || 0);
+              let total = weight * this.inwards.data[i].rate;
               this.inwards.data[i].nettotal =
                 total +
                 total * this.inwards.data[i].inward_mst_gst_percentage * 0.01;

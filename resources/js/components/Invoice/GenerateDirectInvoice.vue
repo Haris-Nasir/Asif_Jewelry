@@ -9,7 +9,7 @@
                             <div class="card card-primary mt-3">
                                 <div class="card-header card-title d-flex">
                                     <span class="p-2 flex-grow-1 bd-highlight">
-                                        Generate Direct Invoice
+                                        Generate Sales Bill (Direct)
                                     </span>
                                     <span class="p-2 bd-highlight">
                                         <button type="button" class="btn btn-tool text-md" data-card-widget="collapse">
@@ -70,6 +70,14 @@
                                             <model-select :options="options.qualities" v-model="invoice.qualityId"
                                             placeholder="Select Quality">
                                             </model-select>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">  
+                                        <div class="col-md-2">
+                                            <label for="" class="text-md mt-1">Weight (grams)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.001" class="form-control text-right" v-model="invoice.weightGrams">
                                         </div>
                                     </div>
                                     <div class="row mt-3">  
@@ -173,6 +181,7 @@ export default {
                 qualityId: "",
                 noOfUnits: '',
                 qty: "",
+                weightGrams: "",
                 rate: "",
                 gstPercentage: "0",
                 totalAmount: (0).toFixed(2),
@@ -285,9 +294,9 @@ export default {
                     });
 
                     if (this.invoice.categoryId == '1') {
-                        this.invoice.unit = "Meters";
+                        this.invoice.unit = "pcs";
                     }else if (this.invoice.categoryId == '2' || this.invoice.categoryId == '3') {
-                        this.invoice.unit = "Kg.";
+                        this.invoice.unit = "pcs";
                     }
                 })
                 .catch(err => {
@@ -407,13 +416,21 @@ export default {
             return true;
         },
 
+        isWeightGramsValid: function(){
+            if(this.invoice.weightGrams == "" || parseFloat(this.invoice.weightGrams) <= 0){
+                toastr.info("Please enter weight in grams");
+                return false;
+            }
+            return true;
+        },
+
 
 
 
         // Generate Invoice Btn
         generateInvoice: function() {
             console.log(this.invoice);
-            if(this.isInvoiceDateValid() && this.isInvoiceNoValid() && this.isCustomerValid() && this.isBrokerValid() && this.isCategoryValid() && this.isNoOfUnitsValid() && this.isQualityValid() && this.isQtyValid() && this.isUnitValid() && this.isRateValid() && this.isGSTPercentageValid()){
+            if(this.isInvoiceDateValid() && this.isInvoiceNoValid() && this.isCustomerValid() && this.isBrokerValid() && this.isCategoryValid() && this.isNoOfUnitsValid() && this.isQualityValid() && this.isQtyValid() && this.isUnitValid() && this.isRateValid() && this.isGSTPercentageValid() && this.isWeightGramsValid()){
                 axios
                     .post('/api/directinvoice', this.invoice)
                     .then(response => {
@@ -421,7 +438,7 @@ export default {
                             swal
                                 .fire({
                                     title: "Success",
-                                    html:  "<h5 style='color:#9C9794'>Invoice Generated Successfully</h5>",
+                                    html:  "<h5 style='color:#9C9794'>Sale bill created. Profit: ₹" + (response.data.profit || 0) + "</h5>",
                                     icon: "success",
                                     allowOutsideClick: false
                                 })
@@ -430,6 +447,7 @@ export default {
                                 });
                         }
                         else if(response.data.status == -1){
+                            toastr.error(response.data.message || "Something went wrong");
                             let errorString = "";
                             let errors = response.data.errors;
 
@@ -468,6 +486,7 @@ export default {
             this.invoice.qualityId ="";
             this.invoice.noOfUnits = "";          
             this.invoice.qty = "";
+            this.invoice.weightGrams = "";
             this.invoice.rate = "";
             this.invoice.gstPercentage = "0";
             this.invoice.totalAmount = (0).toFixed(2);

@@ -11,7 +11,7 @@
                 <div class="card card-primary">
                   <!-- Add Inward Card header -->
                   <div class="card-header">
-                    <h3 class="card-title">Add New Inward</h3>
+                    <h3 class="card-title">Add New Purchase (Gold / Silver)</h3>
                     <div class="card-tools">
                       <button
                         type="button"
@@ -150,7 +150,7 @@
                     >
                       <div class="col-md-2">
                         <label for="" class="col-form-label text-md"
-                          >Prod. Category
+                          >Metal Type
                           <span class="required-mark" style="color: red"
                             >*</span
                           >
@@ -168,7 +168,7 @@
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="unit" class="col-form-label text-md"
-                          >Unit
+                          >Pieces
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -179,7 +179,8 @@
                           type="text"
                           class="form-control"
                           v-model="unit"
-                          placeholder="Unit..."
+                          placeholder="pcs"
+                          value="pcs"
                           disabled
                         />
                       </div>
@@ -192,7 +193,7 @@
                         <label
                           for="productQuality"
                           class="col-form-label text-md"
-                          >Product Quality
+                          >Item Type
                           <span class="required-mark" style="color: red"
                             >*</span
                           >
@@ -208,8 +209,26 @@
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
+                        <label for="weightGrams" class="col-form-label text-md"
+                          >Weight (grams)
+                          <span class="required-mark" style="color: red"
+                            >*</span
+                          ></label
+                        >
+                      </div>
+                      <div class="col-md-3">
+                        <input
+                          type="number"
+                          step="0.001"
+                          class="form-control"
+                          v-model="weightGrams"
+                          placeholder="Enter weight in grams..."
+                        />
+                      </div>
+                      <div class="col-md-1"></div>
+                      <div class="col-md-2">
                         <label for="quantity" class="col-form-label text-md"
-                          >Quantity
+                          >Pieces
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -234,7 +253,7 @@
                           for="rate"
                           id="rate"
                           class="col-form-label text-md"
-                          >Rate/Qty
+                          >Rate / gram (₹)
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -390,8 +409,10 @@ export default {
       date: "",
       gstNo: "",
       mobileNo: "",
-      unit: "",
-      quantity: "",
+      unit: "pcs",
+      quantity: "1",
+      weightGrams: "",
+      metalType: "gold",
       rate: "",
       gstPercentage: "0",
       totalAmount: "",
@@ -414,6 +435,10 @@ export default {
     },
 
     rate: function () {
+      this.calcTotalAmount();
+    },
+
+    weightGrams: function () {
       this.calcTotalAmount();
     },
 
@@ -536,23 +561,27 @@ export default {
     //Function is to check Product Quantity
     quantityValidation: function () {
       if (this.quantity == "") {
-        toastr.info("Please Enter Quantity");
-        return false;
+        this.quantity = 1;
       } else if (this.quantity < 0) {
-        toastr.info("Quantity Can't Be minus");
-        return false;
-      } else if (this.quantity.length > 11) {
-        toastr.warning("Quantity must be less or equal than 11 digits");
+        toastr.info("Pieces can't be negative");
         return false;
       } else {
         return true;
       }
     },
 
-    //Function is to check Rate per Quantity
+    weightGramsValidation: function () {
+      if (this.weightGrams == "" || parseFloat(this.weightGrams) <= 0) {
+        toastr.info("Please enter weight in grams");
+        return false;
+      }
+      return true;
+    },
+
+    //Function is to check Rate per gram
     ratePerQtyValidation: function () {
       if (this.rate == "") {
-        toastr.info("Please Enter Rate Per Quantity");
+        toastr.info("Please Enter Rate Per Gram");
         return false;
       } else if (this.rate < 0) {
         toastr.info("Rate Can't Be minus");
@@ -588,12 +617,13 @@ export default {
     //Function is to load Product Quality Category
     loadProductQualityCategory() {
       axios
-        .get("../api/productqualitycategories")
+        .get("../api/sellqualitycategories")
         .then((response) => {
-          this.productQualityCategories = response.data.map((category) => {
+          this.productQualityCategories = response.data.qualityCategories.map((category) => {
             return {
-              value: category.inward_quality_category_id,
-              text: category.inward_category_name,
+              value: category.qualityCategoryId,
+              text: category.qualityCategoryName + " (" + category.metalType + ")",
+              metalType: category.metalType,
             };
           });
         })
@@ -657,22 +687,22 @@ export default {
 
       axios
         .get(
-          "../api/inwardqualityofcategories/" +
+          "../api/sellqualityofcategory/" +
             this.selectedProductQualityCategory
         )
         .then((response) => {
           this.productQualities = response.data.map((quality) => {
             return {
-              value: quality.inward_quality_id,
+              value: quality.sell_quality_id,
               text: quality.quality_name,
             };
           });
 
-          if (this.selectedProductQualityCategory == "1") {
-            this.unit = "Meters";
-          } else if (this.selectedProductQualityCategory == "2") {
-            this.unit = "Kg.";
-          }
+          const category = this.productQualityCategories.find(
+            (c) => c.value == this.selectedProductQualityCategory
+          );
+          this.metalType = category ? category.metalType : "gold";
+          this.unit = "pcs";
         })
         .catch((err) => {
           console.log(err);
@@ -682,10 +712,10 @@ export default {
 
     //Function or Watcher is to calculate Total amount based on the Quantity and Rate
     calcTotalAmount: function () {
-      if (this.quantity == "" || this.rate == "") {
+      if (this.weightGrams == "" || this.rate == "") {
         this.totalAmount = "";
       } else {
-        this.totalAmount = this.quantity * this.rate;
+        this.totalAmount = (parseFloat(this.weightGrams) * parseFloat(this.rate)).toFixed(2);
       }
     },
 
@@ -716,6 +746,7 @@ export default {
         this.brokerValidation() &&
         this.productCategoryValidation() &&
         this.productQualityValidation() &&
+        this.weightGramsValidation() &&
         this.quantityValidation() &&
         this.ratePerQtyValidation()
       ) {
@@ -724,9 +755,11 @@ export default {
         addData["companyName"] = this.selectedCompanyName;
         addData["invoiceNo"] = this.invoiceNo;
         addData["brokerName"] = this.selectedBroker;
-        addData["productQuality"] = this.selectedProductQuality;
-        addData["unit"] = this.unit;
-        addData["quantity"] = this.quantity;
+        addData["itemTypeId"] = this.selectedProductQuality;
+        addData["metalType"] = this.metalType;
+        addData["weightGrams"] = this.weightGrams;
+        addData["unit"] = this.unit || "pcs";
+        addData["quantity"] = this.quantity || 1;
         addData["rate"] = this.rate;
         addData["gstPercentage"] = this.gstPercentage;
 
@@ -786,7 +819,7 @@ export default {
               swal
                 .fire({
                   title: "Success",
-                  html: "<h5 style='color:#9C9794'>Inward Added Successfully</h5>",
+                  html: "<h5 style='color:#9C9794'>Purchase added and stock updated</h5>",
                   icon: "success",
                 })
                 .then((result) => {
@@ -811,8 +844,10 @@ export default {
         (this.selectedProductQualityCategory = ""),
         (this.selectedProductQuality = ""),
         (this.selectedBroker = ""),
-        (this.unit = ""),
-        (this.quantity = ""),
+        (this.unit = "pcs"),
+        (this.quantity = "1"),
+        (this.weightGrams = ""),
+        (this.metalType = "gold"),
         (this.rate = ""),
         (this.gstPercentage = "0"),
         (this.totalAmount = ""),

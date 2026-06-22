@@ -23,7 +23,7 @@ NOTES
                             <div class="card card-primary">
                                 <div class="card-header">
                                     <h3 class="card-title">
-                                        S&M Challan
+                                        Manage Sales Bills
                                     </h3>
                                     <div class="card-tools">
                                         <button
@@ -133,9 +133,10 @@ NOTES
                                                     </th>
                                                     <th>Company</th>
                                                     <th>Broker</th>
-                                                    <th>Quality</th>
+                                                    <th>Item Type</th>
                                                     <th>Category</th>
                                                     <th>Qty</th>
+                                                    <th class="text-right">Weight (g)</th>
                                                     <th width="18%">Action</th>
                                                 </tr>
                                             </thead>
@@ -153,6 +154,7 @@ NOTES
                                                     <td>{{ challan.quality_name }}</td>
                                                     <td>{{ challan.sell_category_name }}</td>
                                                     <td class="text-right">{{ challan.totalqty }}</td>
+                                                    <td class="text-right">{{ challan.weight_grams || '-' }}</td>
                                                     <td class="text-center">
                                                         <a :href="'challan/pdf/'+challan.challan_mst_id" target="_blank" class="btn btn-danger btn-sm text-md" ><i class="fas fa-file-pdf" style="font-size: 20px;"></i></a>
                                                         <button class="btn btn-info btn-sm text-md" @click="viewChallan(challan.challan_mst_id, challan.challan_no)"><i class="fas fa-eye"></i></button>
