@@ -10,9 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Concerns\AuditsActions;
 
 class InvestorController extends Controller
 {
+    use AuditsActions;
+
     protected InvestorProfitService $profitService;
 
     public function __construct(InvestorProfitService $profitService)
@@ -204,6 +207,8 @@ class InvestorController extends Controller
             'created_by' => optional($request->user())->id,
             'transaction_status' => true,
         ]);
+
+        $this->audit('create', 'investor_transaction', $transaction->investor_transaction_id, 'Investor transaction: ' . $type);
 
         return response()->json([
             'status' => 1,

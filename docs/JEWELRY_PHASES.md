@@ -68,8 +68,11 @@ NODE_OPTIONS=--openssl-legacy-provider npm run dev
 
 ---
 
-## Phase 5 — Polish
+## Phase 5 — Polish ✅
 
-- Fine-grained worker permissions
-- Audit logs
-- Production hardening
+- Fine-grained worker permissions (`users.permissions` JSON + admin UI at `/workers`)
+- Permission middleware on API routes; sidebar hides unauthorized modules
+- Default worker: purchases, sales, invoices, expenses, laboratory, stock (no masters/delete)
+- Audit logs (`tbl_audit_logs`) for login, purchases, expenses, lab jobs, investor transactions
+- Admin audit log viewer at `/auditlogs`
+- Production hardening: login rate limit (10/min), Sanctum token expiry (8h default), PDF routes require auth token

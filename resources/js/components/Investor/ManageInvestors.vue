@@ -171,6 +171,7 @@
 <script>
 import toastr from 'toastr';
 import swal from 'sweetalert2';
+import { pdfUrl } from '../../auth';
 
 toastr.options = {
     closeButton: true,
@@ -339,7 +340,7 @@ export default {
                 });
         },
         pdfUrl(investorId, period) {
-            return `/investor/pdf/${investorId}/${period}`;
+            return pdfUrl(`/investor/pdf/${investorId}/${period}`);
         },
     },
 };

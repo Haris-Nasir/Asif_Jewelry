@@ -156,7 +156,7 @@ NOTES
                                                     <td class="text-right">{{ challan.totalqty }}</td>
                                                     <td class="text-right">{{ challan.weight_grams || '-' }}</td>
                                                     <td class="text-center">
-                                                        <a :href="'challan/pdf/'+challan.challan_mst_id" target="_blank" class="btn btn-danger btn-sm text-md" ><i class="fas fa-file-pdf" style="font-size: 20px;"></i></a>
+                                                        <a :href="pdfLink('/challan/pdf/' + challan.challan_mst_id)" target="_blank" class="btn btn-danger btn-sm text-md" ><i class="fas fa-file-pdf" style="font-size: 20px;"></i></a>
                                                         <button class="btn btn-info btn-sm text-md" @click="viewChallan(challan.challan_mst_id, challan.challan_no)"><i class="fas fa-eye"></i></button>
                                                         <button class="btn btn-primary btn-sm text-md" @click="editChallan(challan.challan_mst_id)"><i class="fas fa-pen"></i></button>
                                                         <button class="btn btn-danger btn-sm text-md" @click="confirmChallandeletation(challan.challan_mst_id, challan.challan_no )"><i class="fas fa-trash"></i></button>
@@ -647,6 +647,7 @@ NOTES
 // importing required plugins
 import toastr from "toastr";
 import swal from "sweetalert2";
+import { pdfUrl } from "../../auth";
 import { ModelSelect } from "vue-search-select"; // plugin for combobox-Searchable Select Menu
 
 export default {
@@ -825,6 +826,9 @@ export default {
 
     },
     methods: {
+        pdfLink(path) {
+            return pdfUrl(path);
+        },
         getChallans: function(page = 1) { // method to load challans in the table
             axios
                 .get(

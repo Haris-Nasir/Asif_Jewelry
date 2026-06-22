@@ -27,6 +27,7 @@ class JewelrySeeder extends Seeder
                 'name' => 'Worker',
                 'password' => Hash::make('password'),
                 'role' => 'worker',
+                'permissions' => config('permissions.worker_defaults', []),
             ]
         );
 

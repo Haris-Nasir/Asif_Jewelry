@@ -150,7 +150,7 @@
                                                     <td class="text-right">{{ invoice.profit_amount != null ? invoice.profit_amount : '-' }}</td>
                                                     <td class="text-right">{{ invoice.netAmount }}</td>
                                                     <td class="text-center">
-                                                        <a :href="'/invoice/pdf/'+invoice.invoice_mst_id"
+                                                        <a :href="pdfLink('/invoice/pdf/' + invoice.invoice_mst_id)"
                                                             target="_blank" class="btn btn-danger btn-sm text-md"><i
                                                                 class="fas fa-file-pdf"></i></a>
                                                         <button class="btn btn-info btn-sm text-md"
@@ -452,6 +452,7 @@
 
     import toastr from "toastr";
     import swal from "sweetalert2";
+    import { pdfUrl } from "../../auth";
     import { ModelSelect } from "vue-search-select";
 
     toastr.options = {
@@ -570,6 +571,9 @@
             this.filters.toDate = this.getTodaysDate();
         },
         methods: {
+            pdfLink(path) {
+                return pdfUrl(path);
+            },
             // load options for filters
             loadCustomersForFilter: function () {
                 axios

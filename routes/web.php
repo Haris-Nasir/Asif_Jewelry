@@ -18,7 +18,7 @@ Route::get('/', function () {
     return view('app');
 });
 
-Route::get('/challan/pdf/{challan_id}', [PDFController::class,"generateChallanPDF"]);
-Route::get('/invoice/pdf/{invoice_id}', [PDFController::class,"generateInvoicePDF"]);
-Route::get('/directinvoice/pdf/{invoice_id}', [PDFController::class,"generateDirectInvoicePDF"]);
-Route::get('/investor/pdf/{investor_id}/{period}', [PDFController::class, 'generateInvestorReportPDF']);
+Route::get('/challan/pdf/{challan_id}', [PDFController::class,"generateChallanPDF"])->middleware('pdf.auth');
+Route::get('/invoice/pdf/{invoice_id}', [PDFController::class,"generateInvoicePDF"])->middleware('pdf.auth');
+Route::get('/directinvoice/pdf/{invoice_id}', [PDFController::class,"generateDirectInvoicePDF"])->middleware('pdf.auth');
+Route::get('/investor/pdf/{investor_id}/{period}', [PDFController::class, 'generateInvestorReportPDF'])->middleware('pdf.auth');

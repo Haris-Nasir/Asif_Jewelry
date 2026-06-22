@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,8 @@ class AuthController extends Controller
 
         $token = $user->createToken('asif-jewelry')->plainTextToken;
 
+        app(AuditLogService::class)->log($user, 'login', 'auth', $user->id, 'User logged in');
+
         return response()->json([
             'token' => $token,
             'user' => $this->userPayload($user),
@@ -40,6 +43,14 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        app(AuditLogService::class)->log(
+            $request->user(),
+            'logout',
+            'auth',
+            $request->user()->id,
+            'User logged out'
+        );
+
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully.']);
@@ -52,6 +63,7 @@ class AuthController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'permissions' => $user->resolvedPermissions(),
         ];
     }
 }
