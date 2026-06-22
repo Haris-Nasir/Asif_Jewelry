@@ -27,4 +27,9 @@ class tbl_investor extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(tbl_investor_transaction::class, 'investor_id', 'investor_id');
+    }
 }

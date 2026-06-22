@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\tbl_investor;
+use App\Models\tbl_investor_transaction;
+use App\Services\InvestorProfitService;
 use App\Models\tbl_invoice_mst;
 use App\Models\tbl_customer;
 use App\Models\tbl_challan_mst;
@@ -177,5 +180,51 @@ class PDFController extends Controller
 
         $pdf = PDF::loadView('invoicePDF', array("invoice" => $invoice, "piecesCount" => $piecesCount));
         return $pdf->stream('Invoice - ' . $invoice_id . '.pdf');
+    }
+
+    public function generateInvestorReportPDF(Request $req, $investorId, $period)
+    {
+        $validated = validator([
+            'investor_id' => $investorId,
+            'period' => $period,
+            'date' => $req->query('date'),
+        ], [
+            'investor_id' => 'required|integer|exists:tbl_investors,investor_id',
+            'period' => 'required|in:daily,monthly,quarterly,financial_year',
+            'date' => 'nullable|date',
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Invalid report parameters.',
+                'errors' => $validated->errors(),
+            ], 422);
+        }
+
+        $investor = tbl_investor::findOrFail($investorId);
+        $profitService = app(InvestorProfitService::class);
+        $summary = $profitService->buildSummary($investor, $period, $req->query('date'));
+
+        $transactions = tbl_investor_transaction::where('investor_id', $investorId)
+            ->where('transaction_status', true)
+            ->whereBetween('transaction_date', [$summary['period']['from_date'], $summary['period']['to_date']])
+            ->orderBy('transaction_date')
+            ->get();
+
+        $reportTitle = ucfirst(str_replace('_', ' ', $summary['period']['type'])) . ' Investor Report';
+
+        $pdf = PDF::loadView('investorReportPDF', [
+            'investor' => $investor,
+            'reportTitle' => $reportTitle,
+            'period' => $summary['period'],
+            'profitSummary' => $summary['profit_summary'],
+            'goldHoldings' => $summary['gold_holdings'],
+            'transactions' => $transactions,
+            'generatedAt' => now()->format('d-m-Y H:i'),
+        ]);
+
+        $filename = 'Investor-Report-' . $investor->investor_name . '-' . $summary['period']['from_date'] . '.pdf';
+        return $pdf->stream($filename);
     }
 }
