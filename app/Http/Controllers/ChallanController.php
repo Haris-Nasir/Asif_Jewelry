@@ -118,7 +118,7 @@ class ChallanController extends Controller
     /* will return starting and ending date of financial year of given date*/
     public function getFinancialYearOfChallanDate($challanDate){
 
-        $challanSplitDate = explode("-",$challanDate);
+        $challanSplitDate = explode("-", Carbon::parse($challanDate)->format('Y-m-d'));
         $challanMonth = $challanSplitDate[1];
         $challanYear = $challanSplitDate[0];
         
@@ -142,7 +142,7 @@ class ChallanController extends Controller
     /* will return starting and ending date of financial year of given date in array form */
     public function getFinancialYearOfChallanDateInArray($challanDate){
 
-        $challanSplitDate = explode("-",$challanDate);
+        $challanSplitDate = explode("-", Carbon::parse($challanDate)->format('Y-m-d'));
         $challanMonth = $challanSplitDate[1];
         $challanYear = $challanSplitDate[0];
         
@@ -170,7 +170,7 @@ class ChallanController extends Controller
 
     /* will  check whether given challan no already exists or not */
     public function verifyChallanNumber(Request $request, $challanNo, $fromDate, $toDate){
-        if(tbl_challan_mst::where('challan_no', '=', $challanNo)->where('challan_mst_status', '=', 1)->whereBetween('challan_date', [$fromDate, $toDate])->exists()){
+        if(tbl_challan_mst::where('challan_no', '=', $challanNo)->where('challan_mst_status', '=', 1)->whereDate('challan_date', '>=', $fromDate)->whereDate('challan_date', '<=', $toDate)->exists()){
             return response()->json(array(
                 "status" => 0,
                 "message"=> "Entered Challan Number Already Exists!!!"
@@ -182,11 +182,23 @@ class ChallanController extends Controller
         }
     }
 
+    public function getNextChallanNumber(Request $request, $challanDate)
+    {
+        $financialYear = $this->getFinancialYearOfChallanDateInArray($challanDate);
+
+        return response()->json([
+            'nextChallanNo' => tbl_challan_mst::getNextChallanNo(
+                $financialYear['fromDate'],
+                $financialYear['toDate']
+            ),
+        ]);
+    }
+
     /* Will add new challan when requested with challan data from front-end */
     public function addNewChallan(Request $request){
         $validated = validator($request->all(),[
-            'challanNo' => 'required | numeric',
-            'challanDate' => 'required | date_format:Y-m-d',
+            'challanNo' => 'nullable | numeric',
+            'challanDate' => 'required | date',
             'customerId' => 'required | numeric',
             'sellCategoryId' => 'required | numeric',
             'sellQualityId' => 'required | numeric',
@@ -206,7 +218,6 @@ class ChallanController extends Controller
             return response()->json($res);
         }
 
-        $challanNo = $request->input("challanNo");
         $challanDate = $request->input("challanDate");
         $customerId = $request->input("customerId");
         $sellCategoryId = $request->input("sellCategoryId");
@@ -218,23 +229,21 @@ class ChallanController extends Controller
         $fromDate = $request->input("fromDate");
         $toDate = $request->input("toDate");
         $allData = $request->input("allData");
+        $financialYear = $this->getFinancialYearOfChallanDateInArray($challanDate);
+        $challanNo = tbl_challan_mst::getNextChallanNo(
+            $financialYear['fromDate'],
+            $financialYear['toDate']
+        );
 
         if(count($allData) > 0){
             for($i=0; $i<count($allData); $i++){
-                if(tbl_challan_mst::join('tbl_challan_details','tbl_challan_msts.challan_mst_id', '=', 'tbl_challan_details.challan_mst_id')
-                ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id', '=', 'tbl_challan_msts.sell_quality_id')
-                ->select('tbl_challan_msts.challan_date', 'tbl_challan_msts.sell_quality_id', 'tbl_sell_qualities.sell_quality_category_id', 'tbl_challan_details.no')
-                ->where('tbl_challan_details.challan_details_status', 1)
-                ->where('tbl_challan_msts.challan_mst_status' , 1)
-                ->whereBetween('challan_date', [$fromDate, $toDate])
-                ->where('tbl_sell_qualities.sell_quality_category_id', '=', $sellCategoryId)
-                ->where('tbl_challan_details.no', '=', $allData[$i]['no'])->exists()){
+                if(!is_numeric($allData[$i]['qty']) || (float) $allData[$i]['qty'] <= 0){
                     $res = array(
-                        "status" => 0,
-                        "message" => 'Product No '.($i+1).' Already Exists.',
+                        "status" => -1,
+                        "message" => 'Row '.($i + 1).' quantity is invalid.',
                         "errors" => null
                     );
-        
+
                     return response()->json($res);
                 }
             }
@@ -260,7 +269,7 @@ class ChallanController extends Controller
 
             for($i=0;$i<count($allData);$i++){
                 $challanDetails = new tbl_challan_details();
-                $challanDetails->no = $allData[$i]['no'];
+                $challanDetails->no = $i + 1;
                 $challanDetails->qty = $allData[$i]['qty'];
                 $challanDetails->challan_mst_id = $challanMstId->challan_mst_id;
                 $challanDetails->challan_type = $sellCategoryId;
@@ -297,8 +306,8 @@ class ChallanController extends Controller
             'challanMstId' => 'required | numeric',
             'oldChallanNo' => 'required | numeric',
             'challanNo' => 'required | numeric',
-            'challandate' => 'required | date_format:Y-m-d',
-            'oldChallanDate' => 'required | date_format:Y-m-d',
+            'challandate' => 'required | date',
+            'oldChallanDate' => 'required | date',
             'company' => 'required | numeric',
             'category' => 'required | numeric',
             'quality' => 'required | numeric',
@@ -336,16 +345,15 @@ class ChallanController extends Controller
         $notValidInEditing = array();
         $notValidInNew = array();
 
-        // check whether all the challan detials entiris no which is updated is valid or not 
+        // check whether all the challan details entries have valid quantity
         foreach($challanDetails as $index=>$challanDetail){
-            if(empty($challanDetail['no']) || !is_numeric($challanDetail['no']) || empty($challanDetail['qty']) || !is_numeric($challanDetail['qty']) ){
+            if(empty($challanDetail['qty']) || !is_numeric($challanDetail['qty']) || (float) $challanDetail['qty'] <= 0){
                 array_push($notValidInEditing, $index);
             }
         }
 
-        // check whether new challan details entiries no is valid or not
         foreach($newProductDetails as $index=>$newProductDetail){
-            if(empty($newProductDetail['no']) || !is_numeric($newProductDetail['no']) || empty($newProductDetail['qty']) || !is_numeric($newProductDetail['qty']) ){
+            if(empty($newProductDetail['qty']) || !is_numeric($newProductDetail['qty']) || (float) $newProductDetail['qty'] <= 0){
                 array_push($notValidInNew, $index);
             }
         }
@@ -419,63 +427,33 @@ class ChallanController extends Controller
 
             $noExists = array();
             $noError = array();
+            $serialNo = 1;
 
             $n = count($challanDetails);
             for($i=0; $i<$n; $i++){
                 $challanDetailsEntry = tbl_challan_details::find($challanDetails[$i]['challanDetailsId']);
-
-                if($oldCategory != 3 && $category == 3){
-                    $challanDetailsEntry->no = (int)$challanDetails[$i]['no']; 
-                }
-                else if($oldCategory == 3 && $category != 3){
-                    // echo $challanDetails[$i]['no'];
-                    // echo $category;
-                    if(tbl_challan_details::isNoExists((int)$challanDetails[$i]['no'], $category, $financialYear['fromDate'], $financialYear['toDate'])){
-                        //echo $challanDetails[$i]['no'];
-                        array_push($noExists,(int)$challanDetails[$i]['no']);
-                        continue;
-                    }
-                    $challanDetailsEntry->no = (int)$challanDetails[$i]['no'];
-                }
-                else if($oldCategory == 3 && $category == 3){
-                    $challanDetailsEntry->no = (int)$challanDetails[$i]['no'];
-                }
-                else{
-                    //oldcategory !=3 && new Category !=  3 &&
-                    if($challanDetailsEntry->no != (int)$challanDetails[$i]['no']){
-                        if(tbl_challan_details::isNoExists((int)$challanDetails[$i]['no'], $category, $financialYear['fromDate'], $financialYear['toDate'])){
-                            array_push($noExists,(int)$challanDetails[$i]['no']);
-                            continue;
-                        }
-                    }
-                    $challanDetailsEntry->no = (int)$challanDetails[$i]['no'];
-                } 
-
+                $challanDetailsEntry->no = $serialNo++;
                 $challanDetailsEntry->qty = (float)$challanDetails[$i]['qty'];
                 $challanDetailsEntry->challan_type = $category;
                 if(!($challanDetailsEntry->save())){
-                    array_push($noError,(int)$challanDetails[$i]['no']);
+                    array_push($noError, $serialNo - 1);
                 }
             }
-            
-            
-            
+
             $n = count($newProductDetails);
             for($i=0; $i<$n; $i++){
-                if($category != 3 && tbl_challan_details::isNoExists((int)$newProductDetails[$i]['no'], $category, $financialYear['fromDate'], $financialYear['toDate'])){
-                    array_push($noExists,(int)$newProductDetails[$i]['no']);
-                    continue;
-                }
-
-                // add new challan details entry
                 $challanDetailsEntry = new tbl_challan_details();
-                $challanDetailsEntry->no = $newProductDetails[$i]['no'];
+                $challanDetailsEntry->no = $serialNo++;
                 $challanDetailsEntry->qty = $newProductDetails[$i]['qty'];
                 $challanDetailsEntry->challan_mst_id = $challanMstId;
                 $challanDetailsEntry->challan_type = $category;
                 $challanDetailsEntry->save();
-                // save new challan details entry
             }
+
+            $challanMst->total_qty = tbl_challan_details::where('challan_mst_id', $challanMstId)
+                ->where('challan_details_status', 1)
+                ->sum('qty');
+            $challanMst->save();
 
             if(count($noExists) == 0 && count($noError) == 0){
                 DB::commit(); // commit the database if everything goes right and send success response
@@ -516,7 +494,7 @@ class ChallanController extends Controller
             // find challan of given challan Mst Id
             $challan = tbl_challan_mst::find($challanMstId);
             $challanNo = $challan->challan_no;
-            $challan->challan_mst_status = true; // set its rec status to 0
+            $challan->challan_mst_status = false;
             $challan->save(); // save the changes
 
             DB::commit(); // commit the changes if everuthing goes right

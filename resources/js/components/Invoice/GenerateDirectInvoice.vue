@@ -26,7 +26,7 @@
                                             <label for="invoice-date" class="text-md mt-1">Invoice Date</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="date" id="invoice-date" class="form-control" v-model="invoice.invoiceDate">
+                                            <input type="datetime-local" id="invoice-date" class="form-control" v-model="invoice.invoiceDate">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
@@ -72,28 +72,39 @@
                                             </model-select>
                                         </div>
                                     </div>
+                                    <div class="row mt-3" v-if="pendingKarigarJobs.length">
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Karigar Job</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <model-select :options="karigarJobOptions" v-model="invoice.karigarJobId"
+                                                placeholder="Link returned karigar job (optional)">
+                                            </model-select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mt-2 mb-0">Select if this sale is from metal returned by a karigar — mazduri will be deducted from profit</p>
+                                        </div>
+                                    </div>
                                     <div class="row mt-3">  
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Weight (grams)</label>
+                                            <label for="" class="text-md mt-1">Weight per piece (g)</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" step="0.001" class="form-control text-right" v-model="invoice.weightGrams">
                                         </div>
-                                    </div>
-                                    <div class="row mt-3">  
-                                        <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">No Of Units</label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="number" class="form-control text-right" v-model="invoice.noOfUnits">
+                                        <div class="col-md-8" v-if="qualityStock">
+                                            <p class="text-muted small mt-2 mb-0">
+                                                Available for <strong>{{ qualityStock.quality_name }}</strong>:
+                                                {{ qualityStock.weight_grams }}g, {{ qualityStock.pieces }} pcs
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="row mt-3">  
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Qty</label>
+                                            <label for="" class="text-md mt-1">Qty (pieces)</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="number" class="form-control text-right" v-model="invoice.qty">
+                                            <input type="number" step="1" min="1" class="form-control text-right" v-model="invoice.qty">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
@@ -105,10 +116,24 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Rate</label>
+                                            <label class="text-md mt-1">Total Weight (g)</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="number" class="form-control text-right" v-model="invoice.rate">
+                                            <input type="text" class="form-control text-right" :value="totalWeightGrams" disabled>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <p class="text-muted small mt-2 mb-0">= weight per piece × qty</p>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-2">
+                                            <label for="" class="text-md mt-1">Rate / gram (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" class="form-control text-right" v-model="invoice.rate">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <p class="text-muted small mt-2 mb-0">Amount = total weight (g) × rate/g</p>
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
@@ -122,6 +147,57 @@
                                                 <option value='18'>18</option>
                                                 <option value='28'>28</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-2">
+                                            <label for="" class="text-md mt-1">Refinery Cost (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" min="0" class="form-control text-right" v-model="invoice.refineryCost">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <p class="text-muted small mt-2 mb-0">Applied to gold and silver sales</p>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3" v-if="selectedMetalType === 'gold'">
+                                        <div class="col-md-2">
+                                            <label for="" class="text-md mt-1">Polish / g (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" min="0" class="form-control text-right" v-model="invoice.polishRatePerGram">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Polish Total</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" :value="polishCostTotal" disabled>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p class="text-muted small mt-2 mb-0">= polish/g × total weight (gold only)</p>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3" v-if="showMazduriField">
+                                        <div class="col-md-2">
+                                            <label for="" class="text-md mt-1">Mazduri (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" min="0" class="form-control text-right" v-model="invoice.mazduriCost"
+                                                :disabled="!!invoice.karigarJobId">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <p class="text-muted small mt-2 mb-0">{{ mazduriHelpText }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Processing Cost</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control text-right" :value="totalProcessingCost" disabled>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <p class="text-muted small mt-2 mb-0">Deducted from profit (refinery + polish or mazduri)</p>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
@@ -163,6 +239,7 @@
 import toastr from "toastr";
 import swal from "sweetalert2";
 import { ModelSelect } from "vue-search-select";
+import { getNowDateTime } from "../../currency";
 
 
 export default {
@@ -179,7 +256,6 @@ export default {
                 brokerId: "",
                 categoryId: "",
                 qualityId: "",
-                noOfUnits: '',
                 qty: "",
                 weightGrams: "",
                 rate: "",
@@ -187,7 +263,11 @@ export default {
                 totalAmount: (0).toFixed(2),
                 gstAmount: (0).toFixed(2),
                 netAmount: (0).toFixed(2),
-                unit:""
+                unit:"",
+                refineryCost: "",
+                polishRatePerGram: "",
+                mazduriCost: "",
+                karigarJobId: "",
             },
 
             options: {
@@ -195,21 +275,87 @@ export default {
                 brokers: [],
                 categories: [],
                 qualities: []
-            }
+            },
+            qualityStock: null,
+            pendingKarigarJobs: [],
         }
     },
     mounted() {
-        this.invoice.invoiceDate = this.getTodaysDate();
+        this.invoice.invoiceDate = getNowDateTime();
         this.loadCustomers();
         this.loadBrokers();
         this.loadCategories();
+    },
+    computed: {
+        selectedMetalType() {
+            const category = this.options.categories.find((item) => String(item.value) === String(this.invoice.categoryId));
+            return category?.metalType || 'gold';
+        },
+        totalWeightGrams() {
+            const perPiece = parseFloat(this.invoice.weightGrams || 0);
+            const qty = parseFloat(this.invoice.qty || 0);
+            if (!perPiece || !qty) {
+                return '0.000';
+            }
+            return (perPiece * qty).toFixed(3);
+        },
+        polishCostTotal() {
+            if (this.selectedMetalType !== 'gold') {
+                return '0.00';
+            }
+            const total = parseFloat(this.invoice.polishRatePerGram || 0) * parseFloat(this.totalWeightGrams || 0);
+            return Number.isNaN(total) ? '0.00' : total.toFixed(2);
+        },
+        totalProcessingCost() {
+            const refinery = parseFloat(this.invoice.refineryCost || 0) || 0;
+            const polish = parseFloat(this.polishCostTotal || 0) || 0;
+            const mazduri = this.showMazduriField ? (parseFloat(this.invoice.mazduriCost || 0) || 0) : 0;
+            return (refinery + polish + mazduri).toFixed(2);
+        },
+        showMazduriField() {
+            return this.selectedMetalType === 'silver' || !!this.invoice.karigarJobId;
+        },
+        mazduriHelpText() {
+            if (this.invoice.karigarJobId) {
+                return 'Karigar labour — deducted from profit when this item is sold';
+            }
+            return 'Overall labour charge for this silver sale';
+        },
+        karigarJobOptions() {
+            return this.pendingKarigarJobs.map(job => ({
+                value: job.karigar_job_id,
+                text: job.karigar_name + ' — ' + job.returned_weight_grams + 'g (Rs. ' + job.mazduri_cost + ' mazduri)',
+            }));
+        },
     },
     watch: {
         'invoice.categoryId' : function(){
             this.loadQualitiesOfSelectedCategory();
         },
 
+        'invoice.qualityId' : function(){
+            this.loadQualityStock();
+            this.loadPendingKarigarJobs();
+        },
+
+        'invoice.karigarJobId' : function(val){
+            if (!val) {
+                if (this.selectedMetalType !== 'silver') {
+                    this.invoice.mazduriCost = '';
+                }
+                return;
+            }
+            const job = this.pendingKarigarJobs.find(j => String(j.karigar_job_id) === String(val));
+            if (job) {
+                this.invoice.mazduriCost = job.mazduri_cost;
+            }
+        },
+
         'invoice.qty' : function(){
+            this.calculateAmounts();
+        },
+
+        'invoice.weightGrams' : function(){
             this.calculateAmounts();
         },
 
@@ -265,7 +411,8 @@ export default {
                 this.options.categories = response.data.qualityCategories.map(category => {
                     return {
                         value: category.qualityCategoryId,
-                        text: category.qualityCategoryName
+                        text: category.qualityCategoryName,
+                        metalType: category.metalType || 'gold',
                     }
                 });
             })
@@ -280,6 +427,7 @@ export default {
                 this.invoice.unit = '';
                 this.options.qualities = [];
                 this.invoice.qualityId = "";
+                this.qualityStock = null;
                 return;
             }
 
@@ -303,6 +451,37 @@ export default {
                     console.log(err);
                     toastr["error"]("Something went Wrong.")
                 })
+        },
+
+        loadQualityStock: function () {
+            if (!this.invoice.qualityId) {
+                this.qualityStock = null;
+                return;
+            }
+
+            axios.get('/api/stock/quality/' + this.invoice.qualityId)
+                .then((res) => {
+                    this.qualityStock = res.data;
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.qualityStock = null;
+                });
+        },
+
+        loadPendingKarigarJobs: function () {
+            this.invoice.karigarJobId = '';
+            this.pendingKarigarJobs = [];
+            if (!this.invoice.qualityId) {
+                return;
+            }
+            axios.get('/api/karigar/jobs/pending-for-sale?sell_quality_id=' + this.invoice.qualityId)
+                .then(res => {
+                    this.pendingKarigarJobs = res.data || [];
+                })
+                .catch(() => {
+                    this.pendingKarigarJobs = [];
+                });
         },
 
 
@@ -361,16 +540,16 @@ export default {
             return true;
         },
 
-        isNoOfUnitsValid: function(){
-            if(this.invoice.noOfUnits == ""){
-                toastr.info("Please Enter No Of Units");
+        isQtyValid: function(){
+            if(this.invoice.qty == "" || typeof this.invoice.qty === 'undefined'){
+                toastr.info("Please Enter Qty (pieces)");
+                return false;
+            }
+            if(parseFloat(this.invoice.qty) <= 0){
+                toastr.info("Qty must be at least 1 piece");
                 return false;
             }
 
-            if(this.invoice.noOfUnits < 0){
-                toastr.info("No Of Units Is In-Valid");
-                return false;
-            }
             return true;
         },
 
@@ -382,22 +561,9 @@ export default {
             return true;
         },
 
-        isQtyValid: function(){
-            if(this.invoice.qty == "" || typeof this.invoice.qty === 'undefined'){
-                toastr.info("Please Enter Qty");
-                return false;
-            }
-            if(this.invoice.qty < 0){
-                toastr.info("Qty Is Invalid");
-                return false;
-            }
-
-            return true;
-        },
-
         isRateValid: function(){
             if(this.invoice.rate == "" || typeof this.invoice.rate === 'undefined'){
-                toastr.info("Please Enter Rate");
+                toastr.info("Please Enter Rate per gram");
                 return false;
             }
             if(this.invoice.rate < 0){
@@ -418,7 +584,7 @@ export default {
 
         isWeightGramsValid: function(){
             if(this.invoice.weightGrams == "" || parseFloat(this.invoice.weightGrams) <= 0){
-                toastr.info("Please enter weight in grams");
+                toastr.info("Please enter weight per piece in grams");
                 return false;
             }
             return true;
@@ -430,7 +596,7 @@ export default {
         // Generate Invoice Btn
         generateInvoice: function() {
             console.log(this.invoice);
-            if(this.isInvoiceDateValid() && this.isInvoiceNoValid() && this.isCustomerValid() && this.isBrokerValid() && this.isCategoryValid() && this.isNoOfUnitsValid() && this.isQualityValid() && this.isQtyValid() && this.isUnitValid() && this.isRateValid() && this.isGSTPercentageValid() && this.isWeightGramsValid()){
+            if(this.isInvoiceDateValid() && this.isInvoiceNoValid() && this.isCustomerValid() && this.isBrokerValid() && this.isCategoryValid() && this.isQualityValid() && this.isQtyValid() && this.isUnitValid() && this.isRateValid() && this.isGSTPercentageValid() && this.isWeightGramsValid()){
                 axios
                     .post('/api/directinvoice', this.invoice)
                     .then(response => {
@@ -438,7 +604,7 @@ export default {
                             swal
                                 .fire({
                                     title: "Success",
-                                    html:  "<h5 style='color:#9C9794'>Sale bill created. Profit: ₹" + (response.data.profit || 0) + "</h5>",
+                                    html:  "<h5 style='color:#9C9794'>Sale bill created. Profit: Rs. " + (response.data.profit || 0) + "</h5>",
                                     icon: "success",
                                     allowOutsideClick: false
                                 })
@@ -447,44 +613,44 @@ export default {
                                 });
                         }
                         else if(response.data.status == -1){
-                            toastr.error(response.data.message || "Something went wrong");
-                            let errorString = "";
-                            let errors = response.data.errors;
-
-                            for(let field in errors){
-                                for(let i=0; i<errors[field].length; i++){
-                                    errorString += "<li>"+errors[field][i]+"</li>";
+                            const errors = response.data.errors;
+                            if (errors && typeof errors === 'object' && Object.keys(errors).length) {
+                                let errorString = "";
+                                for (const field in errors) {
+                                    for (let i = 0; i < errors[field].length; i++) {
+                                        errorString += "<li>" + errors[field][i] + "</li>";
+                                    }
                                 }
-                            };
-
-                            toastr.error(errorString, response.data.message , {timeOut: 20000, "closeButton": true})
+                                toastr.error(errorString, response.data.message || "Validation failed", { timeOut: 20000, closeButton: true });
+                            } else {
+                                toastr.error(response.data.message || "Unable to create sale bill.");
+                            }
                         }
                         else if(response.data.status == 0){
                             toastr.error(response.data.message);
                         }
                         else{
                             console.log("Other Then Expected Response Recieved In Generate Direct Invoice");
-                            toastr.error("Something Went Wrong");
+                            toastr.error(response.data.message || "Unable to create sale bill.");
                         }
 
                         
                     })  
                     .catch(err=>{
-                        console.log("Err In Generatin Invoice");
-                        toastr.error("Something Went Wrong");
+                        console.log("Err In Generatin Invoice", err);
+                        toastr.error(err.response?.data?.message || "Unable to create sale bill. Check item type stock and weight.");
                     });
             }
         },
 
         // Reset Invoice Form Btn
         resetInvoiceForm: function() {
-            this.invoice.invoiceDate = this.getTodaysDate();
+            this.invoice.invoiceDate = getNowDateTime();
             this.invoice.invoiceNo = "";
             this.invoice.customerId = "";
             this.invoice.brokerId = "";
             this.invoice.categoryId = "";
             this.invoice.qualityId ="";
-            this.invoice.noOfUnits = "";          
             this.invoice.qty = "";
             this.invoice.weightGrams = "";
             this.invoice.rate = "";
@@ -493,6 +659,12 @@ export default {
             this.invoice.gstAmount = (0).toFixed(2);
             this.invoice.netAmount = (0).toFixed(2);
             this.invoice.unit = "";
+            this.invoice.refineryCost = "";
+            this.invoice.polishRatePerGram = "";
+            this.invoice.mazduriCost = "";
+            this.invoice.karigarJobId = "";
+            this.pendingKarigarJobs = [];
+            this.qualityStock = null;
         },
 
 
@@ -536,9 +708,10 @@ export default {
 
         // Calculate Amount
         calculateAmounts: function (){
-            let totalAmount = this.invoice.qty * this.invoice.rate;
-            let gstAmount = totalAmount * this.invoice.gstPercentage * 0.01;
-            let netAmount = totalAmount + gstAmount;
+            const totalWeight = parseFloat(this.invoice.weightGrams || 0) * parseFloat(this.invoice.qty || 0);
+            const totalAmount = totalWeight * parseFloat(this.invoice.rate || 0);
+            const gstAmount = totalAmount * this.invoice.gstPercentage * 0.01;
+            const netAmount = totalAmount + gstAmount;
             
             this.invoice.totalAmount = totalAmount.toFixed(2);
             this.invoice.gstAmount = gstAmount.toFixed(2);

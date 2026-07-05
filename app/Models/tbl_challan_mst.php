@@ -12,9 +12,9 @@ class tbl_challan_mst extends Model
 
     protected $primaryKey = "challan_mst_id";
 
-    function getChallanDateAttribute($value){
-        return (Carbon::parse($value)->format('d-m-Y'));
-    }
+    protected $casts = [
+        'challan_date' => 'datetime',
+    ];
 
     function customer(){
         return $this->hasOne('App\Models\tbl_customer', 'customer_id', 'customer_id');
@@ -43,5 +43,15 @@ class tbl_challan_mst extends Model
 
     public static function isChallanNoExists($challanNo, $fromDate, $toDate){
         return tbl_challan_mst::where('challan_no', '=', $challanNo)->where('challan_mst_status', '=', 1)->whereBetween('challan_date', [$fromDate, $toDate])->exists();
+    }
+
+    public static function getNextChallanNo(string $fromDate, string $toDate): int
+    {
+        $max = self::where('challan_mst_status', true)
+            ->whereDate('challan_date', '>=', $fromDate)
+            ->whereDate('challan_date', '<=', $toDate)
+            ->max('challan_no');
+
+        return $max ? ((int) $max + 1) : 1;
     }
 }

@@ -11,6 +11,7 @@ class tbl_investor_transaction extends Model
 
     protected $fillable = [
         'investor_id',
+        'lab_job_id',
         'transaction_date',
         'transaction_type',
         'metal_type',
@@ -23,7 +24,7 @@ class tbl_investor_transaction extends Model
     ];
 
     protected $casts = [
-        'transaction_date' => 'date',
+        'transaction_date' => 'datetime',
         'weight_grams' => 'decimal:3',
         'rate_per_gram' => 'decimal:2',
         'amount' => 'decimal:2',

@@ -30,7 +30,7 @@
                             </div>
 
                             <div class="col-md-3 mr-5">
-                                <input type="text" class="form-control" v-model="contactNo" maxlength="10"
+                                <input type="text" class="form-control" v-model="contactNo" maxlength="11"
                                     placeholder="Enter Broker Contact No...">
                             </div>
                         </div>

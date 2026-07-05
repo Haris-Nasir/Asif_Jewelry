@@ -71,13 +71,38 @@ class SellQualityController extends Controller
         $qualityName = $request->input("qualityName");
         $qualityCategoryId = $request->input("qualityCategoryId");
 
-        if (tbl_sell_quality::where('quality_name', "=", $qualityName)->where('sell_quality_category_id', "=", $qualityCategoryId)->exists()) {
-            $res = array(
-                "status" => 0,
-                "message" => "Record Already Exists",
-                "errors" => null
-            );
-            return response()->json($res);
+        $existing = tbl_sell_quality::where('quality_name', '=', $qualityName)
+            ->where('sell_quality_category_id', '=', $qualityCategoryId)
+            ->first();
+
+        if ($existing) {
+            if ($existing->sell_quality_status) {
+                return response()->json([
+                    "status" => 0,
+                    "message" => "Record Already Exists",
+                    "errors" => null,
+                ]);
+            }
+
+            DB::beginTransaction();
+            try {
+                $existing->sell_quality_status = 1;
+                $existing->save();
+            } catch (QueryException $e) {
+                DB::rollBack();
+                return response()->json([
+                    "status" => -1,
+                    "message" => "Server Error",
+                    "errors" => "Exception Generated",
+                ], 500);
+            }
+            DB::commit();
+
+            return response()->json([
+                "status" => 1,
+                "message" => "Sell Quality Added Successfully.",
+                "errors" => null,
+            ], 200);
         }
 
         DB::beginTransaction();
@@ -128,7 +153,11 @@ class SellQualityController extends Controller
         $editQualityCategoryId = $request->input('editQualityCategoryId');
         $editQualityName = $request->input('editQualityName');
 
-        if (tbl_sell_quality::where('quality_name', "=", $editQualityName)->where('sell_quality_category_id', "=", $editQualityCategoryId)->exists()) {
+        if (tbl_sell_quality::where('quality_name', '=', $editQualityName)
+            ->where('sell_quality_category_id', '=', $editQualityCategoryId)
+            ->where('sell_quality_status', '=', 1)
+            ->where('sell_quality_id', '!=', $sellQualityId)
+            ->exists()) {
             $res = array(
                 "status" => 0,
                 "message" => "Record Already Exists",

@@ -10,7 +10,7 @@ use App\Models\tbl_inward_mst;
 use App\Models\tbl_inward_details;
 use App\Models\tbl_vendor;
 use App\Models\tbl_broker;
-use App\Models\tbl_inward_quality;
+use App\Models\tbl_sell_quality;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Validator;
 // Using the Carbon for manupulation of Date and its formats
 use Carbon\Carbon;
 use App\Services\StockService;
-use App\Models\tbl_sell_quality;
 use App\Http\Controllers\Concerns\AuditsActions;
 
 // InwardContoller Class
@@ -37,12 +36,12 @@ class InwardController extends Controller
     {
         // First of all valdiate all the fields if they are in proper format or not
         $validated = validator($request->all(),[
-            'date' => 'required | date_format:Y-m-d',
-            'invoiceNo' => 'required | max:20',
+            'date' => 'required | date',
+            'invoiceNo' => 'nullable | max:20',
             'unit' => 'nullable | max:10',
             'quantity' => 'nullable | numeric',
             'rate' => 'required | numeric',
-            'gstPercentage' => 'required',
+            'gstPercentage' => 'nullable | numeric | min:0',
             'metalType' => 'required | in:gold,silver',
             'weightGrams' => 'required | numeric | min:0.001',
             'itemTypeId' => 'required | numeric',
@@ -62,14 +61,14 @@ class InwardController extends Controller
 
         //If all data is in proper format then input all of them in below variables
         $date = $request->input("date");
-        $invoiceNo = $request->input("invoiceNo");
         $companyName = $request->input("companyName");
         $brokerName = $request->input("brokerName");
         $productQuality = $request->input("productQuality");
         $unit = $request->input("unit", "pcs");
         $quantity = $request->input("quantity", 1);
         $rate = $request->input("rate");
-        $gstPercentage = $request->input("gstPercentage");
+        $gstPercentage = $request->input('gstPercentage');
+        $gstPercentage = ($gstPercentage === null || $gstPercentage === '') ? 0 : (float) $gstPercentage;
         $metalType = $request->input("metalType");
         $weightGrams = (float) $request->input("weightGrams");
         $itemTypeId = (int) $request->input("itemTypeId");
@@ -118,6 +117,12 @@ class InwardController extends Controller
         // If all validation are done and data is valid then add the data in the tables
         DB::beginTransaction();
         try{
+            $financialYear = $this->getFinancialYearOfInwardDate($date);
+            $invoiceNo = tbl_inward_mst::getNextInvoiceNo(
+                $financialYear['fromDate'],
+                $financialYear['toDate']
+            );
+
             $inward_mst = new tbl_inward_mst();
             $inward_mst->inward_mst_date = $date;
             $inward_mst->inward_mst_invoice_no = $invoiceNo;
@@ -218,7 +223,8 @@ class InwardController extends Controller
         ->select('tbl_inward_details.inward_mst_id', 'inward_mst_date','inward_mst_invoice_no','vendor_company_name','broker_name','tbl_sell_qualities.quality_name','tbl_inward_details.weight_grams','tbl_inward_details.metal_type','qty','rate','inward_mst_gst_percentage', 'tbl_sell_quality_categories.sell_category_name')
         ->where('tbl_inward_msts.inward_mst_status', '=', 1)
         ->where('tbl_inward_details.inward_details_status', '=', 1)
-        ->whereBetween('tbl_inward_msts.inward_mst_date', [$from_date, $to_date])
+        ->whereDate('tbl_inward_msts.inward_mst_date', '>=', $from_date)
+        ->whereDate('tbl_inward_msts.inward_mst_date', '<=', $to_date)
         ->where(function($query) use ($search_term)
         {
             // Bring the data according to the filters applied using where conditions
@@ -246,12 +252,67 @@ class InwardController extends Controller
         ->paginate($paginate));
     }
 
+    public function getNextPurchaseInvoiceNumber(Request $request, $inwardDate)
+    {
+        $financialYear = $this->getFinancialYearOfInwardDate($inwardDate);
+
+        return response()->json([
+            'nextInvoiceNo' => tbl_inward_mst::getNextInvoiceNo(
+                $financialYear['fromDate'],
+                $financialYear['toDate']
+            ),
+        ]);
+    }
+
+    private function getFinancialYearOfInwardDate($date): array
+    {
+        $splitDate = explode('-', Carbon::parse($date)->format('Y-m-d'));
+        $month = $splitDate[1];
+        $year = $splitDate[0];
+
+        $fromDate = $year;
+        $toDate = $year;
+
+        if ((int) $month < 4) {
+            $fromDate = (int) $year - 1;
+        } else {
+            $toDate = (int) $year + 1;
+        }
+
+        return [
+            'fromDate' => $fromDate . '-04-01',
+            'toDate' => $toDate . '-03-31',
+        ];
+    }
+
     // function to display all data related to inward record
     public function viewInwardDetails(Request $request, $inwardMstId)
     {
-        // Bring the data from the respective tables
-        return tbl_inward_mst::with(["inward_details:inward_details_id,inward_mst_id,inward_quality_id,qty,qty_unit,rate", "getBroker:broker_id,broker_name", "getVendor:vendor_id,vendor_company_name,vendor_contact_no,vendor_gst_no"])->where("inward_mst_id", $inwardMstId)->select('inward_mst_id','inward_mst_date','inward_mst_invoice_no','inward_mst_vendor_id', 'inward_mst_broker_id','inward_mst_gst_percentage')->first(); 
-        
+        $inward = tbl_inward_mst::with([
+            'inward_details.quality.category',
+            'getBroker:broker_id,broker_name',
+            'getVendor:vendor_id,vendor_company_name,vendor_contact_no,vendor_gst_no',
+        ])
+            ->where('inward_mst_id', $inwardMstId)
+            ->where('inward_mst_status', 1)
+            ->select(
+                'inward_mst_id',
+                'inward_mst_date',
+                'inward_mst_invoice_no',
+                'inward_mst_vendor_id',
+                'inward_mst_broker_id',
+                'inward_mst_gst_percentage'
+            )
+            ->first();
+
+        if (!$inward || !$inward->inward_details) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Purchase record not found.',
+            ], 404);
+        }
+
+        return response()->json($inward);
     }
 
     // function to update inward record
@@ -261,7 +322,7 @@ class InwardController extends Controller
         in proper format or not*/
         $validated = validator($request->all(),[
             'inwardMstId' => 'required | numeric',
-            'inwardDate' => 'required | date_format:Y-m-d',
+            'inwardDate' => 'required | date',
             'invoiceNo' => 'required | max:20',
             'company' => 'required | numeric',
             'broker' => 'required | numeric',
@@ -269,8 +330,10 @@ class InwardController extends Controller
             'quality' => 'required | numeric',
             'unit' => 'required | max:10',
             'rate' => 'required | numeric',
-            'gstPercentage' => 'required | numeric',
-            'qty' => 'required | numeric'
+            'gstPercentage' => 'nullable | numeric | min:0',
+            'qty' => 'required | numeric',
+            'weightGrams' => 'required | numeric | min:0.001',
+            'metalType' => 'required | in:gold,silver',
         ]);
 
         /* If the Validation failed then status would be -1 and Validation Failed messaged and display
@@ -295,10 +358,12 @@ class InwardController extends Controller
         $unit = $request->input("unit");
         $quantity = $request->input("qty");
         $rate = $request->input("rate");
-        $gstPercentage = $request->input("gstPercentage");
+        $gstPercentage = $request->input('gstPercentage');
+        $gstPercentage = ($gstPercentage === null || $gstPercentage === '') ? 0 : (float) $gstPercentage;
+        $weightGrams = (float) $request->input("weightGrams");
+        $metalType = $request->input("metalType");
+        $inwardMstId = $request->input("inwardMstId");
 
-        /*Check in the DB if the Vendor Company Name available in DB. If
-        No, then change the status to -1 and then display message that vendor not available*/
         if(!tbl_vendor::isThereCompanyNameWithVendorId($companyName)){
             return response()->json(array(
                 "status" => -1,
@@ -317,26 +382,28 @@ class InwardController extends Controller
 
         /*Check in the DB if the product quality available in DB. If
         No, then change the status to -1 and then display message that quality not available*/
-        if(!tbl_inward_quality::isThereProductQualityWithQualityId($productQuality)){
+        if(!tbl_sell_quality::where('sell_quality_id', $productQuality)->where('sell_quality_status', 1)->exists()){
             return response()->json(array(
                 "status" => -1,
-                "message" => "Inward Product Quality Not Available!"
+                "message" => "Item type not available!"
             ));
         }
-        
-        /* update the data in DB in both the tables and display the appropriate message on success and
-        change the status to 1*/
+
         tbl_inward_details::join('tbl_inward_msts','tbl_inward_details.inward_mst_id',"=","tbl_inward_msts.inward_mst_id")
-        ->where('inward_details_id','=',$inwardId)
-        ->update(['inward_mst_date' => $date, 
-        'inward_mst_invoice_no' => $invoiceNo, 
-        'inward_mst_vendor_id' => $companyName,
-        'inward_mst_broker_id' => $brokerName,
-        'inward_quality_id' => $productQuality,
-        'qty' => $quantity,
-        'qty_unit' => $unit,
-        'rate' => $rate,
-        'inward_mst_gst_percentage' => $gstPercentage]);
+        ->where('tbl_inward_details.inward_mst_id', '=', $inwardMstId)
+        ->update([
+            'inward_mst_date' => $date,
+            'inward_mst_invoice_no' => $invoiceNo,
+            'inward_mst_vendor_id' => $companyName,
+            'inward_mst_broker_id' => $brokerName,
+            'sell_quality_id' => $productQuality,
+            'metal_type' => $metalType,
+            'weight_grams' => $weightGrams,
+            'qty' => $quantity,
+            'qty_unit' => $unit,
+            'rate' => $rate,
+            'inward_mst_gst_percentage' => $gstPercentage,
+        ]);
         return response()->json(array(
             "status" => 1,
             "message"=> "Inward Record Updated Succesfully..."
@@ -346,25 +413,55 @@ class InwardController extends Controller
     // Function is to delete respective inward using inward id
     public function deleteInward(Request $request, $inwardId)
     {
-        /* Inside the try block we will update status of the respective inwards as 0 and if it is then
-        status would be 1 and Inward Deleted successfully messaged */
-        try{
-            tbl_inward_details::join('tbl_inward_msts','tbl_inward_details.inward_mst_id',"=","tbl_inward_msts.inward_mst_id")
-            ->where('inward_details_id','=',$inwardId)
-            ->update(['inward_mst_status' => 0, 'inward_details_status' => 0]);
-            return response()->json(array(
-                "status" => 1,
-                "message"=> "Inward Record Deleted Succesfully..."
-            ));
+        $inward = tbl_inward_mst::with(['inward_details'])
+            ->where('inward_mst_id', $inwardId)
+            ->where('inward_mst_status', 1)
+            ->first();
+
+        if (!$inward || !$inward->inward_details || !$inward->inward_details->inward_details_status) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Purchase record not found or already deleted.',
+            ]);
         }
 
-        /* If any exception occurs it will go inside the catch block then status will be -1 and 
-        Inward Deletion failed messaged */
-        catch(Exception $e){
-            return response()->json(array(
-                "status" => -1,
-                "message" => "Inward Deletation Failed"
-            ));
+        DB::beginTransaction();
+
+        try {
+            $detail = $inward->inward_details;
+
+            $this->stockService->reversePurchase(
+                'purchase',
+                (int) $detail->inward_details_id,
+                optional($request->user())->id
+            );
+
+            $inward->inward_mst_status = 0;
+            $inward->save();
+
+            tbl_inward_details::where('inward_mst_id', $inwardId)
+                ->update(['inward_details_status' => 0]);
+
+            DB::commit();
+
+            $this->audit(
+                'delete',
+                'purchase',
+                (int) $inwardId,
+                'Purchase deleted: invoice ' . $inward->inward_mst_invoice_no
+            );
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Purchase deleted and stock updated successfully.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => -1,
+                'message' => $e->getMessage() ?: 'Purchase deletion failed.',
+            ]);
         }
     }
 }

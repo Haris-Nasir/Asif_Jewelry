@@ -11,11 +11,11 @@ class CustomerController extends Controller
     {
         $validated = validator($req->all(),[
             'companyName' => 'required | max:50',
-            'companyContact' => 'required | digits:10',
-            'companyAddress' => 'required | max:255',
+            'companyContact' => 'nullable | digits_between:10,11',
+            'companyAddress' => 'nullable | max:255',
             'emailAddress' => 'nullable | email | max:255',
-            'gstNumber' => 'required | alpha_num | min:15 | max:15',
-            'gstCode' => 'required | alpha_num | min:2 | max:2'
+            'gstNumber' => 'nullable | alpha_num | min:15 | max:15',
+            'gstCode' => 'nullable | alpha_num | min:2 | max:2'
         ]);
 
         if($validated->fails()){
@@ -29,36 +29,30 @@ class CustomerController extends Controller
         }
 
         $companyName = $req->input("companyName");
-        $companyContact = $req->input("companyContact");
-        $companyAddress = $req->input("companyAddress");
+        $companyContact = trim((string) $req->input("companyContact", ''));
+        $companyAddress = trim((string) $req->input("companyAddress", ''));
         $emailAddress = $req->input("emailAddress");
-        $gstNumber = $req->input("gstNumber");
-        $gstCode = $req->input("gstCode");
+        $gstNumber = trim((string) $req->input('gstNumber', ''));
+        $gstCode = trim((string) $req->input('gstCode', ''));
 
-        if($gstCode != substr($gstNumber,0,2))
+        if ($gstNumber !== '' && $gstCode !== '' && $gstCode !== substr($gstNumber, 0, 2))
         {
-            $res = array(
-                "status" => -1,
-                "message" => "GST Code must be equal to first 2 characters of GST Number!",
-                "errors" => $validated->errors()
-            );
-
-            return response()->json($res);
+            return response()->json([
+                'status' => -1,
+                'message' => 'GST Code must be equal to first 2 characters of GST Number!',
+            ]);
         }
 
-        $isSameCustomer = tbl_customer::where('customer_company_name', '=', $companyName)
-        ->where("customer_contact_no",'=',$companyContact)
-        ->where("customer_status", '=', '1')
-        ->first();
+        $isSameCustomer = $this->findDuplicateCustomer($companyName, $companyContact);
 
         if(is_null($isSameCustomer)){
             $newCustomer = new tbl_customer();
             $newCustomer->customer_company_name = $req->input("companyName");
-            $newCustomer->customer_contact_no = $req->input("companyContact");
+            $newCustomer->customer_contact_no = $companyContact !== '' ? $companyContact : null;
             $newCustomer->customer_email = $req->input("emailAddress");
-            $newCustomer->customer_gst_no = $req->input("gstNumber");
-            $newCustomer->customer_gst_code = $req->input("gstCode");
-            $newCustomer->customer_address = $req->input("companyAddress");
+            $newCustomer->customer_gst_no = $gstNumber !== '' ? $gstNumber : null;
+            $newCustomer->customer_gst_code = $gstCode !== '' ? $gstCode : null;
+            $newCustomer->customer_address = $companyAddress !== '' ? $companyAddress : null;
             
             if($newCustomer->save()){
                 return response()->json(array(
@@ -116,11 +110,11 @@ class CustomerController extends Controller
 
         $validated = validator($req->all(),[
             'companyName' => 'required | max:50',
-            'companyContact' => 'required | digits:10',
-            'companyAddress' => 'required | max:255',
+            'companyContact' => 'nullable | digits_between:10,11',
+            'companyAddress' => 'nullable | max:255',
             'emailAddress' => 'nullable | email | max:255',
-            'gstNumber' => 'required | alpha_num | min:15 | max:15',
-            'gstCode' => 'required | alpha_num | min:2 | max:2'
+            'gstNumber' => 'nullable | alpha_num | min:15 | max:15',
+            'gstCode' => 'nullable | alpha_num | min:2 | max:2'
         ]);
 
         if($validated->fails()){
@@ -134,26 +128,30 @@ class CustomerController extends Controller
         }
 
         $companyName = $req->input("companyName");
-        $companyContact = $req->input("companyContact");
-        $companyAddress = $req->input("companyAddress");
+        $companyContact = trim((string) $req->input("companyContact", ''));
+        $companyAddress = trim((string) $req->input("companyAddress", ''));
         $emailAddress = $req->input("emailAddress");
-        $gstNumber = $req->input("gstNumber");
-        $gstCode = $req->input("gstCode");
+        $gstNumber = trim((string) $req->input('gstNumber', ''));
+        $gstCode = trim((string) $req->input('gstCode', ''));
+
+        if ($gstNumber !== '' && $gstCode !== '' && $gstCode !== substr($gstNumber, 0, 2)) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'GST Code must be equal to first 2 characters of GST Number!',
+            ]);
+        }
     
-        $isSameCustomer = tbl_customer::where('customer_company_name', '=', $companyName)
-        ->where("customer_contact_no",'=',$companyContact)
-        ->where("customer_status", '=', '1')
-        ->first();
+        $isSameCustomer = $this->findDuplicateCustomer($companyName, $companyContact, (int) $customerId);
 
         if(is_null($isSameCustomer)){
 
             $customer = tbl_customer::find($customerId);
             $customer->customer_company_name= $companyName;
-            $customer->customer_contact_no= $companyContact;
+            $customer->customer_contact_no= $companyContact !== '' ? $companyContact : null;
             $customer->customer_email= $emailAddress;
-            $customer->customer_gst_no= $gstNumber;
-            $customer->customer_gst_code= $gstCode;
-            $customer->customer_address= $companyAddress;
+            $customer->customer_gst_no = $gstNumber !== '' ? $gstNumber : null;
+            $customer->customer_gst_code = $gstCode !== '' ? $gstCode : null;
+            $customer->customer_address= $companyAddress !== '' ? $companyAddress : null;
             
             if($customer->save()){
                 return response()->json(array(
@@ -194,6 +192,27 @@ class CustomerController extends Controller
         return (
             tbl_customer::select("customer_gst_no", "customer_contact_no")->where('customer_id', '=', $customerId)->where('customer_status', true)->first()
         );
+    }
+
+    private function findDuplicateCustomer(string $companyName, string $companyContact, ?int $excludeCustomerId = null): ?tbl_customer
+    {
+        $query = tbl_customer::where('customer_company_name', '=', $companyName)
+            ->where('customer_status', '=', '1');
+
+        if ($excludeCustomerId) {
+            $query->where('customer_id', '!=', $excludeCustomerId);
+        }
+
+        if ($companyContact !== '') {
+            $query->where('customer_contact_no', '=', $companyContact);
+        } else {
+            $query->where(function ($inner) {
+                $inner->whereNull('customer_contact_no')
+                    ->orWhere('customer_contact_no', '=', '');
+            });
+        }
+
+        return $query->first();
     }
 
 }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\InvestorController;
+use App\Http\Controllers\InvestorExpenseAllocationController;
 use App\Http\Controllers\InwardQualityController;
 use App\Http\Controllers\InwardController;
 use App\Http\Controllers\SellQualityController;
@@ -20,7 +21,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LabJobController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\KarigarController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
 
     Route::get('/stock/balances', [StockController::class, 'balances']);
+    Route::get('/stock/quality/{sellQualityId}', [StockController::class, 'qualityBalance']);
     Route::get('/stock/ledger', [StockController::class, 'ledger'])
         ->middleware(['role:admin,worker', 'permission:stock']);
 
@@ -48,10 +50,28 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/update/{investorId}', [InvestorController::class, 'update']);
         Route::post('/transaction', [InvestorController::class, 'addTransaction']);
         Route::delete('/transaction/{transactionId}', [InvestorController::class, 'deleteTransaction']);
+        Route::get('/expense-allocations', [InvestorExpenseAllocationController::class, 'index']);
+        Route::get('/expenses-for-allocation', [InvestorExpenseAllocationController::class, 'expensesForAllocation']);
+        Route::post('/expense-allocations', [InvestorExpenseAllocationController::class, 'store']);
+        Route::put('/expense-allocations/{allocationId}', [InvestorExpenseAllocationController::class, 'update']);
+        Route::delete('/expense-allocations/{allocationId}', [InvestorExpenseAllocationController::class, 'destroy']);
     });
 
     Route::get('/lab/jobs', [LabJobController::class, 'index'])->middleware('role:admin,worker,investor');
     Route::get('/lab/summary', [LabJobController::class, 'summary'])->middleware('role:admin,worker,investor');
+    Route::get('/lab/preview-shares', [LabJobController::class, 'previewShares'])->middleware('role:admin,worker');
+
+    Route::middleware('role:admin,worker')->prefix('karigar')->group(function () {
+        Route::get('/list', [KarigarController::class, 'listKarigars'])->middleware('permission:karigar');
+        Route::get('/jobs/pending-for-sale', [KarigarController::class, 'getPendingJobsForSale'])->middleware('permission:invoices');
+        Route::get('/jobs', [KarigarController::class, 'getJobs'])->middleware('permission:karigar');
+        Route::post('/jobs/issue', [KarigarController::class, 'issueJob'])->middleware('permission:karigar');
+        Route::post('/jobs/{jobId}/return', [KarigarController::class, 'returnJob'])->middleware('permission:karigar');
+        Route::get('/', [KarigarController::class, 'getKarigars'])->middleware('permission:karigar');
+        Route::post('/', [KarigarController::class, 'storeKarigar'])->middleware('permission:karigar');
+        Route::put('/{karigarId}', [KarigarController::class, 'updateKarigar'])->middleware('permission:karigar');
+        Route::delete('/{karigarId}', [KarigarController::class, 'deleteKarigar'])->middleware('permission:karigar');
+    });
 
     Route::middleware('role:admin,worker')->prefix('lab')->group(function () {
         Route::post('/jobs', [LabJobController::class, 'store'])->middleware('permission:laboratory');
@@ -84,7 +104,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/delete/{inward_quality_id}', [InwardQualityController::class, 'deleteInwardQuality']);
         });
 
-        Route::get('/sellqualitycategories', [SellQualityController::class, 'getQualityCategories']);
         Route::get('/sellqualities', [SellQualityController::class, 'getAllSellQualities']);
         Route::prefix('/sellquality')->group(function () {
             Route::post('/insert', [SellQualityController::class, 'insertSellQuality']);
@@ -113,6 +132,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['role:admin,worker', 'permission:purchases'])->group(function () {
         Route::post('/inward', [InwardController::class, 'addNewInward']);
+        Route::get('/inward/next-invoice-no/{inwarddate}', [InwardController::class, 'getNextPurchaseInvoiceNumber']);
         Route::get('/inwards', [InwardController::class, 'getAllInwards']);
         Route::get('/inward/view/{inward_mst_id}', [InwardController::class, 'viewInwardDetails']);
         Route::put('/inward/update/{inward_details_id}', [InwardController::class, 'updateInward']);
@@ -124,6 +144,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware(['role:admin,worker', 'permission:sales'])->group(function () {
         Route::get('/getfinancialyear/{challandate}', [ChallanController::class, 'getFinancialYearOfChallanDate']);
+        Route::get('/challan/next-no/{challandate}', [ChallanController::class, 'getNextChallanNumber']);
         Route::get('/verifychallan/{challanno}/{fromdate}/{todate}', [ChallanController::class, 'verifyChallanNumber']);
         Route::post('/challan/insert', [ChallanController::class, 'addNewChallan']);
         Route::get('/challans', [ChallanController::class, 'getChallans']);
@@ -139,6 +160,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/directinvoice/{invoiceid}', [InvoiceController::class, 'getDirectInvoiceOfInvoiceId']);
         Route::put('/directinvoice', [InvoiceController::class, 'updateDirectInvoice']);
 
+        Route::get('/invoice/available-challans', [InvoiceController::class, 'getAvailableChallansForInvoice']);
         Route::get('/invoice/getfinancialyear/{invoiceno}', [InvoiceController::class, 'getFromInvoiceNo']);
         Route::get('/invoice/challandata/{invoiceno}/{fromdate}/{todate}', [InvoiceController::class, 'getFromInvoiceNoAndFinancialYear']);
         Route::get('/getstate/{code}', [InvoiceController::class, 'getStateFromCode']);

@@ -2,15 +2,14 @@
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="/" class="brand-link">
             <img
-                src="dist/img/SahajanandLogo.png"
-                alt="Asif Jewelry Logo"
-                class="brand-image img-circle elevation-3"
-                style="opacity: 0.8"
+                src="/images/logo-gold-jewelry.png"
+                alt="Asif Jewelers Logo"
+                class="brand-image elevation-3"
             />
-            <span class="brand-text font-weight-light">Asif Jewelry</span>
+            <span class="brand-text font-weight-light">Asif Jewelers</span>
         </a>
 
-        <div class="sidebar">
+        <div ref="sidebarMenu" class="sidebar">
             <nav class="mt-2">
                 <ul
                     class="nav nav-pills nav-sidebar flex-column"
@@ -64,7 +63,7 @@
                         </li>
 
                         <li class="nav-item" v-if="can('purchases')">
-                            <a href="#" class="nav-link">
+                            <a href="#" class="nav-link" @click.prevent="toggleSubmenu">
                                 <i class="nav-icon nav-icon far bi bi-box-arrow-in-right"></i>
                                 <p class="text-md">
                                     Purchase
@@ -88,7 +87,7 @@
                         </li>
 
                         <li class="nav-item" v-if="can('sales')">
-                            <a href="#" class="nav-link">
+                            <a href="#" class="nav-link" @click.prevent="toggleSubmenu">
                                 <i class="nav-icon nav-icon far bi bi-receipt"></i>
                                 <p class="text-md">
                                     Sales Bill
@@ -112,7 +111,7 @@
                         </li>
 
                         <li class="nav-item" v-if="can('invoices')">
-                            <a href="#" class="nav-link">
+                            <a href="#" class="nav-link" @click.prevent="toggleSubmenu">
                                 <i class="nav-icon nav-icon far bi bi-receipt-cutoff"></i>
                                 <p class="text-md">
                                     Invoice
@@ -147,15 +146,8 @@
                             </ul>
                         </li>
 
-                        <li class="nav-item" v-if="isAdmin">
-                            <router-link to="/bankdetails" class="nav-link">
-                                <i class="nav-icon far bi bi-bank"></i>
-                                <p>Bank Details</p>
-                            </router-link>
-                        </li>
-
                         <li class="nav-item" v-if="can('expenses')">
-                            <a href="#" class="nav-link">
+                            <a href="#" class="nav-link" @click.prevent="toggleSubmenu">
                                 <i class="nav-icon far bi bi-dash-circle"></i>
                                 <p class="text-md">
                                     Expense
@@ -180,7 +172,7 @@
 
                         <li class="nav-item" v-if="isAdmin">
                             <router-link to="/credit" class="nav-link">
-                                <i class="nav-icon fas fa-rupee-sign"></i>
+                                <i class="nav-icon fas fa-money-bill-wave"></i>
                                 <p>Credit</p>
                             </router-link>
                         </li>
@@ -192,6 +184,13 @@
                             </router-link>
                         </li>
 
+                        <li class="nav-item" v-if="isAdmin">
+                            <router-link to="/distributeexpenses" class="nav-link">
+                                <i class="nav-icon fas fa-divide"></i>
+                                <p>Distribute Expenses</p>
+                            </router-link>
+                        </li>
+
                         <li class="nav-item" v-if="can('laboratory')">
                             <router-link to="/laboratory" class="nav-link">
                                 <i class="nav-icon fas fa-flask"></i>
@@ -199,10 +198,24 @@
                             </router-link>
                         </li>
 
+                        <li class="nav-item" v-if="can('karigar')">
+                            <router-link to="/karigar" class="nav-link">
+                                <i class="nav-icon fas fa-hammer"></i>
+                                <p class="text-md">Karigar</p>
+                            </router-link>
+                        </li>
+
                         <li class="nav-item" v-if="isAdmin">
                             <router-link to="/workers" class="nav-link">
                                 <i class="nav-icon fas fa-users-cog"></i>
                                 <p>Workers</p>
+                            </router-link>
+                        </li>
+
+                        <li class="nav-item" v-if="isAdmin">
+                            <router-link to="/bankdetails" class="nav-link">
+                                <i class="nav-icon far bi bi-bank"></i>
+                                <p>Bank Details</p>
                             </router-link>
                         </li>
 
@@ -239,6 +252,26 @@ export default {
         can(permission) {
             return hasPermission(permission);
         },
+        toggleSubmenu(event) {
+            const item = event.currentTarget.closest('.nav-item');
+            if (item) {
+                item.classList.toggle('menu-open');
+            }
+        },
+        onSidebarWheel(event) {
+            const sidebar = this.$refs.sidebarMenu;
+            if (!sidebar || sidebar.scrollHeight <= sidebar.clientHeight) {
+                return;
+            }
+
+            event.stopPropagation();
+        },
+    },
+    mounted() {
+        this.$el.addEventListener('wheel', this.onSidebarWheel, { passive: true, capture: true });
+    },
+    beforeDestroy() {
+        this.$el.removeEventListener('wheel', this.onSidebarWheel, { capture: true });
     },
 };
 </script>

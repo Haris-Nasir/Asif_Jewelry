@@ -11,19 +11,24 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Select investors from the dropdown. Base price is cut equally from each selected investor.
+                        Profit uses each investor's configured profit share % from Manage Investors.
+                    </p>
+
                     <div class="form-group row">
                         <div class="col-md-2">
-                            <label class="text-md">Job Date *</label>
-                            <input type="date" class="form-control" v-model="form.job_date">
+                            <label class="text-md">Job Date &amp; Time *</label>
+                            <input type="datetime-local" class="form-control" v-model="form.job_date">
                         </div>
                         <div class="col-md-3">
-                            <label class="text-md">Investor *</label>
-                            <select class="form-control" v-model="form.investor_id">
-                                <option value="">Select investor</option>
-                                <option v-for="inv in investors" :key="inv.investor_id" :value="inv.investor_id">
-                                    {{ inv.investor_name }}
-                                </option>
-                            </select>
+                            <label class="text-md">Investors *</label>
+                            <investor-multi-select
+                                :investors="investors"
+                                v-model="form.investor_ids"
+                                placeholder="Select investors..."
+                                @change="refreshSharePreview"
+                            />
                         </div>
                         <div class="col-md-2">
                             <label class="text-md">Reference</label>
@@ -41,25 +46,54 @@
                             <input type="number" class="form-control text-right" v-model="form.weight_grams" min="0" step="0.001">
                         </div>
                     </div>
+
+                    <div v-if="sharePreview.participants.length" class="alert alert-light border mb-3">
+                        <strong>Split preview</strong>
+                        <span class="text-muted small ml-2">
+                            Profit allocated: {{ sharePreview.total_profit_share_percentage }}%
+                            <span v-if="sharePreview.unallocated_profit_percentage > 0">
+                                · Unallocated: {{ sharePreview.unallocated_profit_percentage }}%
+                            </span>
+                        </span>
+                        <table class="table table-sm table-borderless mb-0 mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Investor</th>
+                                    <th class="text-right">Balance (Rs.)</th>
+                                    <th class="text-right">Purchase cut (Rs.)</th>
+                                    <th class="text-right">Profit share %</th>
+                                    <th class="text-right" v-if="estimatedProfit !== '-'">Est. profit (Rs.)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="row in sharePreview.participants" :key="row.investor_id">
+                                    <td>{{ row.investor_name }}</td>
+                                    <td class="text-right">{{ formatAmount(row.investment_basis) }}</td>
+                                    <td class="text-right">{{ formatAmount(row.purchase_share) }}</td>
+                                    <td class="text-right">{{ row.share_percentage }}%</td>
+                                    <td class="text-right" v-if="estimatedProfit !== '-'">
+                                        {{ formatAmount(row.profit_share) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div class="form-group row">
                         <div class="col-md-2">
-                            <label class="text-md">Base Price (₹) *</label>
-                            <input type="number" class="form-control text-right" v-model="form.base_price" min="0" step="0.01">
+                            <label class="text-md">Base Price (Rs.) *</label>
+                            <input type="number" class="form-control text-right" v-model="form.base_price" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
                         <div class="col-md-2">
-                            <label class="text-md">Cash Amount (₹)</label>
-                            <input type="number" class="form-control text-right" v-model="form.cash_amount" min="0" step="0.01">
+                            <label class="text-md">Refinery Cost (Rs.)</label>
+                            <input type="number" class="form-control text-right" v-model="form.refinery_cost" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
                         <div class="col-md-2">
-                            <label class="text-md">Refinery Cost (₹)</label>
-                            <input type="number" class="form-control text-right" v-model="form.refinery_cost" min="0" step="0.01">
+                            <label class="text-md">Sold Amount (Rs.)</label>
+                            <input type="number" class="form-control text-right" v-model="form.sold_amount" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
                         <div class="col-md-2">
-                            <label class="text-md">Sold Amount (₹)</label>
-                            <input type="number" class="form-control text-right" v-model="form.sold_amount" min="0" step="0.01" @input="calcProfit">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="text-md">Est. Profit (₹)</label>
+                            <label class="text-md">Est. Profit (Rs.)</label>
                             <input type="text" class="form-control text-right" :value="estimatedProfit" disabled>
                         </div>
                     </div>
@@ -80,6 +114,8 @@
 <script>
 import toastr from 'toastr';
 import swal from 'sweetalert2';
+import { formatAmount as formatAmountValue, getNowDateTime } from '../../currency';
+import InvestorMultiSelect from './InvestorMultiSelect.vue';
 
 toastr.options = {
     closeButton: true,
@@ -89,17 +125,23 @@ toastr.options = {
 
 export default {
     name: 'NewLabJob',
+    components: { InvestorMultiSelect },
     data() {
         return {
             investors: [],
+            sharePreview: {
+                participants: [],
+                total_investment_basis: 0,
+                total_profit_share_percentage: 0,
+                unallocated_profit_percentage: 100,
+            },
             form: {
                 job_date: '',
-                investor_id: '',
+                investor_ids: [],
                 job_reference: '',
                 metal_type: 'gold',
                 weight_grams: '',
                 base_price: '',
-                cash_amount: '',
                 refinery_cost: '',
                 sold_amount: '',
                 notes: '',
@@ -118,13 +160,19 @@ export default {
         },
     },
     mounted() {
-        this.form.job_date = this.getTodaysDate();
+        this.form.job_date = getNowDateTime();
         this.loadInvestors();
     },
     methods: {
+        formatAmount(value) {
+            return formatAmountValue(value);
+        },
         getTodaysDate() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        },
+        normalizedInvestorIds() {
+            return this.form.investor_ids.map((id) => parseInt(id, 10)).filter((id) => !Number.isNaN(id));
         },
         loadInvestors() {
             axios.get('/api/investor/list')
@@ -136,13 +184,41 @@ export default {
                     toastr['error']('Unable to load investors.');
                 });
         },
-        calcProfit() {},
-        saveJob() {
-            if (!this.form.job_date || !this.form.investor_id || this.form.weight_grams === '' || this.form.base_price === '') {
-                toastr['error']('Job date, investor, weight, and base price are required.');
+        refreshSharePreview() {
+            const investorIds = this.normalizedInvestorIds();
+            if (!investorIds.length) {
+                this.sharePreview = { participants: [], total_investment_basis: 0, total_profit_share_percentage: 0, unallocated_profit_percentage: 100 };
                 return;
             }
-            axios.post('/api/lab/jobs', this.form)
+
+            const params = { investor_ids: investorIds };
+            if (this.form.base_price !== '') {
+                params.base_price = this.form.base_price;
+            }
+            if (this.estimatedProfit !== '-') {
+                params.profit_amount = this.estimatedProfit;
+            }
+
+            axios.get('/api/lab/preview-shares', { params })
+                .then((res) => {
+                    this.sharePreview = res.data;
+                })
+                .catch((err) => {
+                    this.sharePreview = { participants: [], total_investment_basis: 0, total_profit_share_percentage: 0, unallocated_profit_percentage: 100 };
+                    if (err.response?.data?.message) {
+                        toastr['error'](err.response.data.message);
+                    }
+                });
+        },
+        saveJob() {
+            const investorIds = this.normalizedInvestorIds();
+            if (!this.form.job_date || !investorIds.length || this.form.weight_grams === '' || this.form.base_price === '') {
+                toastr['error']('Job date, at least one investor, weight, and base price are required.');
+                return;
+            }
+
+            const payload = { ...this.form, investor_ids: investorIds };
+            axios.post('/api/lab/jobs', payload)
                 .then((res) => {
                     if (res.data.status === 1) {
                         swal.fire({
@@ -163,17 +239,17 @@ export default {
         },
         resetForm() {
             this.form = {
-                job_date: this.getTodaysDate(),
-                investor_id: '',
+                job_date: getNowDateTime(),
+                investor_ids: [],
                 job_reference: '',
                 metal_type: 'gold',
                 weight_grams: '',
                 base_price: '',
-                cash_amount: '',
                 refinery_cost: '',
                 sold_amount: '',
                 notes: '',
             };
+            this.sharePreview = { participants: [], total_investment_basis: 0, total_profit_share_percentage: 0, unallocated_profit_percentage: 100 };
         },
     },
 };

@@ -1,13 +1,15 @@
 import Router from "vue-router";
 import Vue from "vue";
-import { getToken, getUser, clearAuth } from '../js/auth';
+import { getToken, getUser, clearAuth, getHomeRoute, canAccessRoute } from '../js/auth';
 
 const Login = () => import('../js/components/Login');
 const Container = () => import('../js/components/containers/Container');
 const Dashboard = () => import('../js/components/Dashboard');
 const InvestorPortal = () => import('../js/components/InvestorPortal');
 const ManageInvestors = () => import('../js/components/Investor/ManageInvestors');
+const DistributeExpenses = () => import('../js/components/Investor/DistributeExpenses');
 const LabJobContainer = () => import('../js/components/Laboratory/LabJobContainer');
+const KarigarContainer = () => import('../js/components/Karigar/KarigarContainer');
 const ManageWorkers = () => import('../js/components/Admin/ManageWorkers');
 const AuditLogs = () => import('../js/components/Admin/AuditLogs');
 const StockLedger = () => import('../js/components/Stock/StockLedger');
@@ -45,10 +47,7 @@ router.beforeEach((to, from, next) => {
     const user = getUser();
 
     if (to.path === '/login' && loggedIn) {
-        if (user && user.role === 'investor') {
-            return next('/investor');
-        }
-        return next('/dashboard');
+        return next(getHomeRoute(user));
     }
 
     if (authRequired && !loggedIn) {
@@ -57,6 +56,18 @@ router.beforeEach((to, from, next) => {
 
     if (user && user.role === 'investor' && !to.path.startsWith('/investor') && to.path !== '/login') {
         return next('/investor');
+    }
+
+    if (loggedIn && user && user.role !== 'investor') {
+        const targetPath = to.path === '/' ? '/dashboard' : to.path;
+
+        if (targetPath === '/dashboard' && !canAccessRoute('/dashboard', user)) {
+            return next(getHomeRoute(user));
+        }
+
+        if (!canAccessRoute(targetPath, user)) {
+            return next(getHomeRoute(user));
+        }
     }
 
     next();
@@ -98,9 +109,19 @@ function configRoutes() {
                     component: ManageInvestors
                 },
                 {
+                    path: "distributeexpenses",
+                    name: "DistributeExpenses",
+                    component: DistributeExpenses
+                },
+                {
                     path: "laboratory",
                     name: "Laboratory",
                     component: LabJobContainer
+                },
+                {
+                    path: "karigar",
+                    name: "Karigar",
+                    component: KarigarContainer
                 },
                 {
                     path: "workers",

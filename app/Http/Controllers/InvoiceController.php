@@ -7,44 +7,79 @@ use App\Models\tbl_challan_mst;
 use App\Models\tbl_challan_details;
 use App\Models\tbl_gst_code;
 use App\Models\tbl_invoice_mst;
+use App\Models\tbl_stock_ledger;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\StockService;
+use App\Services\KarigarService;
+use App\Models\tbl_karigar_job;
 
 class InvoiceController extends Controller
 {
     protected StockService $stockService;
+    protected KarigarService $karigarService;
 
-    public function __construct(StockService $stockService)
+    public function __construct(StockService $stockService, KarigarService $karigarService)
     {
         $this->stockService = $stockService;
+        $this->karigarService = $karigarService;
+    }
+
+    public function getAvailableChallansForInvoice(Request $request)
+    {
+        $challans = tbl_challan_mst::query()
+            ->join('tbl_customers', 'tbl_customers.customer_id', '=', 'tbl_challan_msts.customer_id')
+            ->join('tbl_challan_details', function ($join) {
+                $join->on('tbl_challan_details.challan_mst_id', '=', 'tbl_challan_msts.challan_mst_id')
+                    ->where('tbl_challan_details.challan_details_status', '=', 1);
+            })
+            ->leftJoin('tbl_invoice_msts', function ($join) {
+                $join->on('tbl_invoice_msts.invoice_mst_id', '=', 'tbl_challan_msts.challan_mst_id')
+                    ->where('tbl_invoice_msts.invoice_mst_status', '=', 1);
+            })
+            ->where('tbl_challan_msts.challan_mst_status', 1)
+            ->where('tbl_challan_msts.is_direct', 0)
+            ->whereNull('tbl_invoice_msts.invoice_mst_id')
+            ->select(
+                'tbl_challan_msts.challan_mst_id',
+                'tbl_challan_msts.challan_no',
+                'tbl_challan_msts.challan_date',
+                'tbl_customers.customer_company_name'
+            )
+            ->distinct()
+            ->orderByDesc('tbl_challan_msts.challan_date')
+            ->orderByDesc('tbl_challan_msts.challan_no')
+            ->get();
+
+        return response()->json($challans->map(function ($challan) {
+            $date = Carbon::parse($challan->getRawOriginal('challan_date'))->timezone(config('app.timezone'))->format('d-m-Y, h:i a');
+
+            return [
+                'challan_mst_id' => (int) $challan->challan_mst_id,
+                'challan_no' => (int) $challan->challan_no,
+                'challan_date' => $date,
+                'customer_company_name' => $challan->customer_company_name,
+            ];
+        })->values());
     }
 
     public function getFromInvoiceNo(Request $request, $invoiceNo){
-        $challanDateQuery = tbl_challan_mst::select('challan_date')->where('challan_no', '=', $invoiceNo)->where('challan_mst_status', '=',1)->get();
-        $financialYears = array();
-        foreach($challanDateQuery as $challanDates){
-            $challanDate = $challanDates->challan_date;
-            $challanSplitDate = explode("-",$challanDate);
-            $challanMonth = $challanSplitDate[1];
-            $challanYear = $challanSplitDate[2];
+        $challans = tbl_challan_mst::query()
+            ->where('challan_no', '=', $invoiceNo)
+            ->where('challan_mst_status', '=', 1)
+            ->get(['challan_date']);
 
-            $fromDate = $challanYear;
-            $toDate = $challanYear;
-
-            if((int)$challanMonth<4){
-                $fromDate = (int)$challanYear - 1;
-            }else{
-                $toDate = (int)$challanYear + 1;
-            }
-            
-            $fromDate = $fromDate;
-            $toDate = $toDate;
-
-            array_push($financialYears, $fromDate.'-'.$toDate);
+        $financialYears = [];
+        foreach ($challans as $challan) {
+            $rawDate = $challan->getRawOriginal('challan_date');
+            $fy = $this->getFinancialYearOfDate($rawDate);
+            $fromYear = (int) substr($fy['fromDate'], 0, 4);
+            $toYear = (int) substr($fy['toDate'], 0, 4);
+            $financialYears[] = $fromYear.'-'.$toYear;
         }
-        return $financialYears;
+
+        return array_values(array_unique($financialYears));
     }
 
     public function getFromInvoiceNoAndFinancialYear(Request $request, $invoiceNo, $fromDate, $toDate){
@@ -65,17 +100,13 @@ class InvoiceController extends Controller
     
             $challanMstId = $challanMstIdQuery->challan_mst_id;
 
-            
-            $totalPiecesQuery = tbl_challan_details::where('challan_mst_id', '=', $challanMstId)
-            ->where('challan_details_status', 1)->get();
-            $totalPieces = $totalPiecesQuery->count();
-            
             $invoiceDataQuery = tbl_challan_mst::join('tbl_brokers', 'tbl_challan_msts.broker_id', '=', 'tbl_brokers.broker_id')
             ->join('tbl_customers', 'tbl_customers.customer_id', '=', 'tbl_challan_msts.customer_id')
             ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id', '=', 'tbl_challan_msts.sell_quality_id')
-            ->select('tbl_challan_msts.challan_no','tbl_challan_msts.challan_date', 'tbl_challan_msts.total_qty', 'tbl_challan_msts.weight_grams',
+            ->join('tbl_sell_quality_categories', 'tbl_sell_quality_categories.sell_quality_category_id', '=', 'tbl_sell_qualities.sell_quality_category_id')
+            ->select('tbl_challan_msts.challan_mst_id', 'tbl_challan_msts.challan_no','tbl_challan_msts.challan_date', 'tbl_challan_msts.total_qty', 'tbl_challan_msts.weight_grams', 'tbl_challan_msts.challan_type',
             'tbl_brokers.broker_name', 'tbl_customers.customer_company_name', 'tbl_customers.customer_gst_no', 
-            'tbl_customers.customer_gst_code', 'tbl_customers.customer_address', 'tbl_sell_qualities.quality_name')
+            'tbl_customers.customer_gst_code', 'tbl_customers.customer_address', 'tbl_sell_qualities.sell_quality_id', 'tbl_sell_qualities.quality_name', 'tbl_sell_quality_categories.metal_type')
             ->where('tbl_challan_msts.challan_no', '=', $invoiceNo)
             ->whereBetween('tbl_challan_msts.challan_date', [$fromDate, $toDate])
             ->where('tbl_challan_msts.challan_mst_status',1)
@@ -92,7 +123,7 @@ class InvoiceController extends Controller
             return response()->json($res, 500);
         }
 
-        array_push($displayData, $totalPieces);
+        array_push($displayData, $invoiceDataQuery->total_qty ?? 0);
         array_push($displayData, $invoiceDataQuery);
 
         return $displayData;
@@ -100,19 +131,28 @@ class InvoiceController extends Controller
     }
 
     public function getStateFromCode(Request $request, $gstCode){
-        return (tbl_gst_code::select('state_name')->where('gst_code', '=', $gstCode)->first());
+        if ($gstCode === null || $gstCode === '') {
+            return response()->json(['state_name' => '']);
+        }
+
+        return tbl_gst_code::select('state_name')->where('gst_code', '=', $gstCode)->first()
+            ?: response()->json(['state_name' => '']);
     }
 
     public function addNewInvoiceFromChallan(Request $request){
         $validated = validator($request->all(),[
             'invoiceId' => 'required | numeric',
-            'invoiceDate' => 'required | date_format:Y-m-d',
+            'invoiceDate' => 'required | date',
             'rate' => 'required | numeric',
-            'gstPercentage' => 'required | numeric',
+            'gstPercentage' => 'nullable | numeric | min:0',
             'bankId' => 'required | numeric',
             'dueDate' => 'required | date_format:Y-m-d',
             'fromDate' => 'required |date_format:Y-m-d',
-            'toDate' => 'required |date_format:Y-m-d'
+            'toDate' => 'required |date_format:Y-m-d',
+            'refineryCost' => 'nullable | numeric | min:0',
+            'polishRatePerGram' => 'nullable | numeric | min:0',
+            'mazduriCost' => 'nullable | numeric | min:0',
+            'karigarJobId' => 'nullable | integer | exists:tbl_karigar_jobs,karigar_job_id',
         ]);
 
         if($validated->fails()){
@@ -127,7 +167,7 @@ class InvoiceController extends Controller
         $invoiceId = $request->input("invoiceId");
         $invoiceDate = $request->input("invoiceDate");
         $rate = $request->input("rate");
-        $gstPercentage = $request->input("gstPercentage");
+        $gstPercentage = (float) ($request->input('gstPercentage') ?? 0);
         $bankId = $request->input("bankId");
         $dueDate = $request->input("dueDate");
         $fromDate = $request->input("fromDate");
@@ -167,12 +207,18 @@ class InvoiceController extends Controller
             }
 
             $metalType = $this->stockService->resolveMetalTypeFromCategory((int) $challan->challan_type);
-            $baseAmount = round((float) $challan->total_qty * (float) $rate, 2);
+            $mazduriCost = $this->resolveKarigarMazduri($request);
+            $processingCosts = $this->resolveSaleProcessingCosts(
+                $metalType,
+                $weightGrams,
+                $request->input('refineryCost'),
+                $request->input('polishRatePerGram'),
+                $mazduriCost
+            );
+            $baseAmount = round($weightGrams * (float) $rate, 2);
             $gstAmount = round($baseAmount * ((float) $gstPercentage / 100), 2);
             $soldAmount = round($baseAmount + $gstAmount, 2);
-            $pieces = tbl_challan_details::where('challan_mst_id', $invoiceId)
-                ->where('challan_details_status', 1)
-                ->count() ?: 1;
+            $pieces = max(1, (int) round((float) $challan->total_qty));
 
             $saleSummary = $this->stockService->recordSale(
                 $metalType,
@@ -193,12 +239,22 @@ class InvoiceController extends Controller
             $invoice->weight_grams = $weightGrams;
             $invoice->cost_amount = $saleSummary['cost_amount'];
             $invoice->sold_amount = $soldAmount;
-            $invoice->profit_amount = $saleSummary['profit_amount'];
+            $invoice->profit_amount = round($saleSummary['profit_amount'] - $processingCosts['processing_cost_total'], 2);
+            $invoice->refinery_cost = $processingCosts['refinery_cost'];
+            $invoice->polish_rate_per_gram = $processingCosts['polish_rate_per_gram'];
+            $invoice->polish_cost = $processingCosts['polish_cost'];
+            $invoice->mazduri_cost = $processingCosts['mazduri_cost'];
             $invoice->gst_percentage = $gstPercentage;
             $invoice->bank_details_id = $bankId;
             $invoice->due_date = $dueDate;
 
             $invoice->save();
+
+            if ($request->filled('karigarJobId')) {
+                $this->karigarService->linkJobToInvoice((int) $request->input('karigarJobId'), (int) $invoiceId);
+                $invoice->karigar_job_id = (int) $request->input('karigarJobId');
+                $invoice->save();
+            }
 
         }catch(\Exception $e){
             DB::rollBack();
@@ -215,7 +271,7 @@ class InvoiceController extends Controller
         $res = array(
             "status" => 1,
             "message" => "Invoice created, stock updated, profit recorded.",
-            "profit" => $saleSummary['profit_amount'] ?? 0,
+            "profit" => $invoice->profit_amount ?? 0,
             "errors" => null
         );
 
@@ -338,7 +394,7 @@ class InvoiceController extends Controller
     public function updateChallanInvoice(Request $req){
         $validated = validator($req->all(),[
             'invoiceId' => "required | numeric",
-            'invoiceDate' => 'required | date_format:Y-m-d',
+            'invoiceDate' => 'required | date',
             'oldInvoiceDate' => 'required | date_format:Y-m-d',
             'invoiceDueDate' => 'required | date_format:Y-m-d',
             'rate' => "required | numeric",
@@ -415,7 +471,7 @@ class InvoiceController extends Controller
         $data = tbl_invoice_mst::with(['challanMstForInvoiceFromChallan', 'bank:bank_details_id,bank_name,branch_name,account_no'])
             ->where('invoice_mst_status', true)
             ->where('invoice_mst_id', $invoiceMstId)
-            ->select('invoice_mst_id', 'invoice_date', 'rate', 'gst_percentage', 'due_date', 'bank_details_id')
+            ->select('invoice_mst_id', 'invoice_date', 'rate', 'gst_percentage', 'due_date', 'bank_details_id', 'weight_grams')
             ->first();
 
         if(!$data){
@@ -459,27 +515,58 @@ class InvoiceController extends Controller
         DB::beginTransaction();
 
         try{
-            $invoice = tbl_invoice_mst::find($invoiceId);
+            $invoice = tbl_invoice_mst::where('invoice_mst_id', $invoiceId)
+                ->where('invoice_mst_status', true)
+                ->first();
+
+            if (!$invoice) {
+                DB::rollBack();
+
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Invoice not found.',
+                ]);
+            }
+
+            $amounts = $this->recalculateInvoiceAmounts($invoice, (float) $rate, (float) $gstPercentage);
+
             $invoice->due_date = $dueDate;
             $invoice->rate = $rate;
             $invoice->gst_percentage = $gstPercentage;
             $invoice->bank_details_id = $bankId;
+            $invoice->sold_amount = $amounts['sold_amount'];
+            $invoice->profit_amount = $amounts['profit_amount'];
+            $invoice->refinery_cost = $amounts['processing_costs']['refinery_cost'];
+            $invoice->polish_rate_per_gram = $amounts['processing_costs']['polish_rate_per_gram'];
+            $invoice->polish_cost = $amounts['processing_costs']['polish_cost'];
+            $invoice->mazduri_cost = $amounts['processing_costs']['mazduri_cost'];
     
             $invoice->save();
+
+            $this->syncStockLedgerSaleAmount(
+                (int) $invoiceId,
+                $amounts['reference_type'],
+                $amounts['weight_grams'],
+                $amounts['sold_amount'],
+                $amounts['cost_amount'],
+                $amounts['profit_amount']
+            );
 
             DB::commit();
 
             return response()->json(array(
                 "status" => 1,
-                "message" => "Invoice Updated Successfully"
+                "message" => "Invoice Updated Successfully",
+                "sold_amount" => $amounts['sold_amount'],
+                "profit_amount" => $amounts['profit_amount'],
             ));
         }
-        catch(Exeption $e){
+        catch(\Exception $e){
             DB::rollback();
 
             return response()->json(array(
                 "status" => -1,
-                "message" => "Err In Updating Invoice"
+                "message" => $e->getMessage() ?: "Err In Updating Invoice"
             ));
         }
         
@@ -515,18 +602,21 @@ class InvoiceController extends Controller
 
     public function addNewDirectInvoice(Request $req){
         $validated = validator($req->all(),[
-            'invoiceDate' => 'required | date_format:Y-m-d',
+            'invoiceDate' => 'required | date',
             'invoiceNo' => 'required | numeric',
             'customerId' => 'required | numeric',
             'brokerId' => 'required | numeric',
             'categoryId' => 'required | numeric',
             'qualityId' => 'required | numeric',
-            'qty' => "required | numeric",
+            'qty' => "required | numeric | min:0.001",
             "unit" => "required",
-            'noOfUnits' => "required | numeric",
             'rate' => "required | numeric",
             'gstPercentage' => "required | numeric",
             'weightGrams' => 'required | numeric | min:0.001',
+            'refineryCost' => 'nullable | numeric | min:0',
+            'polishRatePerGram' => 'nullable | numeric | min:0',
+            'mazduriCost' => 'nullable | numeric | min:0',
+            'karigarJobId' => 'nullable | integer | exists:tbl_karigar_jobs,karigar_job_id',
         ]);
 
         if($validated->fails()){
@@ -545,12 +635,20 @@ class InvoiceController extends Controller
         $brokerId = $req->input('brokerId');
         $categoryId = $req->input('categoryId');
         $qualityId = $req->input('qualityId');
-        $qty = $req->input('qty');
+        $qty = (float) $req->input('qty');
         $unit = $req->input('unit');
-        $noOfUnits = $req->input('noOfUnits');
-        $rate = $req->input('rate');
-        $gstPercentage = $req->input('gstPercentage');
-        $weightGrams = (float) $req->input('weightGrams');
+        $rate = (float) $req->input('rate');
+        $gstPercentage = (float) $req->input('gstPercentage');
+        $weightPerPiece = (float) $req->input('weightGrams');
+        $pieces = max(1, (int) round($qty));
+        $totalWeightGrams = round($weightPerPiece * $qty, 3);
+
+        if ($totalWeightGrams <= 0) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Total weight must be greater than zero (weight per piece × qty).',
+            ], 422);
+        }
 
         $financialYear = $this->getFinancialYearOfDate($invoiceDate);
 
@@ -567,7 +665,15 @@ class InvoiceController extends Controller
 
         try{
             $metalType = $this->stockService->resolveMetalTypeFromCategory((int) $categoryId);
-            $baseAmount = round($noOfUnits * $rate, 2);
+            $mazduriCost = $this->resolveKarigarMazduri($req);
+            $processingCosts = $this->resolveSaleProcessingCosts(
+                $metalType,
+                $totalWeightGrams,
+                $req->input('refineryCost'),
+                $req->input('polishRatePerGram'),
+                $mazduriCost
+            );
+            $baseAmount = round($totalWeightGrams * $rate, 2);
             $gstAmount = round($baseAmount * ($gstPercentage / 100), 2);
             $soldAmount = round($baseAmount + $gstAmount, 2);
 
@@ -578,7 +684,7 @@ class InvoiceController extends Controller
             $challanMst->sell_quality_id = $qualityId;
             $challanMst->qty_unit = $unit;
             $challanMst->total_qty = $qty;
-            $challanMst->weight_grams = $weightGrams;
+            $challanMst->weight_grams = $totalWeightGrams;
             $challanMst->broker_id = $brokerId;
             $challanMst->challan_type = $categoryId;
             $challanMst->is_direct = 1;
@@ -588,8 +694,8 @@ class InvoiceController extends Controller
             $saleSummary = $this->stockService->recordSale(
                 $metalType,
                 (int) $qualityId,
-                $weightGrams,
-                (int) $noOfUnits,
+                $totalWeightGrams,
+                $pieces,
                 $soldAmount,
                 'sale',
                 $challanMst->challan_mst_id,
@@ -599,24 +705,35 @@ class InvoiceController extends Controller
             $invoiceMst = new tbl_invoice_mst();
             $invoiceMst->invoice_mst_id = $challanMst->challan_mst_id;
             $invoiceMst->invoice_date = $invoiceDate;
-            $invoiceMst->no_of_units = $noOfUnits;
+            $invoiceMst->no_of_units = $pieces;
             $invoiceMst->rate = $rate;
-            $invoiceMst->weight_grams = $weightGrams;
+            $invoiceMst->weight_grams = $totalWeightGrams;
             $invoiceMst->cost_amount = $saleSummary['cost_amount'];
             $invoiceMst->sold_amount = $soldAmount;
-            $invoiceMst->profit_amount = $saleSummary['profit_amount'];
+            $invoiceMst->profit_amount = round($saleSummary['profit_amount'] - $processingCosts['processing_cost_total'], 2);
+            $invoiceMst->refinery_cost = $processingCosts['refinery_cost'];
+            $invoiceMst->polish_rate_per_gram = $processingCosts['polish_rate_per_gram'];
+            $invoiceMst->polish_cost = $processingCosts['polish_cost'];
+            $invoiceMst->mazduri_cost = $processingCosts['mazduri_cost'];
             $invoiceMst->bank_details_id = $bankDetailsId;
             $invoiceMst->gst_percentage = $gstPercentage;
 
             $invoiceMst->save();
+
+            if ($req->filled('karigarJobId')) {
+                $this->karigarService->linkJobToInvoice((int) $req->input('karigarJobId'), (int) $challanMst->challan_mst_id);
+                $invoiceMst->karigar_job_id = (int) $req->input('karigarJobId');
+                $invoiceMst->save();
+            }
 
             DB::commit();
 
             return response()->json(array(
                 "status" => 1,
                 "message" => "Sale bill created, stock updated, profit recorded.",
-                "profit" => $saleSummary['profit_amount'],
+                "profit" => $invoiceMst->profit_amount,
                 "sold_amount" => $soldAmount,
+                "processing_cost_total" => $processingCosts['processing_cost_total'],
             ));
         }
         catch(\Exception $e){
@@ -707,7 +824,7 @@ class InvoiceController extends Controller
     public function updateDirectInvoice(Request $req){
         $validated = validator($req->all(),[
             'invoiceId' => 'required | numeric',
-            'invoiceDate' => 'required | date_format:Y-m-d',
+            'invoiceDate' => 'required | date',
             'oldInvoiceDate' => 'required | date_format:Y-m-d',
             'invoiceNo' => 'required | numeric',
             'oldInvoiceNo' => 'required | numeric',
@@ -715,10 +832,8 @@ class InvoiceController extends Controller
             'broker' => 'required | numeric',
             'category' => 'required | numeric',
             'quality' => 'required | numeric',
-            'qty' => "required | numeric",
+            'qty' => "required | numeric | min:0.001",
             "unit" => "required",
-            // "unit" => "required | regex:/[a-zA-Z]+\./i",
-            'noOfUnits' => "required | numeric",
             'rate' => "required | numeric",
             'gstPercentage' => "required | numeric"
         ]);
@@ -745,7 +860,6 @@ class InvoiceController extends Controller
         $qualityId = $req->input('quality');
         $qty = $req->input('qty');
         $unit = $req->input('unit');
-        $noOfUnits = $req->input('noOfUnits');
         $rate = $req->input('rate');
         $gstPercentage = $req->input('gstPercentage');
 
@@ -780,11 +894,23 @@ class InvoiceController extends Controller
 
             $invoiceMst = tbl_invoice_mst::find($invoiceId);
             $invoiceMst->invoice_date = $invoiceDate;
-            $invoiceMst->no_of_units = $noOfUnits;
+            $invoiceMst->no_of_units = max(1, (int) round((float) $qty));
             $invoiceMst->rate = $rate;
             $invoiceMst->gst_percentage = $gstPercentage;
 
+            $amounts = $this->recalculateInvoiceAmounts($invoiceMst, (float) $rate, (float) $gstPercentage);
+            $invoiceMst->sold_amount = $amounts['sold_amount'];
+            $invoiceMst->profit_amount = $amounts['profit_amount'];
             $invoiceMst->save();
+
+            $this->syncStockLedgerSaleAmount(
+                (int) $invoiceId,
+                $amounts['reference_type'],
+                $amounts['weight_grams'],
+                $amounts['sold_amount'],
+                $amounts['cost_amount'],
+                $amounts['profit_amount']
+            );
 
             $challanMst = tbl_challan_mst::find($invoiceId);
             $challanMst->challan_no = $invoiceNo;
@@ -847,5 +973,116 @@ class InvoiceController extends Controller
                 "message" => "Invoice Deletation Failed"
             ));
         }
+    }
+
+    private function recalculateInvoiceAmounts(
+        tbl_invoice_mst $invoice,
+        float $rate,
+        float $gstPercentage,
+        $refineryCost = null,
+        $polishRatePerGram = null,
+        $mazduriCost = null
+    ): array {
+        $challan = tbl_challan_mst::where('challan_mst_id', $invoice->invoice_mst_id)
+            ->where('challan_mst_status', true)
+            ->first();
+
+        if (!$challan) {
+            throw new \RuntimeException('Sales bill not found for this invoice.');
+        }
+
+        $weightGrams = (float) ($invoice->weight_grams ?: $challan->weight_grams);
+        if ($weightGrams <= 0) {
+            throw new \RuntimeException('Invoice has no weight recorded.');
+        }
+
+        $metalType = $this->stockService->resolveMetalTypeFromCategory((int) $challan->challan_type);
+        $processingCosts = $this->resolveSaleProcessingCosts(
+            $metalType,
+            $weightGrams,
+            $refineryCost ?? $invoice->refinery_cost,
+            $polishRatePerGram ?? $invoice->polish_rate_per_gram,
+            $mazduriCost ?? $invoice->mazduri_cost
+        );
+
+        $baseAmount = round($weightGrams * $rate, 2);
+        $gstAmount = round($baseAmount * ($gstPercentage / 100), 2);
+        $soldAmount = round($baseAmount + $gstAmount, 2);
+        $costAmount = (float) ($invoice->cost_amount ?? 0);
+        $profitAmount = round($soldAmount - $costAmount - $processingCosts['processing_cost_total'], 2);
+
+        return [
+            'weight_grams' => $weightGrams,
+            'sold_amount' => $soldAmount,
+            'cost_amount' => $costAmount,
+            'profit_amount' => $profitAmount,
+            'processing_costs' => $processingCosts,
+            'reference_type' => $challan->is_direct ? 'sale' : 'sale_challan',
+        ];
+    }
+
+    private function syncStockLedgerSaleAmount(
+        int $invoiceId,
+        string $referenceType,
+        float $weightGrams,
+        float $soldAmount,
+        float $costAmount,
+        float $profitAmount
+    ): void {
+        $entry = tbl_stock_ledger::where('reference_type', $referenceType)
+            ->where('reference_id', $invoiceId)
+            ->where('transaction_type', 'sale')
+            ->first();
+
+        if (!$entry) {
+            return;
+        }
+
+        $entry->amount = $soldAmount;
+        $entry->rate_per_gram = $weightGrams > 0 ? round($soldAmount / $weightGrams, 2) : 0;
+        $entry->notes = 'Cost: ' . $costAmount . ', Profit: ' . $profitAmount;
+        $entry->save();
+    }
+
+    private function resolveSaleProcessingCosts(
+        string $metalType,
+        float $weightGrams,
+        $refineryCost,
+        $polishRatePerGram,
+        $mazduriCost
+    ): array {
+        $refinery = round(max((float) ($refineryCost ?? 0), 0), 2);
+        $polishRate = $metalType === 'gold'
+            ? round(max((float) ($polishRatePerGram ?? 0), 0), 2)
+            : 0.0;
+        $polishTotal = $metalType === 'gold'
+            ? round($polishRate * $weightGrams, 2)
+            : 0.0;
+        $mazduri = round(max((float) ($mazduriCost ?? 0), 0), 2);
+
+        return [
+            'refinery_cost' => $refinery,
+            'polish_rate_per_gram' => $polishRate,
+            'polish_cost' => $polishTotal,
+            'mazduri_cost' => $mazduri,
+            'processing_cost_total' => round($refinery + $polishTotal + $mazduri, 2),
+        ];
+    }
+
+    private function resolveKarigarMazduri(Request $request): float
+    {
+        if ($request->filled('karigarJobId')) {
+            $job = tbl_karigar_job::where('karigar_job_id', (int) $request->input('karigarJobId'))
+                ->where('karigar_job_status', true)
+                ->where('job_status', 'returned')
+                ->whereNull('invoice_mst_id')
+                ->first();
+
+            if ($job) {
+                return (float) $job->mazduri_cost;
+            }
+        }
+
+        return round(max((float) ($request->input('mazduriCost') ?? 0), 0), 2);
     }
 }

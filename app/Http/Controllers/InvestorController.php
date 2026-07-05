@@ -26,8 +26,10 @@ class InvestorController extends Controller
     public function summary(Request $request)
     {
         $validated = $request->validate([
-            'period' => 'nullable|in:daily,monthly,quarterly,financial_year',
+            'period' => 'nullable|in:daily,weekly,monthly,custom',
             'date' => 'nullable|date',
+            'from_date' => 'nullable|date|required_if:period,custom',
+            'to_date' => 'nullable|date|required_if:period,custom|after_or_equal:from_date',
             'investor_id' => 'nullable|integer|exists:tbl_investors,investor_id',
         ]);
 
@@ -37,7 +39,13 @@ class InvestorController extends Controller
         }
 
         $period = $validated['period'] ?? 'monthly';
-        $summary = $this->profitService->buildSummary($investor, $period, $validated['date'] ?? null);
+        $summary = $this->profitService->buildPortalSummary(
+            $investor,
+            $period,
+            $validated['date'] ?? null,
+            $validated['from_date'] ?? null,
+            $validated['to_date'] ?? null
+        );
 
         $transactions = tbl_investor_transaction::where('investor_id', $investor->investor_id)
             ->where('transaction_status', true)
@@ -50,8 +58,10 @@ class InvestorController extends Controller
         return response()->json([
             'investor' => $investor,
             'period' => $summary['period'],
-            'profit_summary' => $summary['profit_summary'],
+            'investment_summary' => $summary['investment_summary'],
             'gold_holdings' => $summary['gold_holdings'],
+            'lab_summary' => $summary['lab_summary'],
+            'expense_allocations' => $summary['expense_allocations'],
             'transactions' => $transactions,
         ]);
     }
@@ -61,7 +71,12 @@ class InvestorController extends Controller
         $investors = tbl_investor::with('user:id,name,email')
             ->where('investor_status', true)
             ->orderBy('investor_name')
-            ->get();
+            ->get()
+            ->map(function ($investor) {
+                $investor->total_invested = $this->profitService->getTotalInvested($investor->investor_id);
+
+                return $investor;
+            });
 
         return response()->json(['data' => $investors]);
     }
@@ -70,7 +85,7 @@ class InvestorController extends Controller
     {
         $validated = $request->validate([
             'investor_name' => 'required|string|max:100',
-            'contact_no' => 'nullable|string|max:15',
+            'contact_no' => 'nullable|numeric|digits_between:10,11',
             'email' => 'nullable|email|max:255',
             'profit_share_percentage' => 'required|numeric|min:0|max:100',
             'create_login' => 'nullable|boolean',
@@ -121,7 +136,7 @@ class InvestorController extends Controller
 
         $validated = $request->validate([
             'investor_name' => 'required|string|max:100',
-            'contact_no' => 'nullable|string|max:15',
+            'contact_no' => 'nullable|numeric|digits_between:10,11',
             'email' => 'nullable|email|max:255',
             'profit_share_percentage' => 'required|numeric|min:0|max:100',
         ]);
@@ -156,7 +171,8 @@ class InvestorController extends Controller
             ->orderByDesc('investor_transaction_id');
 
         if (!empty($validated['from_date']) && !empty($validated['to_date'])) {
-            $query->whereBetween('transaction_date', [$validated['from_date'], $validated['to_date']]);
+            $query->whereDate('transaction_date', '>=', $validated['from_date'])
+                ->whereDate('transaction_date', '<=', $validated['to_date']);
         }
 
         return response()->json($query->paginate($paginate));
@@ -193,6 +209,16 @@ class InvestorController extends Controller
                 ], 422);
             }
             $amount = round((float) $validated['amount'], 2);
+        }
+
+        if (in_array($type, ['withdrawal', 'gold_sell'], true)) {
+            $available = $this->profitService->getTotalInvested((int) $validated['investor_id']);
+            if ($amount > $available + 0.005) {
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Payout amount exceeds investor balance. Available: Rs. ' . number_format($available, 2),
+                ], 422);
+            }
         }
 
         $transaction = tbl_investor_transaction::create([

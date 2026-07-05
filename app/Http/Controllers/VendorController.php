@@ -11,11 +11,11 @@ class VendorController extends Controller
     {
         $validated = validator($req->all(),[
             'companyName' => 'required | max:50',
-            'companyContact' => 'required | digits:10',
-            'companyAddress' => 'required | max:255',
+            'companyContact' => 'nullable | digits_between:10,11',
+            'companyAddress' => 'nullable | max:255',
             'emailAddress' => 'nullable | email | max:255',
-            'gstNumber' => 'required | alpha_num | min:15 | max:15',
-            'gstCode' => 'required | alpha_num | min:2 | max:2'
+            'gstNumber' => 'nullable | alpha_num | min:15 | max:15',
+            'gstCode' => 'nullable | alpha_num | min:2 | max:2'
         ]);
 
         if($validated->fails()){
@@ -29,42 +29,30 @@ class VendorController extends Controller
         }
 
         $companyName = $req->input("companyName");
-        $companyContact = $req->input("companyContact");
-        $companyAddress = $req->input("companyAddress");
+        $companyContact = trim((string) $req->input("companyContact", ''));
+        $companyAddress = trim((string) $req->input("companyAddress", ''));
         $emailAddress = $req->input("emailAddress");
-        $gstNumber = $req->input("gstNumber");
-        $gstCode = $req->input("gstCode");
+        $gstNumber = trim((string) $req->input('gstNumber', ''));
+        $gstCode = trim((string) $req->input('gstCode', ''));
 
-        if($gstCode != substr($gstNumber,0,2))
+        if ($gstNumber !== '' && $gstCode !== '' && $gstCode !== substr($gstNumber, 0, 2))
         {
-            $res = array(
-                "status" => -1,
-                "message" => "GST Code must be equal to first 2 characters of GST Number!",
-                "errors" => $validated->errors()
-            );
-
-            return response()->json($res);
+            return response()->json([
+                'status' => -1,
+                'message' => 'GST Code must be equal to first 2 characters of GST Number!',
+            ]);
         }
 
-        $isSameVendor = tbl_vendor::where('vendor_company_name', '=', $companyName)
-        ->where("vendor_contact_no",'=',$companyContact)
-        ->where("vendor_status", '=', '1')
-        ->exists();
+        $isSameVendor = $this->findDuplicateVendor($companyName, $companyContact);
 
-        if($isSameVendor){
-            return response()->json(array(
-                "status" => 0,
-                "message" => "Vendor Already Exists!!!"
-            ));
-        }
-        else{
+        if(is_null($isSameVendor)){
             $newVendor = new tbl_vendor();
             $newVendor->vendor_company_name = $req->input("companyName");
-            $newVendor->vendor_contact_no = $req->input("companyContact");
+            $newVendor->vendor_contact_no = $companyContact !== '' ? $companyContact : null;
             $newVendor->vendor_email = $req->input("emailAddress");
-            $newVendor->vendor_gst_no = $req->input("gstNumber");
-            $newVendor->vendor_gst_code = $req->input("gstCode");
-            $newVendor->vendor_address = $req->input("companyAddress");
+            $newVendor->vendor_gst_no = $gstNumber !== '' ? $gstNumber : null;
+            $newVendor->vendor_gst_code = $gstCode !== '' ? $gstCode : null;
+            $newVendor->vendor_address = $companyAddress !== '' ? $companyAddress : null;
             
             if($newVendor->save()){
                 return response()->json(array(
@@ -78,6 +66,12 @@ class VendorController extends Controller
                     "message" => "Something Went Wrong! Please Try Again..."
                 ));
             }
+        }
+        else{
+            return response()->json(array(
+                "status" => 0,
+                "message" => "Vendor Already Exists!!!"
+            ));
         }
     }
 
@@ -116,11 +110,11 @@ class VendorController extends Controller
 
         $validated = validator($req->all(),[
             'companyName' => 'required | max:50',
-            'companyContact' => 'required | digits:10',
-            'companyAddress' => 'required | max:255',
+            'companyContact' => 'nullable | digits_between:10,11',
+            'companyAddress' => 'nullable | max:255',
             'emailAddress' => 'nullable | email | max:255',
-            'gstNumber' => 'required | alpha_num | min:15 | max:15',
-            'gstCode' => 'required | alpha_num | min:2 | max:2'
+            'gstNumber' => 'nullable | alpha_num | min:15 | max:15',
+            'gstCode' => 'nullable | alpha_num | min:2 | max:2'
         ]);
 
         if($validated->fails()){
@@ -134,26 +128,30 @@ class VendorController extends Controller
         }
 
         $companyName = $req->input("companyName");
-        $companyContact = $req->input("companyContact");
-        $companyAddress = $req->input("companyAddress");
+        $companyContact = trim((string) $req->input("companyContact", ''));
+        $companyAddress = trim((string) $req->input("companyAddress", ''));
         $emailAddress = $req->input("emailAddress");
-        $gstNumber = $req->input("gstNumber");
-        $gstCode = $req->input("gstCode");
+        $gstNumber = trim((string) $req->input('gstNumber', ''));
+        $gstCode = trim((string) $req->input('gstCode', ''));
+
+        if ($gstNumber !== '' && $gstCode !== '' && $gstCode !== substr($gstNumber, 0, 2)) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'GST Code must be equal to first 2 characters of GST Number!',
+            ]);
+        }
     
-        $isSameVendor = tbl_vendor::where('vendor_company_name', '=', $companyName)
-        ->where("vendor_contact_no",'=',$companyContact)
-        ->where("vendor_status", '=', '1')
-        ->first();
+        $isSameVendor = $this->findDuplicateVendor($companyName, $companyContact, (int) $vendorId);
 
         if(is_null($isSameVendor)){
 
             $vendor = tbl_vendor::find($vendorId);
             $vendor->vendor_company_name= $companyName;
-            $vendor->vendor_contact_no= $companyContact;
+            $vendor->vendor_contact_no= $companyContact !== '' ? $companyContact : null;
             $vendor->vendor_email= $emailAddress;
-            $vendor->vendor_gst_no= $gstNumber;
-            $vendor->vendor_gst_code= $gstCode;
-            $vendor->vendor_address= $companyAddress;
+            $vendor->vendor_gst_no = $gstNumber !== '' ? $gstNumber : null;
+            $vendor->vendor_gst_code = $gstCode !== '' ? $gstCode : null;
+            $vendor->vendor_address= $companyAddress !== '' ? $companyAddress : null;
             
             if($vendor->save()){
                 return response()->json(array(
@@ -192,5 +190,26 @@ class VendorController extends Controller
     public function getSelectedVendorData(Request $req, $vendorId)
     {
         return (tbl_vendor::select("vendor_gst_no", "vendor_contact_no")->where("vendor_id", "=", $vendorId)->where("vendor_status", true)->first());
+    }
+
+    private function findDuplicateVendor(string $companyName, string $companyContact, ?int $excludeVendorId = null): ?tbl_vendor
+    {
+        $query = tbl_vendor::where('vendor_company_name', '=', $companyName)
+            ->where('vendor_status', '=', '1');
+
+        if ($excludeVendorId) {
+            $query->where('vendor_id', '!=', $excludeVendorId);
+        }
+
+        if ($companyContact !== '') {
+            $query->where('vendor_contact_no', '=', $companyContact);
+        } else {
+            $query->where(function ($inner) {
+                $inner->whereNull('vendor_contact_no')
+                    ->orWhere('vendor_contact_no', '=', '');
+            });
+        }
+
+        return $query->first();
     }
 }

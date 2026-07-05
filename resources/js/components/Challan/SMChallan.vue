@@ -51,7 +51,7 @@ NOTES
                                             <input type="date" class="form-control" id="to-date" v-model="toDate"/>
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="company-name" class="text-md">Company Name</label>
+                                            <label for="company-name" class="text-md">Customer</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="compniesForFilter" v-model="selectedCompanyForFilter" placeholder="Select Company">
@@ -131,7 +131,7 @@ NOTES
                                                             <span v-if="sort_direction =='desc'? 1: 0">&darr;</span>
                                                         </span>
                                                     </th>
-                                                    <th>Company</th>
+                                                    <th>Customer</th>
                                                     <th>Broker</th>
                                                     <th>Item Type</th>
                                                     <th>Category</th>
@@ -147,7 +147,7 @@ NOTES
                                                         challan.challan_id
                                                     "
                                                 >
-                                                    <td> {{ challan.challan_date }}</td>
+                                                    <td class="text-nowrap">{{ formatDate(challan.challan_date) }}</td>
                                                     <td>{{ challan.challan_no }}</td>
                                                     <td>{{ challan.customer_company_name }}</td>
                                                     <td>{{ challan.broker_name }}</td>
@@ -181,14 +181,14 @@ NOTES
                                         <!-- <div class="col-md-5"></div> -->
                                         <div class="col-md-9 text-right">
                                             <label for="" class="mt-2 text-md">
-                                                Total Amount of this page :
+                                                Total weight of this page (g) :
                                             </label>
                                         </div>
                                         <div class="col-md-3">
                                             <input
                                                 type="text"
                                                 class="form-control text-right"
-                                                v-model="totalAmountOfPage"
+                                                v-model="totalWeightOfPage"
                                                 disabled
                                             />
                                         </div>
@@ -210,11 +210,11 @@ NOTES
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="challanDate" class="text-md col-form-label">Date <span
+                                            <label for="challanDate" class="text-md col-form-label">Date &amp; Time <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
-                                            <input type="date" id="challanDate" v-model="challanDate"
+                                            <input type="datetime-local" id="challanDate" v-model="challanDate"
                                                 class="form-control text-md">
                                         </div>
 
@@ -229,12 +229,12 @@ NOTES
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="companyName" class="text-md col-form-label">Company Name <span
+                                            <label for="companyName" class="text-md col-form-label">Customer <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="companyNames" v-model="selectedCompanyName"
-                                                @blur="getFromSelectedCompany" placeholder="Select a Company Name">
+                                                @blur="getFromSelectedCompany" placeholder="Select Customer">
                                             </model-select>
                                         </div>
 
@@ -307,8 +307,7 @@ NOTES
                                                     <table class="table table-bordered">
                                                         <thead class="table-secondary text-md text-dark">
                                                             <th >Sr. No.</th>
-                                                            <th >No</th>
-                                                            <th >Qty</th>
+                                                            <th >Quantity</th>
                                                             <th width="20%"></th>
                                                         </thead>
                                                         <tbody>
@@ -316,21 +315,15 @@ NOTES
                                                                 <td v-if="index % 2 ? 0 : 1">{{index + 1}}</td>
                                                                 <td v-if="index % 2 ? 0 : 1">
                                                                     <input type="number" class="form-control text-right"
-                                                                        :disabled="data.isDisabled"
-                                                                        v-model="data.no" 
-                                                                        :ref="'takano'+index">
-                                                                </td>
-                                                                <td v-if="index % 2 ? 0 : 1">
-                                                                    <input type="number" class="form-control text-right"
                                                                         v-model="data.qty" 
                                                                         @blur="sumTotalQuantity"
                                                                         @click="selectQuantity(index)"
-                                                                        @keydown.tab.prevent="tranferCursor(index)"
+                                                                        @keydown.tab.prevent="tranferCursor(index, 'qty')"
                                                                         :disabled="data.isDisabled"
                                                                         :ref="'qty'+index">
                                                                 </td>
                                                                 <td v-if="index % 2 ? 0 : 1" class="text-center">
-                                                                    <button class="btn btn-success text-md" @click="data.isDisabled == true ? editChallanDetailsEntry(index, data.challanDetailsId, data.no, data.qty):cancelEditChallanDetailsEntry(index)"><i
+                                                                    <button class="btn btn-success text-md" @click="data.isDisabled == true ? editChallanDetailsEntry(index, data.challanDetailsId):cancelEditChallanDetailsEntry(index)"><i
                                                                         class="fas" :class="data.isDisabled == true?'fa-pen':'fa-times'"></i></button>
                                                                     <button class="btn btn-danger text-md" @click="deleteChallanDetailsId(index, data.challanDetailsId)"><i
                                                                         class="fas fa-trash"></i></button>
@@ -344,8 +337,7 @@ NOTES
                                                     <table class="table table-bordered">
                                                         <thead class="table-secondary text-md text-dark">
                                                             <th >Sr. No.</th>
-                                                            <th >No</th>
-                                                            <th >Qty</th>
+                                                            <th >Quantity</th>
                                                             <th width="20%"></th>
                                                         </thead>
                                                         <tbody>
@@ -355,21 +347,15 @@ NOTES
                                                                 </td>
                                                                 <td v-if="index % 2 ? 1 : 0">
                                                                     <input type="number" class="form-control text-right"
-                                                                        v-model="data.no" 
-                                                                        :disabled="data.isDisabled"
-                                                                        :ref="'takano'+index">
-                                                                </td>
-                                                                <td v-if="index % 2 ? 1 : 0">
-                                                                    <input type="number" class="form-control text-right"
                                                                         v-model="data.qty" 
                                                                         @blur="sumTotalQuantity"
                                                                         @click="selectQuantity(index)"
-                                                                        @keydown.tab.prevent="tranferCursor(index)"
+                                                                        @keydown.tab.prevent="tranferCursor(index, 'qty')"
                                                                         :disabled="data.isDisabled"
                                                                         :ref="'qty'+index">
                                                                 </td>
                                                                 <td v-if="index % 2? 1 : 0" class="text-center">
-                                                                    <button class="btn btn-success text-md" @click="data.isDisabled == true? editChallanDetailsEntry(index, data.challanDetailsId, data.no, data.qty):cancelEditChallanDetailsEntry(index)"><i
+                                                                    <button class="btn btn-success text-md" @click="data.isDisabled == true? editChallanDetailsEntry(index, data.challanDetailsId):cancelEditChallanDetailsEntry(index)"><i
                                                                         class="fas" :class="data.isDisabled == true?'fa-pen':'fa-times'"></i></button>
                                                                     <button class="btn btn-danger text-md" @click="deleteChallanDetailsId(index, data.challanDetailsId)"><i
                                                                         class="fas fa-trash"></i></button>
@@ -382,7 +368,7 @@ NOTES
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Quantity
+                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Pieces
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -399,8 +385,7 @@ NOTES
                                                     <table class="table table-bordered">
                                                         <thead class="table-secondary text-md text-dark">
                                                             <th >Sr. No.</th>
-                                                            <th >No</th>
-                                                            <th >Qty</th>
+                                                            <th >Quantity</th>
                                                             <th width="20%"></th>
                                                         </thead>
                                                         <tbody class="text-md">
@@ -408,14 +393,10 @@ NOTES
                                                                 <td v-if="index % 2 ? 0 : 1">{{allData.length + index + 1}}</td>
                                                                 <td v-if="index % 2 ? 0 : 1">
                                                                     <input type="number" class="form-control text-right"
-                                                                        v-model="data.no" :ref="'newtakano'+index">
-                                                                </td>
-                                                                <td v-if="index % 2 ? 0 : 1">
-                                                                    <input type="number" class="form-control text-right"
                                                                         v-model="data.qty"
                                                                         @click="selectQuantity(index, 'newqty')"
                                                                         @blur="sumNewTotalQuantity"
-                                                                        @keydown.tab.prevent="tranferCursor(index, 'newtakano')"
+                                                                        @keydown.tab.prevent="tranferCursor(index, 'newqty')"
                                                                         @keyup.enter="enterPressed(index)" :ref="'newqty'+index">
                                                                 </td>
                                                                 <td v-if="index % 2 ? 0 : 1" class="text-center">
@@ -431,8 +412,7 @@ NOTES
                                                     <table class="table table-bordered text-md">
                                                         <thead class="table-secondary text-md text-dark">
                                                             <th >Sr. No.</th>
-                                                            <th >No</th>
-                                                            <th >Qty</th>
+                                                            <th >Quantity</th>
                                                             <th width="20%"></th>
                                                         </thead>
                                                         <tbody>
@@ -442,16 +422,11 @@ NOTES
                                                                 </td>
                                                                 <td v-if="index % 2 ? 1 : 0">
                                                                     <input type="number" class="form-control text-right"
-                                                                        :disabled="data.isDisabled"
-                                                                        v-model="data.no" :ref="'newtakano'+index">
-                                                                </td>
-                                                                <td v-if="index % 2 ? 1 : 0">
-                                                                    <input type="number" class="form-control text-right"
                                                                         v-model="data.qty" 
                                                                         @blur="sumNewTotalQuantity"
                                                                         :disabled="data.isDisabled"
                                                                         @click="selectQuantity(index, 'newqty')"
-                                                                        @keydown.tab.prevent="tranferCursor(index, 'newtakano')"
+                                                                        @keydown.tab.prevent="tranferCursor(index, 'newqty')"
                                                                         @keyup.enter="enterPressed(index)" :ref="'newqty'+index">
                                                                 </td>
                                                                 <td v-if="index % 2? 1 : 0" class="text-center">
@@ -468,7 +443,7 @@ NOTES
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Quantity(New)
+                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Pieces (New)
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -476,7 +451,7 @@ NOTES
                                                 v-model="totalNewQty" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md col-form-label mt-3">Total Quantity(Net)
+                                            <label class="text-md col-form-label mt-3">Total Pieces (Net)
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -558,13 +533,11 @@ NOTES
                                             <table class="table table-hover table-bordered table-striped table-sm">
                                                 <thead class="text-md">
                                                     <th width="15%">Sr. No.</th>
-                                                    <th class="text-center">No</th>
-                                                    <th class="text-center">Qty</th>
+                                                    <th class="text-center">Quantity</th>
                                                 </thead>
                                                 <tbody class="text-md">
                                                     <tr v-for="(product, index) in challanToView.products.productPart1" v-bind:key="index">
                                                         <td class="text-right">{{index+1}}</td>
-                                                        <td class="text-right">{{product.no}}</td>
                                                         <td class="text-right">{{product.qty}}</td>
                                                     </tr>
                                                 </tbody>
@@ -574,13 +547,11 @@ NOTES
                                             <table class="table table-hover table-bordered table-striped table-sm">
                                                 <thead class="text-md">
                                                     <th width="15%">Sr. No.</th>
-                                                    <th class="text-center">No</th>
-                                                    <th class="text-center">Qty</th>
+                                                    <th class="text-center">Quantity</th>
                                                 </thead>
                                                 <tbody class="text-md">
                                                     <tr v-for="(product, index) in challanToView.products.productPart2" v-bind:key="index">
                                                         <td class="text-right">{{index+17}}</td>
-                                                        <td class="text-right">{{product.no}}</td>
                                                         <td class="text-right">{{product.qty}}</td>
                                                     </tr>
                                                 </tbody>
@@ -590,13 +561,11 @@ NOTES
                                             <table class="table table-hover table-bordered table-striped table-sm">
                                                 <thead class="text-md">
                                                     <th width="15%">Sr. No.</th>
-                                                    <th class="text-center">No</th>
-                                                    <th class="text-center">Qty</th>
+                                                    <th class="text-center">Quantity</th>
                                                 </thead>
                                                 <tbody class="text-md">
                                                     <tr v-for="(product, index) in challanToView.products.productPart3" v-bind:key="index">
                                                         <td class="text-right">{{index+33}}</td>
-                                                        <td class="text-right">{{product.no}}</td>
                                                         <td class="text-right">{{product.qty}}</td>
                                                     </tr>
                                                 </tbody>
@@ -648,6 +617,7 @@ NOTES
 import toastr from "toastr";
 import swal from "sweetalert2";
 import { pdfUrl } from "../../auth";
+import { formatDate, getNowDateTime, toInputDateTime, toDateOnly } from "../../currency";
 import { ModelSelect } from "vue-search-select"; // plugin for combobox-Searchable Select Menu
 
 export default {
@@ -678,7 +648,7 @@ export default {
             fromDate: this.getTodaysDate(), // From date to set for getting challans
             toDate: this.getDateBeforeDays(), // to date to set for getting challans
 
-            totalAmountOfPage: (0).toFixed(2),  // Total amount of one page in challans datatable
+            totalWeightOfPage: (0).toFixed(3),
 
             challanIdToBeEdit: -1, // challan id which need to be edit
 
@@ -855,20 +825,22 @@ export default {
                 )
                 .then(result => {
                     this.challans = result.data;
-                    let totalAmountOfPage = 0;
+                    let totalWeightOfPage = 0;
                     for (let i = 0; i < this.challans.data.length; i++) {
                         this.challans.data[i]["totalqty"] = this.challans.data[i]["totalqty"].toFixed(2);
-                        totalAmountOfPage += parseFloat(
-                            this.challans.data[i]["totalqty"]
+                        totalWeightOfPage += parseFloat(
+                            this.challans.data[i]["weight_grams"] || 0
                         );
                     }
-                    this.totalAmountOfPage = totalAmountOfPage.toFixed(2);
+                    this.totalWeightOfPage = totalWeightOfPage.toFixed(3);
                 })
                 .catch(err => {
                     console.log("Err in Fetching Challans");
                     toastr.error("Something Went Wrong, Please Refrash");
                 });
         },
+
+        formatDate,
 
         getTodaysDate: function() { // will return todays date in YYYY-MM-DD formate
             let d = new Date();
@@ -1033,8 +1005,8 @@ export default {
                 .get("/api/challan/"+challan_id)
                 .then((response)=>{
                     let challan = response.data;
-                    this.challanDate = this.getStdDate(challan.challandate);  
-                    this.oldChallanDate = this.challanDate; 
+                    this.challanDate = toInputDateTime(challan.challandate);
+                    this.oldChallanDate = this.challanDate;
                     this.challanNo = challan.challanno;
                     this.oldChallanNo = challan.challanno;
 
@@ -1078,7 +1050,7 @@ export default {
             
         },
 
-        editChallanDetailsEntry: function(index, challanDetailsId, no, qty) { // edit challan details entry
+        editChallanDetailsEntry: function(index, challanDetailsId) { // edit challan details entry
             this.allData[index].isDisabled = false; 
             this.editedChallanDetailsIds.add(challanDetailsId);         
         },
@@ -1138,7 +1110,6 @@ export default {
             if (this.allData.length < 48) {
                 if((this.allData.length + this.newProductDetails.length) < 48){
                     this.newProductDetails.push({
-                        no: "",
                         qty: (0).toFixed(2)
                     });
                 }
@@ -1164,13 +1135,13 @@ export default {
             this.sumTotalQuantity();
         },
 
-        tranferCursor: function (index, prefix = 'takano') { // will transfer cusrsor to next cell when TAB is pressed
+        tranferCursor: function (index, prefix = 'qty') { // will transfer cusrsor to next cell when TAB is pressed
             
-            if (prefix === "takano" && this.allData.length == (index + 1)) {
+            if (prefix === "qty" && this.allData.length == (index + 1)) {
                 return;
             }
             
-            if(prefix === "newtakano" && this.newProductDetails.length == (index + 1)) {
+            if(prefix === "newqty" && this.newProductDetails.length == (index + 1)) {
                 return;
 
             }
@@ -1240,7 +1211,7 @@ export default {
 
         validateCompany: function(){ // validates company
             if(this.selectedCompanyName == ""){
-                toastr.info("Company Name Is Required");
+                toastr.info("Customer is required");
                 return false;
             }
             return true;
@@ -1406,7 +1377,7 @@ export default {
         },
 
         resetFields() { // will resets fields
-            this.challanDate = this.getTodaysDate();
+            this.challanDate = getNowDateTime();
             this.challanNo = '',
             this.companyContactNo = '',
             this.companyGSTNo = '',
@@ -1550,7 +1521,7 @@ export default {
             axios
                 .get("/api/challan/"+challanMstId)
                 .then((response) => {
-                    this.challanToView.challanDate = response.data.challandate;
+                    this.challanToView.challanDate = formatDate(response.data.challandate);
                     this.challanToView.challanNo = response.data.challanno;
                     this.challanToView.company = response.data.customer.customer_company_name;
                     this.challanToView.broker = response.data.broker.broker_name;

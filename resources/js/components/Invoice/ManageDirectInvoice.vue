@@ -44,7 +44,7 @@ NOTES
                                             <input type="date" class="form-control" id="to-date" v-model="filters.toDate" />
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="company-name" class="text-md">Company Name</label>
+                                            <label for="company-name" class="text-md">Customer</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.customers" v-model="filters.customer" placeholder="Select Company">
@@ -142,7 +142,7 @@ NOTES
                                                         invoice.invoice_mst_id
                                                     "
                                                 >
-                                                    <td> {{ invoice.invoice_date }}</td>
+                                                    <td class="text-nowrap">{{ formatDate(invoice.invoice_date) }}</td>
                                                     <td>{{ invoice.challan_no }}</td>
                                                     <td>{{ invoice.customer_company_name }}</td>
                                                     <td>{{ invoice.broker_name }}</td>
@@ -213,7 +213,7 @@ NOTES
                                             <label for="invoice-date" class="text-md mt-1">Invoice Date</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="date" id="invoice-date" class="form-control" v-model="invoiceToEdit.invoiceDate">
+                                            <input type="datetime-local" id="invoice-date" class="form-control" v-model="invoiceToEdit.invoiceDate">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
@@ -261,18 +261,18 @@ NOTES
                                     </div>
                                     <div class="row mt-3">  
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">No Of Units</label>
+                                            <label class="text-md mt-1">Weight / piece (g)</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="number" class="form-control text-right" v-model="invoiceToEdit.noOfUnits">
+                                            <input type="number" step="0.001" class="form-control text-right" v-model="invoiceToEdit.weightGrams" @input="updateAmounts">
                                         </div>
                                     </div>
                                     <div class="row mt-3">  
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Qty</label>
+                                            <label for="" class="text-md mt-1">Qty (pieces)</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="number" class="form-control text-right" v-model="invoiceToEdit.qty">
+                                            <input type="number" class="form-control text-right" v-model="invoiceToEdit.qty" @input="updateAmounts">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
@@ -284,10 +284,10 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Rate</label>
+                                            <label for="" class="text-md mt-1">Rate / gram (Rs.)</label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="number" class="form-control text-right" v-model="invoiceToEdit.rate">
+                                            <input type="number" class="form-control text-right" v-model="invoiceToEdit.rate" @input="updateAmounts">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
@@ -413,15 +413,15 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-1 text-md">
-                                            No Of Units
+                                            Total Weight (g)
                                         </div>
                                         <div class="col-md-3">
-                                            <input type="text" class="form-control" v-model="invoiceToView.noOfUnits" disabled>
+                                            <input type="text" class="form-control text-right" v-model="invoiceToView.totalWeightGrams" disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-1 text-md">
-                                            Total Quantity
+                                            Qty (pieces)
                                         </div>
                                         <div class="col-md-3">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.qty" disabled>
@@ -436,7 +436,7 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-1 text-md">
-                                            Rate
+                                            Rate / gram (Rs.)
                                         </div>
                                         <div class="col-md-3">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.rate" disabled>
@@ -489,6 +489,7 @@ import toastr from "toastr";
 import swal from "sweetalert2";
 import { pdfUrl } from "../../auth";
 import { ModelSelect } from "vue-search-select";
+import { formatDate, toInputDateTime, getNowDateTime } from "../../currency";
 
 export default {
     name: "ManageDirectInvoice",
@@ -528,7 +529,7 @@ export default {
                 broker: "",
                 category: "",
                 quality: "",
-                noOfUnits: "",
+                totalWeightGrams: "",
                 qty: "",
                 unit: "",
                 rate: "",
@@ -559,7 +560,7 @@ export default {
                 qualitiesOptions: [],
                 quality: "",
 
-                noOfUnits: "",
+                weightGrams: "",
                 qty: "",
                 unit: "",
                 rate: "",
@@ -634,6 +635,7 @@ export default {
 
     },
     methods: {
+        formatDate,
         pdfLink(path) {
             return pdfUrl(path);
         },
@@ -759,9 +761,10 @@ export default {
                     let totalAmountOfPage = 0;
 
                     for(let i = 0; i < invoices.length; i++){
-                        let totalAmount = invoices[i].total_qty * invoices[i].rate;
-                        let gstAmount = totalAmount * invoices[i].gst_percentage * 0.01;
-                        let netAmount = totalAmount + gstAmount;
+                        const weight = parseFloat(invoices[i].weight_grams || 0);
+                        const rate = parseFloat(invoices[i].rate || 0);
+                        const sold = parseFloat(invoices[i].sold_amount || 0);
+                        const netAmount = sold > 0 ? sold : (weight * rate * (1 + parseFloat(invoices[i].gst_percentage || 0) * 0.01));
 
                         totalAmountOfPage += netAmount;
                         invoices[i].netAmount = netAmount.toFixed(2);
@@ -827,7 +830,7 @@ export default {
                         toastr.info(response.data.message);
                     }
                     else if(response.data.status == 1){
-                        this.invoiceToView.invoiceDate = this.getStdDate(response.data.data.challan_mst_for_invoice.challan_date);
+                        this.invoiceToView.invoiceDate = formatDate(response.data.data.challan_mst_for_invoice.challan_date);
                         this.invoiceToView.invoiceNo = response.data.data.challan_mst_for_invoice.challan_no;
                         this.invoiceToView.customer = response.data.data.challan_mst_for_invoice.customer_relation.customer_company_name;
                         this.invoiceToView.broker = response.data.data.challan_mst_for_invoice.broker.broker_name;
@@ -835,14 +838,18 @@ export default {
                         this.invoiceToView.customerGSTNo = response.data.data.challan_mst_for_invoice.customer_relation.customer_gst_no;
                         this.invoiceToView.quality = response.data.data.challan_mst_for_invoice.quality.quality_name;
                         this.invoiceToView.category = response.data.data.challan_mst_for_invoice.quality.category.sell_category_name;
-                        this.invoiceToView.noOfUnits = response.data.data.no_of_units;
                         this.invoiceToView.qty = response.data.data.challan_mst_for_invoice.total_qty;
+                        this.invoiceToView.totalWeightGrams = parseFloat(response.data.data.weight_grams || 0).toFixed(3);
                         this.invoiceToView.unit = response.data.data.challan_mst_for_invoice.qty_unit;
                         this.invoiceToView.rate = response.data.data.rate;
                         this.invoiceToView.gstPercentage = response.data.data.gst_percentage;
-                        let totalAmount = this.invoiceToView.qty * this.invoiceToView.rate;
-                        let gstAmount = totalAmount * this.invoiceToView.gstPercentage * 0.01;
-                        let netAmount = totalAmount + gstAmount;
+                        const totalWeight = parseFloat(response.data.data.weight_grams || 0);
+                        const rate = parseFloat(response.data.data.rate || 0);
+                        const gstPct = parseFloat(response.data.data.gst_percentage || 0);
+                        const sold = parseFloat(response.data.data.sold_amount || 0);
+                        let totalAmount = sold > 0 ? sold / (1 + gstPct * 0.01) : totalWeight * rate;
+                        let gstAmount = totalAmount * gstPct * 0.01;
+                        let netAmount = sold > 0 ? sold : totalAmount + gstAmount;
                         this.invoiceToView.totalAmount = totalAmount.toFixed(2);
                         this.invoiceToView.gstAmount = gstAmount.toFixed(2);
                         this.invoiceToView.netAmount = netAmount.toFixed(2);
@@ -867,7 +874,7 @@ export default {
                         toastr.info(response.data.message);
                     }
                     else if(response.data.status == 1){
-                        this.invoiceToEdit.invoiceDate = this.getStdDate(response.data.data.challan_mst_for_invoice.challan_date);
+                        this.invoiceToEdit.invoiceDate = toInputDateTime(response.data.data.challan_mst_for_invoice.challan_date);
                         this.invoiceToEdit.oldInvoiceDate = this.invoiceToEdit.invoiceDate;
                         this.invoiceToEdit.invoiceNo = response.data.data.challan_mst_for_invoice.challan_no;
                         this.invoiceToEdit.oldInvoiceNo = this.invoiceToEdit.invoiceNo;
@@ -886,17 +893,14 @@ export default {
                         this.loadQualitiesOfSelectedCategory();
                         this.invoiceToEdit.quality = response.data.data.challan_mst_for_invoice.quality.sell_quality_id;
 
-                        this.invoiceToEdit.noOfUnits = response.data.data.no_of_units;
                         this.invoiceToEdit.qty = response.data.data.challan_mst_for_invoice.total_qty;
+                        const totalWeight = parseFloat(response.data.data.weight_grams || 0);
+                        const qty = parseFloat(this.invoiceToEdit.qty || 1);
+                        this.invoiceToEdit.weightGrams = qty > 0 ? (totalWeight / qty).toFixed(3) : '';
                         this.invoiceToEdit.unit = response.data.data.challan_mst_for_invoice.qty_unit;
                         this.invoiceToEdit.rate = response.data.data.rate;
                         this.invoiceToEdit.gstPercentage = response.data.data.gst_percentage;
-                        let totalAmount = this.invoiceToEdit.qty * this.invoiceToEdit.rate;
-                        let gstAmount = totalAmount * this.invoiceToEdit.gstPercentage * 0.01;
-                        let netAmount = totalAmount + gstAmount;
-                        this.invoiceToEdit.totalAmount = totalAmount.toFixed(2);
-                        this.invoiceToEdit.gstAmount = gstAmount.toFixed(2);
-                        this.invoiceToEdit.netAmount = netAmount.toFixed(2);
+                        this.updateAmounts();
                         this.invoiceToEdit.invoiceId = response.data.data.invoice_mst_id;
                     }
                     else{
@@ -966,19 +970,6 @@ export default {
             return true;
         },
 
-        isNoOfUnitsValid: function(){
-            if(this.invoiceToEdit.noOfUnits == ""){
-                toastr.info("Please Enter No Of Units");
-                return false;
-            }
-
-            if(this.invoiceToEdit.noOfUnits < 0){
-                toastr.info("No Of Units Is In-Valid");
-                return false;
-            }
-            return true;
-        },
-
         isUnitValid: function(){
             if(typeof this.invoiceToEdit.unit === 'undefined' || this.invoiceToEdit.unit == ""){
                 toastr.info("Please Select Unit");
@@ -1025,7 +1016,7 @@ export default {
         // update Invoice
         updateInvoice: function(){
 
-            if(this.isInvoiceDateValid() && this.isInvoiceNoValid() && this.isCustomerValid() && this.isBrokerValid() && this.isCategoryValid() && this.isNoOfUnitsValid() && this.isQualityValid() && this.isQtyValid() && this.isUnitValid() && this.isRateValid() && this.isGSTPercentageValid()){
+            if(this.isInvoiceDateValid() && this.isInvoiceNoValid() && this.isCustomerValid() && this.isBrokerValid() && this.isCategoryValid() && this.isQualityValid() && this.isQtyValid() && this.isUnitValid() && this.isRateValid() && this.isGSTPercentageValid()){
                 let invoice = {
                     invoiceId: this.invoiceToEdit.invoiceId,
                     invoiceDate: this.invoiceToEdit.invoiceDate,
@@ -1041,7 +1032,6 @@ export default {
 
                     quality: this.invoiceToEdit.quality,
 
-                    noOfUnits: this.invoiceToEdit.noOfUnits,
                     qty: this.invoiceToEdit.qty,
                     unit: this.invoiceToEdit.unit,
                     rate: this.invoiceToEdit.rate,
@@ -1118,7 +1108,7 @@ export default {
             this.invoiceToEdit.category = "";
             this.invoiceToEdit.qualitiesOptions = [],
             this.invoiceToEdit.quality = "";
-            this.invoiceToEdit.noOfUnits = "";
+            this.invoiceToEdit.weightGrams = "";
             this.invoiceToEdit.qty = "";
             this.invoiceToEdit.unit = "";
             this.invoiceToEdit.rate = "";
@@ -1139,7 +1129,7 @@ export default {
             this.invoiceToView.customerGSTNo = "";
             this.invoiceToView.quality = "";
             this.invoiceToView.category = "";
-            this.invoiceToView.noOfUnits = "";
+            this.invoiceToView.totalWeightGrams = "";
             this.invoiceToView.qty = "";
             this.invoiceToView.unit = "";
             this.invoiceToView.rate = "";
@@ -1235,9 +1225,10 @@ export default {
 
 
         updateAmounts: function(){
-            let totalAmount = this.invoiceToEdit.rate * this.invoiceToEdit.qty;
-            let gstAmount = totalAmount * this.invoiceToEdit.gstPercentage * 0.01;
-            let netAmount = totalAmount + gstAmount;
+            const totalWeight = parseFloat(this.invoiceToEdit.weightGrams || 0) * parseFloat(this.invoiceToEdit.qty || 0);
+            const totalAmount = totalWeight * parseFloat(this.invoiceToEdit.rate || 0);
+            const gstAmount = totalAmount * this.invoiceToEdit.gstPercentage * 0.01;
+            const netAmount = totalAmount + gstAmount;
             this.invoiceToEdit.totalAmount = totalAmount.toFixed(2);
             this.invoiceToEdit.gstAmount = gstAmount.toFixed(2);
             this.invoiceToEdit.netAmount = netAmount.toFixed(2);

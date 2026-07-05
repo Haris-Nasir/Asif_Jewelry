@@ -27,16 +27,28 @@ class tbl_vendor extends Model
     }
 
     public function setVendorGstNoAttribute($value){
+        if ($value === null || $value === '') {
+            $this->attributes['vendor_gst_no'] = null;
+            return;
+        }
         $value = preg_replace('/\s+/', ' ', $value);
         $this->attributes['vendor_gst_no'] = strtoupper($value);
     }
 
     public function setVendorGstCodeAttribute($value){
+        if ($value === null || $value === '') {
+            $this->attributes['vendor_gst_code'] = null;
+            return;
+        }
         $value = preg_replace('/\s+/', ' ', $value);
         $this->attributes['vendor_gst_code'] = strtoupper($value);
     }
 
     public function setVendorAddressAttribute($value){
+        if ($value === null || $value === '') {
+            $this->attributes['vendor_address'] = null;
+            return;
+        }
         $value = preg_replace('/\s+/', ' ', $value);
         $this->attributes['vendor_address'] = ucwords(strtolower($value));
     }

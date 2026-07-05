@@ -33,38 +33,36 @@ NOTES
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="challanDate" class="text-md col-form-label">Date <span
+                                            <label for="challanDate" class="text-md col-form-label">Date &amp; Time <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
 
                                         <!-- here I have called a resetChallanNo function which will be called when challan Date changes -->
                                         <div class="col-md-3">
-                                            <input type="date" id="challanDate" v-model="challanDate"
-                                                class="form-control text-md" @change="resetChallanNo">
+                                            <input type="datetime-local" id="challanDate" v-model="challanDate"
+                                                class="form-control text-md" @change="loadNextChallanNo">
                                         </div>
 
+                                        <!-- next sales bill number is assigned automatically per financial year -->
                                         <div class="col-md-2 ml-auto">
-                                            <label for="challanNo" class="text-md col-form-label">Challan Number <span
-                                                    class="required-mark" style="color: red;">*</span></label>
+                                            <label for="challanNo" class="text-md col-form-label">Sales Bill No</label>
                                         </div>
 
-                                        <!-- here I have called an getFinancialYearOfChallanDate function which will call when we move outside from the challan no field -->
                                         <div class="col-md-3 mr-5">
-                                            <input type="number" class="text-md form-control" v-model="challanNo"
-                                                @blur="getFinancialYearOfChallanDate">
+                                            <input type="text" class="text-md form-control" v-model="challanNo" disabled>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="companyName" class="text-md col-form-label">Company Name <span
+                                            <label for="companyName" class="text-md col-form-label">Customer <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
 
                                         <!-- here I have called an getFromSelectedCompany function which will be called when i move outside from the company Name field -->
                                         <div class="col-md-3">
                                             <model-select :options="companyNames" v-model="selectedCompanyName"
-                                                @blur="getFromSelectedCompany" placeholder="Select a Company Name">
+                                                @blur="getFromSelectedCompany" placeholder="Select Customer">
                                             </model-select>
                                         </div>
 
@@ -140,8 +138,7 @@ NOTES
                                             <table class="table table-bordered">
                                                 <thead class="table-secondary text-md text-dark">
                                                     <th>Sr. No.</th>
-                                                    <th>No</th>
-                                                    <th>Qty</th>
+                                                    <th>Quantity</th>
                                                     <th></th>
                                                 </thead>
                                                 <tbody>
@@ -149,10 +146,6 @@ NOTES
                                                     <tr v-for="(data, index) in allData" :key="index">
                                                         <td v-if="index % 2 ? 0 : 1">
                                                             {{index + 1}}
-                                                        </td>
-                                                        <td v-if="index % 2 ? 0 : 1">
-                                                            <input type="number" class="form-control text-right"
-                                                                v-model="data.no" :ref="'takano'+index">
                                                         </td>
                                                         <td v-if="index % 2 ? 0 : 1">
                                                             <input type="number" class="form-control text-right"
@@ -174,8 +167,7 @@ NOTES
                                             <table class="table table-bordered">
                                                 <thead class="table-secondary text-md text-dark">
                                                     <th>Sr. No.</th>
-                                                    <th>No</th>
-                                                    <th>Qty</th>
+                                                    <th>Quantity</th>
                                                     <th></th>
                                                 </thead>
                                                 <tbody>
@@ -183,10 +175,6 @@ NOTES
                                                     <tr v-for="(data, index) in allData" :key="index">
                                                         <td v-if="index % 2 ? 1 : 0">
                                                             {{index + 1}}
-                                                        </td>
-                                                        <td v-if="index % 2 ? 1 : 0">
-                                                            <input type="number" class="form-control text-right"
-                                                                v-model="data.no" :ref="'takano'+index">
                                                         </td>
                                                         <td v-if="index % 2 ? 1 : 0">
                                                             <input type="number" class="form-control text-right"
@@ -225,6 +213,12 @@ NOTES
                                             <input type="number" class="text-md form-control mt-3 text-right"
                                                 v-model="totalQty" disabled>
                                         </div>
+                                        <div class="col-md-12" v-if="qualityStock">
+                                            <p class="text-muted small mt-2 mb-0">
+                                                In stock for <strong>{{ qualityStock.quality_name }}</strong>:
+                                                {{ qualityStock.weight_grams }}g, {{ qualityStock.pieces }} pcs
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -249,6 +243,7 @@ NOTES
     import toastr from 'toastr';
     import swal from 'sweetalert2';
     import { ModelSelect } from "vue-search-select";
+    import { getNowDateTime, toDateOnly } from "../../currency";
 
     //toastr options contains properties of the alerts so on firing it will display as per the below options
     toastr.options = {
@@ -284,6 +279,7 @@ NOTES
                 allData: [],
                 totalQty: (0).toFixed(2),
                 weightGrams: '',
+                qualityStock: null,
                 status: null,
                 message: null,
                 errors: null
@@ -294,10 +290,17 @@ NOTES
         like to display todays date, populate options for Company Name, Broker Name and Quality Categories on refreshing 
         the page.*/
         mounted() {
-            this.challanDate = this.getTodaysDate();
+            this.challanDate = getNowDateTime();
             this.loadCompanyName();
             this.loadBrokerName();
             this.loadQualityCategories();
+            this.loadNextChallanNo();
+        },
+
+        watch: {
+            selectedProductQuality() {
+                this.loadQualityStock();
+            },
         },
 
         methods: {
@@ -322,9 +325,7 @@ NOTES
             and also have given a limit that no one could enter a row more than 48.*/
             addRow: function () {
                 if (this.allData.length < 48) {
-                    //so when the if condition will return true then two data properties will be added no and qty
                     this.allData.push({
-                        no: "",
                         qty: (0).toFixed(2)
                     })
 
@@ -351,7 +352,7 @@ NOTES
                 if (this.allData.length == (index + 1)) {
                     return;
                 }
-                this.$refs['takano' + (index + 1)][0].focus();
+                this.$refs['qty' + (index + 1)][0].focus();
             },
 
             /*this function will call an api customerlist which will get all the customer informaiation like id, name and
@@ -464,15 +465,39 @@ NOTES
                 }
             },
 
-            //this function will reset the challan no  it all already exists
-            resetChallanNo() {
-                this.challanNo = '';
+            loadQualityStock: function () {
+                if (!this.selectedProductQuality) {
+                    this.qualityStock = null;
+                    return;
+                }
+
+                axios.get('/api/stock/quality/' + this.selectedProductQuality)
+                    .then((res) => {
+                        this.qualityStock = res.data;
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        this.qualityStock = null;
+                    });
+            },
+
+            loadNextChallanNo() {
+                if (!this.challanDate) {
+                    return;
+                }
+
+                axios.get('../api/challan/next-no/' + toDateOnly(this.challanDate)).then(response => {
+                    this.challanNo = response.data.nextChallanNo;
+                }).catch(err => {
+                    console.log(err);
+                    toastr["error"]("Unable to load next sales bill number.");
+                });
             },
             
             /*this function will call an api get financial api by taking the challan date and will get a response of the
             financial year of entered challan date*/
             getFinancialYearOfChallanDate() {
-                axios.get('../api/getfinancialyear/' + this.challanDate).then(response => {
+                axios.get('../api/getfinancialyear/' + toDateOnly(this.challanDate)).then(response => {
                     this.verifyChallanNo(response.data.fromDate, response.data.toDate);
                 }).catch(err => {
                     console.log(err);
@@ -510,41 +535,24 @@ NOTES
                 addData["totalQty"] = this.totalQty;
                 addData["weightGrams"] = this.weightGrams;
                 addData["brokerId"] = this.selectedBrokerName;
-                addData["allData"] = this.allData;//this contains an array of table value of no and quantity values
+                addData["allData"] = this.allData.map((row, index) => ({
+                    no: index + 1,
+                    qty: row.qty,
+                }));
 
-                axios.get('../api/getfinancialyear/' + this.challanDate).then(response => {
+                axios.get('../api/getfinancialyear/' + toDateOnly(this.challanDate)).then(response => {
                     addData["fromDate"] = response.data.fromDate;
                     addData["toDate"] = response.data.toDate;
                     //here it will check if any of the field is empty or not
-                    if (this.challanNo == '' || this.challanDate == '' || this.selectedCompanyName == '' || this.selectedProductQuality == '' || this.unit == '' || this.totalQty === '' || this.weightGrams === '' || parseFloat(this.weightGrams) <= 0 || this.selectedBrokerName == '') {
+                    if (this.challanDate == '' || this.selectedCompanyName == '' || this.selectedProductQuality == '' || this.unit == '' || this.totalQty === '' || this.weightGrams === '' || parseFloat(this.weightGrams) <= 0 || this.selectedBrokerName == '') {
                         toastr["error"]('All Fields are Required (including weight in grams)');
                     } else if (this.allData.length == 0) {//here it will check whether we have entered 1 product or not
                         toastr["error"]("Insert Product.");
                     } else {
-                        //Here it will trigger an alert if any of the quantity or challan field is empty
                         for (let i = 0; i < this.allData.length; i++) {
-                            if (this.allData[i].no == '') {
-                                toastr["error"]((i + 1) + " number field is empty.");
+                            if (this.allData[i].qty === '' || parseFloat(this.allData[i].qty) <= 0) {
+                                toastr["error"]("Row " + (i + 1) + " quantity is empty or invalid.");
                                 return;
-                            }
-                        }
-
-                        if (this.selectedProductCategory == 1 || this.selectedProductCategory == 2) {
-                            var productNo = [];
-                            for (let i = 0; i < this.allData.length; i++) {
-                                productNo.push(this.allData[i].no);
-                            }
-
-                            var productNoSet = new Set(productNo);
-                            var setArray = Array.from(productNoSet);
-                            //it will trigger an alert if any of the product no and quantoty field contains a same value specifically for grey and beam quality
-                            if (productNoSet.size != productNo.length) {
-                                for (let i = 0; i < this.allData.length; i++) {
-                                    if (productNo[i] != setArray[i]) {
-                                        toastr["error"]((i + 1) + " number field contains duplicate value.");
-                                        return;
-                                    }
-                                }
                             }
                         }
 
@@ -621,8 +629,7 @@ NOTES
 
             //this function will reset all fields of the form
             resetFields() {
-                this.challanDate = this.getTodaysDate();
-                this.challanNo = '',
+                this.challanDate = getNowDateTime();
                 this.companyContactNo = '',
                 this.companyGSTNo = '',
                 this.selectedCompanyName = '',
@@ -633,6 +640,8 @@ NOTES
                 this.allData = [],
                 this.totalQty = (0).toFixed(2)
                 this.weightGrams = ''
+                this.qualityStock = null
+                this.loadNextChallanNo();
             },
 
             //this function is used when we click an input field of the quantity in the table and select all data of that field
