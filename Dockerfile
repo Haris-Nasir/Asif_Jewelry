@@ -11,7 +11,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 RUN npm install && npm run production
 
