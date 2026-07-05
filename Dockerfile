@@ -52,8 +52,6 @@ RUN npm ci
 
 COPY webpack.mix.js ./
 COPY resources ./resources
-COPY public ./public
-
 RUN npm run production
 
 # --- Production runtime ---
