@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Asif Jewelers">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff3b0"/>
+      <stop offset="35%" stop-color="#f0d875"/>
+      <stop offset="70%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#8b6914"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="36" fill="#2a2520"/>
+  <circle cx="90" cy="90" r="72" fill="url(#gold)" stroke="#b8860b" stroke-width="4"/>
+  <path d="M90 42 L122 78 L108 132 H72 L58 78 Z" fill="#fff8dc" stroke="#a67c00" stroke-width="3"/>
+  <path d="M90 42 L122 78 L90 98 L58 78 Z" fill="#f4e4a6"/>
+  <path d="M90 98 L122 78 L108 132 H72 L58 78 Z" fill="#c9a227"/>
+</svg>
