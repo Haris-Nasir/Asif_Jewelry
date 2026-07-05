@@ -1,0 +1,24 @@
+# Railway / Nixpacks — Laravel on PHP 8.4
+# PHP version is read from composer.json ("php": "^8.4") and reinforced below.
+
+[variables]
+NIXPACKS_PHP_ROOT_DIR = "/app/public"
+
+[phases.setup]
+nixPkgs = ["php84", "php84Packages.composer", "nodejs_18", "nginx"]
+
+[phases.install]
+dependsOn = ["setup"]
+cmds = [
+    "composer install --no-dev --optimize-autoloader --no-interaction"
+]
+
+[phases.build]
+dependsOn = ["install"]
+cmds = [
+    "npm ci",
+    "npm run production",
+    "php artisan config:cache",
+    "php artisan route:cache",
+    "php artisan view:cache"
+]
