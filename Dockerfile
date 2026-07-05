@@ -1,6 +1,7 @@
-# Laravel 8 on PHP 8.4 for Railway (and other Docker hosts)
+# syntax=docker/dockerfile:1
+# Laravel 8 — Railway production image (PHP 8.4+, Docker-only; no Railpack/Nixpacks)
 
-FROM php:8.4-cli-bookworm AS php-base
+FROM php:8.4.3-cli-bookworm AS php-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
@@ -9,50 +10,76 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring xml zip gd \
+    && docker-php-ext-install pdo_mysql mbstring xml zip gd opcache \
     && rm -rf /var/lib/apt/lists/*
+
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    COMPOSER_MEMORY_LIMIT=-1
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# --- PHP dependencies (must run on PHP 8.4+) ---
 FROM php-base AS vendor
 
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+RUN php -v \
+    && composer --version \
+    && composer install \
+        --no-dev \
+        --no-interaction \
+        --prefer-dist \
+        --optimize-autoloader \
+        --no-scripts \
+    && composer check-platform-reqs
 
 COPY . .
+
 RUN composer dump-autoload --optimize --no-interaction \
     && php artisan package:discover --ansi
 
+# --- Frontend assets (Laravel Mix) ---
 FROM node:20-bookworm AS frontend
 
 WORKDIR /app
 
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . .
-COPY --from=vendor /app/vendor ./vendor
+COPY webpack.mix.js ./
+COPY resources ./resources
+COPY public ./public
+
 RUN npm run production
 
-FROM php:8.4-cli-bookworm AS runtime
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libzip4 \
-    libpng16-16 \
-    libonig5 \
-    libxml2 \
-    && docker-php-ext-install pdo_mysql mbstring xml zip gd \
-    && rm -rf /var/lib/apt/lists/*
+# --- Production runtime ---
+FROM php-base AS runtime
 
 WORKDIR /app
 
 COPY --from=vendor /app /app
-COPY --from=frontend /app/public /app/public
+COPY --from=frontend /app/public/js /app/public/js
+COPY --from=frontend /app/public/css /app/public/css
+COPY --from=frontend /app/public/mix-manifest.json /app/public/mix-manifest.json
 
-ENV APP_ENV=production
+RUN mkdir -p \
+        storage/framework/cache \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+COPY docker/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+ENV APP_ENV=production \
+    APP_DEBUG=false
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
+CMD ["/usr/local/bin/start.sh"]
