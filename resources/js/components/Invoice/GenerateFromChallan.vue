@@ -19,12 +19,17 @@
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="invoiceNo" class="text-md col-form-label">Invoice No. <span
+                                            <label for="salesBillNo" class="text-md col-form-label">Sales Bill No. <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
-                                        <div class="col-md-2">
-                                            <input type="number" class="text-md text-right form-control"
-                                                v-model="invoiceNo" @blur="getFromInvoiceNo">
+                                        <div class="col-md-4">
+                                            <model-select
+                                                :options="availableSalesBills"
+                                                v-model="salesBillNo"
+                                                @input="onSalesBillSelected"
+                                                placeholder="Select Sales Bill No...">
+                                            </model-select>
+                                            <small class="text-muted">Sales bills not yet invoiced.</small>
                                         </div>
                                     </div>
 
@@ -35,7 +40,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <model-select :options="financialYear" v-model="selectedFinancialYear"
-                                                @blur="getFromNumberAndFinancialYear"
+                                                @input="loadSalesBillData"
                                                 placeholder="Select a Financial Year">
                                             </model-select>
                                         </div>
@@ -81,8 +86,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="gstNo" class="text-md col-form-label">GST Number
-                                                <span class="required-mark" style="color: red;">*</span></label>
+                                            <label for="gstNo" class="text-md col-form-label">GST Number</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control" v-model="gstNo"
@@ -90,8 +94,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="code" class="text-md col-form-label">Code
-                                                <span class="required-mark" style="color: red;">*</span></label>
+                                            <label for="code" class="text-md col-form-label">Code</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control" v-model="code"
@@ -104,17 +107,9 @@
                                             <label for="address" class="text-md col-form-label">Address
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-10">
                                             <textarea class="text-md form-control" v-model="address"
                                                 disabled></textarea>
-                                        </div>
-
-                                        <div class="col-md-2">
-                                            <label for="state" class="text-md col-form-label">State
-                                                <span class="required-mark" style="color: red;">*</span></label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="text-md form-control" v-model="state" disabled>
                                         </div>
                                     </div>
 
@@ -138,17 +133,6 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="totalQuantity" class="text-md col-form-label">Total Quantity
-                                                <span class="required-mark" style="color: red;">*</span></label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="text-md text-right form-control"
-                                                v-model="totalQuantity" @change="calcAmount" disabled>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <div class="col-md-2">
                                             <label for="weightGrams" class="text-md col-form-label">Weight (g)
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
@@ -158,13 +142,27 @@
                                         </div>
                                     </div>
 
+                                    <div class="form-group row" v-if="pendingKarigarJobs.length">
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">Karigar Job</label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <model-select :options="karigarJobOptions" v-model="karigarJobId"
+                                                placeholder="Link returned karigar job (optional)">
+                                            </model-select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">If this sale is from karigar work, select the job — mazduri is deducted from profit</small>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group row">
                                         <div class="col-md-2">
                                             <label for="invoiceDate" class="text-md col-form-label">Invoice Date <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="date" class="text-md form-control" v-model="invoiceDate">
+                                            <input type="datetime-local" class="text-md form-control" v-model="invoiceDate">
                                         </div>
 
                                         <div class="col-md-2">
@@ -178,32 +176,33 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="rate" class="text-md col-form-label">Rate <span
-                                                    class="required-mark" style="color: red;">*</span></label>
+                                            <label for="rate" class="text-md col-form-label">Rate / gram (Rs.)
+                                                <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="number" class="text-md text-right form-control" v-model="rate"
-                                                @change="calcAmount">
+                                            <input type="number" step="0.01" class="text-md text-right form-control"
+                                                v-model="rate" placeholder="Rate per gram..."
+                                                @change="recalculateTotals">
+                                            <small class="text-muted">Amount = weight (g) × rate/g</small>
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="amount" class="text-md col-form-label">Amount <span
-                                                    class="required-mark" style="color: red;">*</span></label>
+                                            <label for="amount" class="text-md col-form-label">Base Amount (Rs.)
+                                                <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="text-md text-right form-control"
-                                                v-model="amount" disabled @change="calcGstAmount">
+                                                v-model="amount" disabled>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="gstPercentage" class="text-md col-form-label">GST <span
-                                                    class="required-mark" style="color: red;">*</span></label>
+                                            <label for="gstPercentage" class="text-md col-form-label">GST</label>
                                         </div>
                                         <div class="col-md-2">
                                             <select class="form-select form-control" v-model="gstPercentage"
-                                                @change="calcGstAmount">
+                                                @change="recalculateTotals">
                                                 <option value="0" selected>0%</option>
                                                 <option value="5">5%</option>
                                                 <option value="12">12%</option>
@@ -213,12 +212,68 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="gstAmount" class="text-md col-form-label">GST Amount <span
-                                                    class="required-mark" style="color: red;">*</span></label>
+                                            <label for="gstAmount" class="text-md col-form-label">GST Amount</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="text-md text-right form-control"
                                                 v-model="gstAmount" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">Refinery Cost (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" min="0" class="text-md text-right form-control"
+                                                v-model="refineryCost">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <small class="text-muted">Applied to gold and silver sales</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" v-if="metalType === 'gold'">
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">Polish / g (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" min="0" class="text-md text-right form-control"
+                                                v-model="polishRatePerGram">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">Polish Total</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="text-md text-right form-control" :value="polishCostTotal" disabled>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <small class="text-muted">= polish/g × weight (gold only)</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" v-if="showMazduriField">
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">Mazduri (Rs.)</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" step="0.01" min="0" class="text-md text-right form-control"
+                                                v-model="mazduriCost" :disabled="!!karigarJobId">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <small class="text-muted">{{ mazduriHelpText }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">Processing Cost</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="text-md text-right form-control" :value="totalProcessingCost" disabled>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <small class="text-muted">Deducted from profit (refinery + polish or mazduri)</small>
                                         </div>
                                     </div>
 
@@ -276,6 +331,7 @@
     import toastr from 'toastr';
     import swal from 'sweetalert2';
     import { ModelSelect } from "vue-search-select";
+    import { getNowDateTime, formatDate } from "../../currency";
 
     //toastr options contains properties of the alerts so on firing it will display as per the below options
     toastr.options = {
@@ -292,28 +348,36 @@
             ModelSelect,
         },
         mounted() {
-            this.invoiceDate = this.getTodaysDate();
+            this.invoiceDate = getNowDateTime();
             this.dueDate = this.getDueDate();
             this.getBank();
+            this.loadAvailableSalesBills();
         },
         watch: {
-            amount: function () {
-                this.calcGrandTotal();
-            },
-
-            gstAmount: function () {
-                this.calcGrandTotal();
-            },
-
-            invoiceNo: function () {
+            salesBillNo: function () {
                 this.resetDisplayDataFields();
                 this.financialYear = [];
                 this.selectedFinancialYear = '';
-            }
+                this.challanMstId = '';
+            },
+            karigarJobId(val) {
+                if (!val) {
+                    if (this.metalType !== 'silver') {
+                        this.mazduriCost = '';
+                    }
+                    return;
+                }
+                const job = this.pendingKarigarJobs.find(j => String(j.karigar_job_id) === String(val));
+                if (job) {
+                    this.mazduriCost = job.mazduri_cost;
+                }
+            },
         },
         data() {
             return {
-                invoiceNo: '',
+                salesBillNo: '',
+                availableSalesBills: [],
+                challanMstId: '',
                 financialYear: [],
                 selectedFinancialYear: '',
 
@@ -326,11 +390,9 @@
                 code: '',
 
                 address: '',
-                state: '',
 
                 productQuality: '',
                 totalPieces: '',
-                totalQuantity: '',
                 weightGrams: '',
 
                 invoiceDate: '',
@@ -340,15 +402,53 @@
                 amount: '',
 
                 gstPercentage: 0,
-                gstAmount: '',
+                gstAmount: '0.00',
 
                 grandTotal: '',
 
                 bank: [],
                 selectedBank: '',
 
-                branch: ''
+                branch: '',
+
+                metalType: 'gold',
+                refineryCost: '',
+                polishRatePerGram: '',
+                mazduriCost: '',
+                sellQualityId: '',
+                karigarJobId: '',
+                pendingKarigarJobs: [],
             }
+        },
+        computed: {
+            polishCostTotal() {
+                if (this.metalType !== 'gold') {
+                    return '0.00';
+                }
+                const total = parseFloat(this.polishRatePerGram || 0) * parseFloat(this.weightGrams || 0);
+                return Number.isNaN(total) ? '0.00' : total.toFixed(2);
+            },
+            totalProcessingCost() {
+                const refinery = parseFloat(this.refineryCost || 0) || 0;
+                const polish = parseFloat(this.polishCostTotal || 0) || 0;
+                const mazduri = this.showMazduriField ? (parseFloat(this.mazduriCost || 0) || 0) : 0;
+                return (refinery + polish + mazduri).toFixed(2);
+            },
+            showMazduriField() {
+                return this.metalType === 'silver' || !!this.karigarJobId;
+            },
+            mazduriHelpText() {
+                if (this.karigarJobId) {
+                    return 'Karigar labour — deducted from profit when this item is sold';
+                }
+                return 'Overall labour charge for this silver sale';
+            },
+            karigarJobOptions() {
+                return this.pendingKarigarJobs.map(job => ({
+                    value: job.karigar_job_id,
+                    text: job.karigar_name + ' — ' + job.returned_weight_grams + 'g (Rs. ' + job.mazduri_cost + ' mazduri)',
+                }));
+            },
         },
         methods: {
             //this function will take todays date and format it in the form "yyyy-mm-dd"
@@ -384,30 +484,58 @@
                 return (year + "-" + month + "-" + day);
             },
 
-            getFromInvoiceNo() {
-                if (this.invoiceNo == '') {
+            loadAvailableSalesBills() {
+                axios.get('../api/invoice/available-challans').then(response => {
+                    this.availableSalesBills = (response.data || []).map(challan => ({
+                        value: challan.challan_no,
+                        text: challan.challan_no + ' - ' + challan.customer_company_name + ' (' + formatDate(challan.challan_date) + ')',
+                    }));
+                }).catch(err => {
+                    console.log(err);
+                    toastr["error"]('Unable to load sales bills.');
+                });
+            },
+
+            onSalesBillSelected() {
+                this.loadFinancialYears();
+            },
+
+            loadFinancialYears() {
+                if (this.salesBillNo == '') {
                     this.financialYear = [];
                     this.selectedFinancialYear = '';
                     this.resetDisplayDataFields();
                     return;
                 }
 
-                axios.get('../api/invoice/getfinancialyear/' + this.invoiceNo).then(response => {
-                    let i = 0;
+                axios.get('../api/invoice/getfinancialyear/' + this.salesBillNo).then(response => {
+                    if (!response.data || response.data.length === 0) {
+                        this.financialYear = [];
+                        this.selectedFinancialYear = '';
+                        this.resetDisplayDataFields();
+                        toastr["warning"]('No sales bill found with this number. Create a sales bill first, or check the number in Manage Sales Bill.');
+                        return;
+                    }
+
                     this.financialYear = response.data.map(year => {
                         return {
                             value: year.replace("-", " - "),
                             text: year,
                         }
-                    })
+                    });
+
+                    if (this.financialYear.length === 1) {
+                        this.selectedFinancialYear = this.financialYear[0].value;
+                        this.loadSalesBillData();
+                    }
                 }).catch(err => {
                     console.log(err);
                     toastr["error"]('Something went Wrong.');
                 })
             },
 
-            getFromNumberAndFinancialYear() {
-                if (this.invoiceNo == '' || this.selectedFinancialYear == '' || this.selectedFinancialYear == undefined) {
+            loadSalesBillData() {
+                if (this.salesBillNo == '' || this.selectedFinancialYear == '' || this.selectedFinancialYear == undefined) {
                     this.resetDisplayDataFields();
                     return;
                 }
@@ -419,30 +547,26 @@
                 let fromDate = fromDateYear + '-04-01';
                 let toDate = toDateYear + '-03-31';
 
-                axios.get('../api/invoice/challandata/' + this.invoiceNo + '/' + fromDate + '/' + toDate).then(response => {
+                axios.get('../api/invoice/challandata/' + this.salesBillNo + '/' + fromDate + '/' + toDate).then(response => {
                     if (response.data.status == -1) {
                         this.resetDisplayDataFields();
                         var errormsg = response.data.errors;
                         toastr["error"](errormsg);
                     } else {
-                        this.totalPieces = response.data[0];
+                        this.challanMstId = response.data[1]["challan_mst_id"];
                         this.challanNo = response.data[1]["challan_no"];
-                        this.challanDate = response.data[1]["challan_date"];
+                        this.challanDate = formatDate(response.data[1]["challan_date"]);
                         this.brokerName = response.data[1]["broker_name"];
                         this.customerName = response.data[1]["customer_company_name"];
-                        this.gstNo = response.data[1]["customer_gst_no"];
-                        this.code = response.data[1]["customer_gst_code"];
+                        this.gstNo = response.data[1]["customer_gst_no"] || '';
+                        this.code = response.data[1]["customer_gst_code"] || '';
                         this.address = response.data[1]["customer_address"];
                         this.productQuality = response.data[1]["quality_name"];
-                        this.totalQuantity = response.data[1]["total_qty"];
+                        this.totalPieces = response.data[1]["total_qty"];
                         this.weightGrams = response.data[1]["weight_grams"] || '';
-
-                        axios.get('../api/getstate/' + this.code).then(response => {
-                            this.state = response.data.state_name;
-                        }).catch(err => {
-                            console.log(err);
-                            toastr["error"]('Something went Wrong!');
-                        })
+                        this.metalType = response.data[1]["metal_type"] || 'gold';
+                        this.sellQualityId = response.data[1]["sell_quality_id"] || '';
+                        this.loadPendingKarigarJobs();
                     }
 
                 }).catch(err => {
@@ -452,6 +576,7 @@
             },
 
             resetDisplayDataFields() {
+                this.challanMstId = '';
                 this.challanNo = '';
                 this.challanDate = '';
                 this.brokerName = '';
@@ -461,44 +586,58 @@
                 this.code = '';
 
                 this.address = '';
-                this.state = '';
 
                 this.productQuality = '';
                 this.totalPieces = '';
-                this.totalQuantity = '';
                 this.weightGrams = '';
 
                 this.rate = '';
                 this.amount = '';
 
                 this.gstPercentage = 0;
-                this.gstAmount = '';
+                this.gstAmount = '0.00';
 
                 this.grandTotal = '';
+
+                this.metalType = 'gold';
+                this.refineryCost = '';
+                this.polishRatePerGram = '';
+                this.mazduriCost = '';
+                this.sellQualityId = '';
+                this.karigarJobId = '';
+                this.pendingKarigarJobs = [];
             },
 
-            calcAmount() {
-                if (this.rate == '' || this.totalQuantity == '') {
+            loadPendingKarigarJobs() {
+                this.karigarJobId = '';
+                this.pendingKarigarJobs = [];
+                if (!this.sellQualityId) {
                     return;
                 }
-                this.amount = parseFloat(this.rate) * parseFloat(this.totalQuantity);
-                this.amount = this.amount.toFixed(2);
+                axios.get('../api/karigar/jobs/pending-for-sale?sell_quality_id=' + this.sellQualityId)
+                    .then(res => {
+                        this.pendingKarigarJobs = res.data || [];
+                    })
+                    .catch(() => {
+                        this.pendingKarigarJobs = [];
+                    });
             },
 
-            calcGstAmount() {
-                if (this.amount == '') {
+            recalculateTotals() {
+                if (this.rate === '' || this.weightGrams === '') {
+                    this.amount = '';
+                    this.gstAmount = '0.00';
+                    this.grandTotal = '';
                     return;
                 }
-                this.gstAmount = parseFloat(this.amount) * parseFloat(this.gstPercentage) * 0.01;
-                this.gstAmount = this.gstAmount.toFixed(2);
-            },
 
-            calcGrandTotal() {
-                if (this.amount == '' || this.gstAmount == '') {
-                    return;
-                }
-                this.grandTotal = parseFloat(this.amount) + parseFloat(this.gstAmount);
-                this.grandTotal = this.grandTotal.toFixed(2);
+                const base = parseFloat(this.rate) * parseFloat(this.weightGrams);
+                const gstPct = parseFloat(this.gstPercentage) || 0;
+                const gst = base * gstPct * 0.01;
+
+                this.amount = base.toFixed(2);
+                this.gstAmount = gst.toFixed(2);
+                this.grandTotal = (base + gst).toFixed(2);
             },
 
             getBank() {
@@ -530,7 +669,7 @@
 
             addInvoice() {
                 var addData = {};
-                addData["invoiceId"] = this.invoiceNo;
+                addData["invoiceId"] = this.challanMstId;
                 addData["invoiceDate"] = this.invoiceDate;
                 addData["rate"] = this.rate;
                 addData["gstPercentage"] = this.gstPercentage;
@@ -546,14 +685,21 @@
 
                 addData["fromDate"] = fromDate;
                 addData["toDate"] = toDate;
+                addData["refineryCost"] = this.refineryCost || 0;
+                addData["polishRatePerGram"] = this.polishRatePerGram || 0;
+                addData["mazduriCost"] = this.mazduriCost || 0;
+                if (this.karigarJobId) {
+                    addData["karigarJobId"] = this.karigarJobId;
+                }
 
-                if (this.invoiceNo == '' || this.invoiceDate == '' || this.dueDate == '' || this.rate == '' || this.selectedBank == '' || this.selectedBank == undefined || this.selectedFinancialYear == '' || this.selectedFinancialYear == undefined) {
+                if (this.salesBillNo == '' || this.challanMstId == '' || this.invoiceDate == '' || this.dueDate == '' || this.rate == '' || this.selectedBank == '' || this.selectedBank == undefined || this.selectedFinancialYear == '' || this.selectedFinancialYear == undefined) {
                     toastr["error"]("All Fields are Required!");
                 } else {
                     axios.get('../api/verifyinvoicedate/' + this.invoiceDate + '/' + fromDate + '/' + toDate).then(response => {
                         if (response.data.status == 1) {
                             axios.post('../api/invoice/insert', addData).then(response => {
                                 if (response.data.status == -1) {
+                                    toastr.error(response.data.message || 'Unable to create invoice.');
                                     var errormsg = response.data.errors;
 
                                     try {
@@ -592,7 +738,7 @@
                                     const profit = response.data.profit != null ? parseFloat(response.data.profit).toFixed(2) : '0.00';
                                     swal.fire({
                                         title: 'Success',
-                                        html: "<h5 style='color:#9C9794'>Invoice created successfully.</h5><p>Profit recorded: ₹" + profit + "</p>",
+                                        html: "<h5 style='color:#9C9794'>Invoice created successfully.</h5><p>Profit recorded: Rs. " + profit + "</p>",
                                         icon: 'success'
                                     }).then((result) => {
                                         this.resetFields();
@@ -601,7 +747,7 @@
 
                             }).catch(err => {
                                 console.log(err);
-                                toastr["error"]("Something went Wrong!");
+                                toastr.error(err.response?.data?.message || 'Unable to create invoice. Check item type stock and weight.');
                             })
                         }else if(response.data.status == 0){
                             toastr["error"](response.data.message);
@@ -611,14 +757,16 @@
             },
 
             resetFields() {
-                this.invoiceNo = '';
+                this.salesBillNo = '';
+                this.challanMstId = '';
                 this.financialYear = [];
                 this.selectedFinancialYear = '';
                 this.resetDisplayDataFields();
-                this.invoiceDate = this.getTodaysDate();
+                this.invoiceDate = getNowDateTime();
                 this.dueDate = this.getDueDate();
                 this.selectedBank = '';
                 this.branch = '';
+                this.loadAvailableSalesBills();
             }
         }
     };

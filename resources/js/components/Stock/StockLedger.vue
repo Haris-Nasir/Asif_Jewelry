@@ -57,6 +57,27 @@
                                         </div>
                                     </div>
 
+                                    <h5 class="mt-2">Stock by Item Type</h5>
+                                    <table class="table table-bordered table-sm mb-3">
+                                        <thead>
+                                            <tr>
+                                                <th>Item Type</th>
+                                                <th class="text-right">Weight (g)</th>
+                                                <th class="text-right">Pieces</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="row in byQuality" :key="row.sell_quality_id">
+                                                <td>{{ row.quality_name }}</td>
+                                                <td class="text-right">{{ row.weight_grams }}</td>
+                                                <td class="text-right">{{ row.pieces }}</td>
+                                            </tr>
+                                            <tr v-if="!byQuality.length">
+                                                <td colspan="3" class="text-center text-muted">No item stock yet.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
                                     <table class="table table-bordered table-striped table-sm">
                                         <thead class="text-md">
                                             <tr>
@@ -111,6 +132,7 @@ export default {
         return {
             ledger: { data: [] },
             balances: { gold: '0.000', silver: '0.000' },
+            byQuality: [],
             filters: {
                 metal_type: '',
                 transaction_type: '',
@@ -127,6 +149,7 @@ export default {
             axios.get('/api/stock/balances').then((res) => {
                 this.balances.gold = parseFloat(res.data.gold?.total_weight_grams || 0).toFixed(3);
                 this.balances.silver = parseFloat(res.data.silver?.total_weight_grams || 0).toFixed(3);
+                this.byQuality = (res.data.by_quality || []).filter((row) => row.weight_grams > 0 || row.pieces > 0);
             });
         },
         loadLedger(page = 1) {

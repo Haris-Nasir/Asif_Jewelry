@@ -46,7 +46,7 @@ NOTES
                       <input type="date" class="form-control" id="to-date" v-model="toDate" />
                     </div>
                     <div class="col-md-1">
-                      <label for="company-name" class="text-md">Company Name</label>
+                      <label for="company-name" class="text-md">Supplier</label>
                     </div>
                     <div class="col-md-3">
                       <model-select :options="companiesForFilter" v-model="selectedCompanyForFilter"
@@ -139,7 +139,7 @@ NOTES
                         <tr v-for="inward in inwards.data" v-bind:key="inward.inward_mst_id">
                         <!-- // Table Data for all inwards -->
                           <td>{{ inward.inward_mst_id }}</td>
-                          <td>{{ inward.inward_mst_date }}</td>
+                          <td class="text-nowrap">{{ formatDate(inward.inward_mst_date) }}</td>
                           <td>{{ inward.inward_mst_invoice_no }}</td>
                           <td>{{ inward.vendor_company_name }}</td>
                           <td>{{ inward.broker_name }}</td>
@@ -214,24 +214,23 @@ NOTES
                         <span class="required-mark" style="color: red">*</span></label>
                     </div>
                     <div class="col-md-3">
-                      <input type="date" class="form-control" v-model="inwardDate" placeholder="Enter Inward Date..." />
+                      <input type="datetime-local" class="form-control" v-model="inwardDate" placeholder="Enter Inward Date..." />
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-2">
-                      <label for="companyName" class="col-form-label text-md">Company Name
+                      <label for="companyName" class="col-form-label text-md">Supplier
                         <span class="required-mark" style="color: red">*</span>
                       </label>
                     </div>
                     <div class="col-md-3">
                       <model-select :options="editCompanyNames" @blur="editGetFromSelectedCompany"
-                        v-model="editSelectedCompanyName" placeholder="Select Company Name...">
+                        v-model="editSelectedCompanyName" placeholder="Select Supplier...">
                       </model-select>
                     </div>
                   </div>
                   <div class="form-group" style="display: flex; flex-direction: row">
                     <div class="col-md-2">
-                      <label for="gstNo" class="col-form-label text-md">GST No.
-                        <span class="required-mark" style="color: red">*</span></label>
+                      <label for="gstNo" class="col-form-label text-md">GST No.</label>
                     </div>
                     <div class="col-md-3">
                       <input type="text" class="form-control" v-model="gstNo" placeholder="GST No..." disabled />
@@ -317,8 +316,7 @@ NOTES
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-2">
-                      <label for="gstPercentage" class="col-form-label text-md">GST
-                        <span class="required-mark" style="color: red">*</span></label>
+                      <label for="gstPercentage" class="col-form-label text-md">GST</label>
                     </div>
                     <div class="col-md-3">
                       <select class="form-select form-control" id="gstPercentage"
@@ -342,8 +340,7 @@ NOTES
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-2">
-                      <label for="gstAmount" class="col-form-label text-md">GST Amount
-                        <span class="required-mark" style="color: red">*</span></label>
+                      <label for="gstAmount" class="col-form-label text-md">GST Amount</label>
                     </div>
                     <div class="col-md-3">
                       <input type="text" class="form-control" v-model="gstAmount" placeholder="GST Amount..."
@@ -515,6 +512,7 @@ NOTES
   import toastr from "toastr";
   import swal from "sweetalert2";
   import { ModelSelect } from "vue-search-select";
+  import { formatDate, toInputDateTime } from "../../currency";
 
 //it contains all the data properties and methods of all the events.
   export default {
@@ -572,6 +570,8 @@ NOTES
         editProductQualities: [],
         editSelectedProductQuality: "",
         quantity: "",
+        weightGrams: "",
+        metalType: "gold",
         
         rate: "",
         gstPercentage: "0",
@@ -598,6 +598,8 @@ NOTES
           unit: "",
           quality: "",
           qty: "",
+          weightGrams: "",
+          metalType: "",
           rate: "",
           gstPercentage: "",
           totalAmount:"",
@@ -678,6 +680,7 @@ NOTES
 
     // Below are the methods that are called during execution
     methods: {
+      formatDate,
       // Method For Loading Vendor info in filter option
       getVendorsList: function () {
         axios
@@ -699,16 +702,16 @@ NOTES
           });
       },
 
-      // Method for loading quality categories in filter
+      // Method for loading item type categories in filter
       loadQualityCategoriesForFilter: function () {
         axios
-          .get("/api/productqualitycategories")
+          .get("/api/sellqualitycategories")
           .then((response) => {
             let allEntry = [{ text: "All", value: "" }];
-            let individualEntry = response.data.map((category) => {
+            let individualEntry = response.data.qualityCategories.map((category) => {
               return {
-                value: category.inward_quality_category_id,
-                text: category.inward_category_name,
+                value: category.qualityCategoryId,
+                text: category.qualityCategoryName + " (" + category.metalType + ")",
               };
             });
             this.categoriesForFilter = allEntry.concat(individualEntry);
@@ -719,7 +722,7 @@ NOTES
           });
       },
 
-     // Method for loading product qualities in filter
+     // Method for loading item types in filter
       loadQualitiesOfCategoryForFilter: function () {
         if (this.selectedCategoryForFilter == "") {
           let allEntry = [{ text: "All", value: "" }];
@@ -729,13 +732,13 @@ NOTES
         }
 
         axios
-          .get("/api/inwardqualityofcategories/" + this.selectedCategoryForFilter)
+          .get("/api/sellqualityofcategory/" + this.selectedCategoryForFilter)
           .then((response) => {
             let allEntry = [{ text: "All", value: "" }];
             let individualEntry = response.data.map((quality) => {
               return {
                 text: quality.quality_name,
-                value: quality.inward_quality_id,
+                value: quality.sell_quality_id,
               };
             });
 
@@ -869,19 +872,20 @@ NOTES
           })
           .catch((err) => {
             console.log(err);
-            toastr["info"]("Please Select Company Name.");
+            toastr["info"]("Please select a supplier.");
           });
       },
 
       // Method for loading quality categories for option
       loadProductQualityCategory() {
         axios
-          .get("../api/productqualitycategories")
+          .get("../api/sellqualitycategories")
           .then((response) => {
-            this.editProductQualityCategories = response.data.map((category) => {
+            this.editProductQualityCategories = response.data.qualityCategories.map((category) => {
               return {
-                value: category.inward_quality_category_id,
-                text: category.inward_category_name,
+                value: category.qualityCategoryId,
+                text: category.qualityCategoryName + " (" + category.metalType + ")",
+                metalType: category.metalType,
               };
             });
           })
@@ -905,22 +909,18 @@ NOTES
 
         axios
           .get(
-            "../api/inwardqualityofcategories/" +
+            "../api/sellqualityofcategory/" +
             this.editSelectedProductQualityCategory
           )
           .then((response) => {
             this.editProductQualities = response.data.map((quality) => {
               return {
-                value: quality.inward_quality_id,
+                value: quality.sell_quality_id,
                 text: quality.quality_name,
               };
             });
 
-            if (this.editSelectedProductQualityCategory == "1") {
-              this.unit = "Meters";
-            } else if (this.editSelectedProductQualityCategory == "2") {
-              this.unit = "Kg.";
-            }
+            this.unit = "pcs";
           })
           .catch((err) => {
             console.log(err);
@@ -940,23 +940,16 @@ NOTES
         }
 
         axios
-          .get("../api/inwardqualityofcategories/" + this.editSelectedProductQualityCategory)
+          .get("../api/sellqualityofcategory/" + this.editSelectedProductQualityCategory)
           .then((response) => {
             this.productQualities = response.data.map((quality) => {
               return {
-                value: quality.inward_quality_id,
+                value: quality.sell_quality_id,
                 text: quality.quality_name,
               };
             });
 
-            if (this.editSelectedProductQualityCategory == "1") {
-              this.unit = "Meters";
-            } else if (
-              this.editSelectedProductQualityCategory == "2" ||
-              this.editSelectedProductQualityCategory == "3"
-            ) {
-              this.unit = "Kg.";
-            }
+            this.unit = "pcs";
           })
           .catch((err) => {
             console.log(err);
@@ -975,8 +968,13 @@ NOTES
           .then((response) => {
             let inward = response.data;
 
+            if (!inward.inward_details || !inward.inward_details.quality) {
+              toastr.error("Purchase details could not be loaded.");
+              return;
+            }
+
             this.invoiceNo = inward.inward_mst_invoice_no;
-            this.inwardDate = this.getStdDate(inward.inward_mst_date);
+            this.inwardDate = toInputDateTime(inward.inward_mst_date);
 
             this.editLoadBroker();
             this.editSelectedBroker = inward.inward_mst_broker_id;
@@ -987,18 +985,25 @@ NOTES
 
             this.loadProductQualityCategory();
             this.editSelectedProductQualityCategory =
-              inward.inward_details.quality.inward_quality_category_id;
+              inward.inward_details.quality.sell_quality_category_id;
 
             this.editLoadFromSelectedCategory();
             this.editSelectedProductQuality =
-              inward.inward_details.inward_quality_id;
+              inward.inward_details.sell_quality_id;
 
             this.quantity = inward.inward_details.qty;
+            this.weightGrams = inward.inward_details.weight_grams || '';
+            this.metalType = inward.inward_details.metal_type || inward.inward_details.quality.category?.metal_type || 'gold';
+            this.unit = inward.inward_details.qty_unit || 'pcs';
             this.rate = inward.inward_details.rate;
             this.gstPercentage = inward.inward_mst_gst_percentage;
-            this.totalAmount = parseFloat(this.quantity) * parseFloat(this.rate);
-            this.gstAmount = this.totalAmount * 0.01 * this.gstPercentage;
-            this.netAmount = this.totalAmount + this.gstAmount;
+            this.totalAmount = (parseFloat(this.weightGrams || this.quantity) * parseFloat(this.rate)).toFixed(2);
+            this.gstAmount = (
+              parseFloat(this.totalAmount) * 0.01 * parseFloat(this.gstPercentage)
+            ).toFixed(2);
+            this.netAmount = (
+              parseFloat(this.totalAmount) + parseFloat(this.gstAmount)
+            ).toFixed(2);
             this.inwardIdToBeEdit = inwardMstId;
           })
           .catch((err) => {
@@ -1010,11 +1015,16 @@ NOTES
     
       // Method to Calculate Total Amount Watcher's Call back
       calcTotalAmount: function () {
-        if (this.quantity == "" || this.rate == "") {
+        if (this.rate == "") {
           this.totalAmount = "";
-        } else {
-          this.totalAmount = this.quantity * this.rate;
+          return;
         }
+        const billableWeight = parseFloat(this.weightGrams || this.quantity);
+        if (!billableWeight) {
+          this.totalAmount = "";
+          return;
+        }
+        this.totalAmount = (billableWeight * parseFloat(this.rate)).toFixed(2);
       },
 
       // Method to calculate gst amount based on total amount and gst percentage selected
@@ -1022,16 +1032,18 @@ NOTES
         if (this.gstPercentage == "0" || this.totalAmount == "") {
           this.gstAmount = "";
         } else {
-          this.gstAmount = this.totalAmount * this.gstPercentage * 0.01;
+          this.gstAmount = (
+            parseFloat(this.totalAmount) * parseFloat(this.gstPercentage) * 0.01
+          ).toFixed(2);
         }
       },
 
-      // Method to calculate net amount based on total amount and gst amount
       calcNetAmount: function () {
         if (this.totalAmount == "") {
           this.netAmount = "";
         } else {
-          this.netAmount = this.totalAmount + this.gstAmount;
+          const gst = this.gstAmount === "" ? 0 : parseFloat(this.gstAmount);
+          this.netAmount = (parseFloat(this.totalAmount) + gst).toFixed(2);
         }
       },
 
@@ -1063,7 +1075,7 @@ NOTES
           this.editSelectedCompanyName == "" ||
           typeof this.editSelectedCompanyName === "undefined"
         ) {
-          toastr.info("Company Name Is Required");
+          toastr.info("Supplier is required");
           return false;
         } else {
           return true;
@@ -1190,6 +1202,8 @@ NOTES
             unit: this.unit,
             rate: this.rate,
             qty: this.quantity,
+            weightGrams: this.weightGrams,
+            metalType: this.metalType,
             gstPercentage: this.gstPercentage
           };
 
@@ -1292,7 +1306,7 @@ NOTES
                 });
             }
             else if(res.data.status == -1){
-              toastr.error("Inward Deletaion Failed! SOmething Went Wrong");
+              toastr.error(res.data.message || "Purchase deletion failed.");
             }
             
           })
@@ -1382,20 +1396,29 @@ NOTES
         axios
          .get("../api/inward/view/" + inwardMstId)
          .then((res) => {
-           console.log(res);
-            this.inwardToView.inwardDate = res.data.inward_mst_date;
+            if (!res.data.inward_details || !res.data.inward_details.quality) {
+              toastr.error("Purchase details could not be loaded.");
+              return;
+            }
+
+            const details = res.data.inward_details;
+            const billableWeight = parseFloat(details.weight_grams || details.qty || 0);
+
+            this.inwardToView.inwardDate = formatDate(res.data.inward_mst_date);
             this.inwardToView.invoiceNo = res.data.inward_mst_invoice_no;
             this.inwardToView.gstNo = res.data.get_vendor.vendor_gst_no;
             this.inwardToView.mobileNo = res.data.get_vendor.vendor_contact_no;
             this.inwardToView.broker=res.data.get_broker.broker_name;
             this.inwardToView.company=res.data.get_vendor.vendor_company_name;
-            this.inwardToView.quality =res.data.inward_details.quality.quality_name;
-            this.inwardToView.category=res.data.inward_details.quality.category.inward_category_name;
-            this.inwardToView.qty = res.data.inward_details.qty;
-            this.inwardToView.rate = res.data.inward_details.rate;
-            this.inwardToView.unit = res.data.inward_details.qty_unit;
+            this.inwardToView.quality = details.quality.quality_name;
+            this.inwardToView.category = details.quality.category?.sell_category_name || '';
+            this.inwardToView.qty = details.qty;
+            this.inwardToView.weightGrams = details.weight_grams || '';
+            this.inwardToView.metalType = details.metal_type || details.quality.category?.metal_type || '';
+            this.inwardToView.rate = details.rate;
+            this.inwardToView.unit = details.qty_unit;
             this.inwardToView.gstPercentage = res.data.inward_mst_gst_percentage;
-            this.inwardToView.totalAmount = (this.inwardToView.qty * this.inwardToView.rate).toFixed(2);
+            this.inwardToView.totalAmount = (billableWeight * parseFloat(details.rate)).toFixed(2);
             this.inwardToView.gstAmount = (this.inwardToView.totalAmount * 0.01 * this.inwardToView.gstPercentage).toFixed(2);
             this.inwardToView.netAmount = (parseFloat(this.inwardToView.totalAmount) + parseFloat(this.inwardToView.gstAmount)).toFixed(2);
             this.inwardToView.inwardIdToBeViewd = inwardMstId;
@@ -1419,6 +1442,8 @@ NOTES
           this.inwardToView.quality ="";
           this.inwardToView.category="";
           this.inwardToView.qty = "";
+          this.inwardToView.weightGrams = "";
+          this.inwardToView.metalType = "";
           this.inwardToView.rate = "";
           this.inwardToView.unit = "";
           this.inwardToView.gstPercentage = "";

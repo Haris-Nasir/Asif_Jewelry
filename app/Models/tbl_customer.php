@@ -27,11 +27,19 @@ class tbl_customer extends Model
     }
 
     public function setCustomerGstNoAttribute($value){
+        if ($value === null || $value === '') {
+            $this->attributes['customer_gst_no'] = null;
+            return;
+        }
         $value = preg_replace('/\s+/', ' ', $value);
         $this->attributes['customer_gst_no'] = strtoupper($value);
     }
 
     public function setCustomerGstCodeAttribute($value){
+        if ($value === null || $value === '') {
+            $this->attributes['customer_gst_code'] = null;
+            return;
+        }
         $value = preg_replace('/\s+/', ' ', $value);
         $this->attributes['customer_gst_code'] = strtoupper($value);
     }

@@ -11,12 +11,9 @@ class tbl_inward_details extends Model
     use HasFactory;
 
     protected $primaryKey = 'inward_details_id';
-    public function getInwardMstDateAttribute($value){
-        return (Carbon::parse($value)->format('d-m-Y'));
-    }
-
 
     public function quality(){
-        return $this->hasOne('App\Models\tbl_inward_quality', 'inward_quality_id', 'inward_quality_id')->with("category:inward_quality_category_id,inward_category_name");
+        return $this->hasOne('App\Models\tbl_sell_quality', 'sell_quality_id', 'sell_quality_id')
+            ->with('category:sell_quality_category_id,sell_category_name,metal_type');
     }
 }

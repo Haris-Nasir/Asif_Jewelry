@@ -126,7 +126,7 @@ export default {
             this.selectedPermissions = [...(worker.permissions || [])];
             if (!this.selectedPermissions.length) {
                 this.defaultPermissions = Object.keys(this.permissionLabels).filter((k) =>
-                    ['dashboard', 'purchases', 'sales', 'invoices', 'expenses', 'laboratory', 'stock'].includes(k)
+                    ['dashboard', 'purchases', 'sales', 'invoices', 'expenses', 'laboratory', 'karigar', 'stock'].includes(k)
                 );
                 this.selectedPermissions = [...this.defaultPermissions];
             }

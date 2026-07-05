@@ -52,7 +52,7 @@ class ExpenseController extends Controller
         $newExpense->expense_amount = $expenseAmount;
 
         if($newExpense->save()){
-            $this->audit('create', 'expense', $newExpense->expense_id, 'Expense added: ₹' . $newExpense->expense_amount);
+            $this->audit('create', 'expense', $newExpense->expense_id, 'Expense added: ' . config('currency.code') . ' ' . $newExpense->expense_amount);
             return response()->json(array(
                 "status" => 1,
                 "message" => "Expense Added Succesfully"

@@ -32,7 +32,7 @@
                     >
                       <div class="col-md-2">
                         <label for="date" class="col-form-label text-md"
-                          >Inward Date
+                          >Inward Date &amp; Time
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -40,16 +40,17 @@
                       </div>
                       <div class="col-md-3">
                         <input
-                          type="date"
+                          type="datetime-local"
                           class="form-control"
                           v-model="date"
+                          @change="loadNextInvoiceNo"
                           placeholder="Enter Inward Date..."
                         />
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="companyName" class="col-form-label text-md"
-                          >Company Name
+                          >Supplier
                           <span class="required-mark" style="color: red"
                             >*</span
                           >
@@ -60,7 +61,7 @@
                           :options="companyNames"
                           @blur="getFromSelectedCompany"
                           v-model="selectedCompanyName"
-                          placeholder="Select Company Name..."
+                          placeholder="Select Supplier..."
                         >
                         </model-select>
                       </div>
@@ -71,10 +72,7 @@
                     >
                       <div class="col-md-2">
                         <label for="gstNo" class="col-form-label text-md"
-                          >GST No.
-                          <span class="required-mark" style="color: red"
-                            >*</span
-                          ></label
+                          >GST No.</label
                         >
                       </div>
                       <div class="col-md-3">
@@ -111,10 +109,7 @@
                     >
                       <div class="col-md-2">
                         <label for="invoiceNo" class="col-form-label text-md"
-                          >Invoice No.
-                          <span class="required-mark" style="color: red"
-                            >*</span
-                          ></label
+                          >Invoice No.</label
                         >
                       </div>
                       <div class="col-md-3">
@@ -122,7 +117,7 @@
                           type="text"
                           class="form-control"
                           v-model="invoiceNo"
-                          placeholder="Enter Invoice No..."
+                          disabled
                         />
                       </div>
                       <div class="col-md-1"></div>
@@ -167,29 +162,6 @@
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
-                        <label for="unit" class="col-form-label text-md"
-                          >Pieces
-                          <span class="required-mark" style="color: red"
-                            >*</span
-                          ></label
-                        >
-                      </div>
-                      <div class="col-md-3">
-                        <input
-                          type="text"
-                          class="form-control"
-                          v-model="unit"
-                          placeholder="pcs"
-                          value="pcs"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="form-group"
-                      style="display: flex; flex-direction: row"
-                    >
-                      <div class="col-md-2">
                         <label
                           for="productQuality"
                           class="col-form-label text-md"
@@ -207,7 +179,11 @@
                         >
                         </model-select>
                       </div>
-                      <div class="col-md-1"></div>
+                    </div>
+                    <div
+                      class="form-group"
+                      style="display: flex; flex-direction: row"
+                    >
                       <div class="col-md-2">
                         <label for="weightGrams" class="col-form-label text-md"
                           >Weight (grams)
@@ -240,7 +216,7 @@
                           id="quantity"
                           class="form-control"
                           v-model="quantity"
-                          placeholder="Enter Quantity..."
+                          placeholder="Enter quantity..."
                         />
                       </div>
                     </div>
@@ -253,7 +229,7 @@
                           for="rate"
                           id="rate"
                           class="col-form-label text-md"
-                          >Rate / gram (₹)
+                          >Rate / gram (Rs.)
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -262,7 +238,7 @@
                       <div class="col-md-3">
                         <input
                           type="text"
-                          id="quantity"
+                          id="rate"
                           class="form-control"
                           v-model="rate"
                           placeholder="Enter Rate..."
@@ -270,8 +246,7 @@
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
-                        <label for="gstPercentage" class="col-form-label text-md">GST
-                          <span class="required-mark" style="color: red">*</span></label>
+                        <label for="gstPercentage" class="col-form-label text-md">GST</label>
                       </div>
                       <div class="col-md-3">
                         <select class="form-select form-control" id="gstPercentage"
@@ -308,10 +283,7 @@
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="gstAmount" class="col-form-label text-md"
-                          >GST Amount
-                          <span class="required-mark" style="color: red"
-                            >*</span
-                          ></label
+                          >GST Amount</label
                         >
                       </div>
                       <div class="col-md-3">
@@ -383,6 +355,7 @@
 import toastr from "toastr";
 import swal from "sweetalert2";
 import { ModelSelect } from "vue-search-select";
+import { getNowDateTime, toDateOnly } from "../../currency";
 
 toastr.options = {
   closeButton: true,
@@ -458,10 +431,11 @@ export default {
 
   // This all methods loaded once the page is refreshed
   mounted() {
-    this.date = this.getTodaysDate();
+    this.date = getNowDateTime();
     this.loadCompanyName();
     this.loadProductQualityCategory();
     this.loadBroker();
+    this.loadNextInvoiceNo();
   },
 
   methods: {
@@ -498,24 +472,37 @@ export default {
         this.selectedCompanyName == "" ||
         typeof this.selectedCompanyName === "undefined"
       ) {
-        toastr.info("Please Enter Company Name");
+        toastr.info("Please select a supplier");
         return false;
       } else {
         return true;
       }
     },
 
+    loadNextInvoiceNo() {
+      if (!this.date) {
+        return;
+      }
+
+      axios
+        .get("../api/inward/next-invoice-no/" + toDateOnly(this.date))
+        .then((response) => {
+          this.invoiceNo = response.data.nextInvoiceNo;
+        })
+        .catch((err) => {
+          console.log(err);
+          toastr["error"]("Unable to load next invoice number.");
+        });
+    },
+
     //Function is to Validate Invoice No.
     invoiceNoValidation: function () {
       if (this.invoiceNo == "") {
-        toastr.info("Please Enter Invoice No");
+        toastr.info("Invoice number is not ready yet. Please wait or refresh.");
         return false;
-      } else if (this.invoiceNo.length > 20) {
-        toastr.warning("Invoice No must be less or equal than 20 characters!");
-        return false;
-      } else {
-        return true;
       }
+
+      return true;
     },
 
     //Function is to Validate Broker Name whether the broker field is empty or not
@@ -670,7 +657,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["info"]("Please Select Company Name.");
+          toastr["info"]("Please select a supplier.");
         });
     },
 
@@ -724,16 +711,18 @@ export default {
       if (this.gstPercentage == "0" || this.totalAmount == "") {
         this.gstAmount = "";
       } else {
-        this.gstAmount = this.totalAmount * this.gstPercentage * 0.01;
+        this.gstAmount = (
+          parseFloat(this.totalAmount) * parseFloat(this.gstPercentage) * 0.01
+        ).toFixed(2);
       }
     },
 
-    //Function or Watcher is to calculate GST amount based on the Total Amount and and GST Percentage
     calcNetAmount: function () {
       if (this.totalAmount == "") {
         this.netAmount = "";
       } else {
-        this.netAmount = this.totalAmount + this.gstAmount;
+        const gst = this.gstAmount === "" ? 0 : parseFloat(this.gstAmount);
+        this.netAmount = (parseFloat(this.totalAmount) + gst).toFixed(2);
       }
     },
 
@@ -836,9 +825,8 @@ export default {
 
     //Function is to reset the details of Inward
     resetInwardDetails() {
-      this.date = this.getTodaysDate();
-      (this.invoiceNo = ""),
-        (this.mobileNo = ""),
+      this.date = getNowDateTime();
+      (this.mobileNo = ""),
         (this.gstNo = ""),
         (this.selectedCompanyName = ""),
         (this.selectedProductQualityCategory = ""),
@@ -853,6 +841,7 @@ export default {
         (this.totalAmount = ""),
         (this.gstAmount = ""),
         (this.netAmount = "");
+      this.loadNextInvoiceNo();
     },
   },
 };

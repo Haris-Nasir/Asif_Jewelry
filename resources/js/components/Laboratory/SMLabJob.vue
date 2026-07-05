@@ -12,34 +12,34 @@
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-2">
-                            <div class="small-box bg-info">
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="small-box lab-stat-box bg-info">
                                 <div class="inner">
                                     <h3>{{ summary.total_jobs }}</h3>
                                     <p>Total Jobs</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <div class="small-box bg-warning">
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="small-box lab-stat-box bg-warning">
                                 <div class="inner">
                                     <h3>{{ summary.open_jobs }}</h3>
                                     <p>Open</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <div class="small-box bg-success">
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="small-box lab-stat-box bg-success">
                                 <div class="inner">
-                                    <h3>₹{{ formatMoney(summary.total_lab_profit) }}</h3>
+                                    <h3 class="stat-amount">{{ formatMoney(summary.total_lab_profit) }}</h3>
                                     <p>Lab Profit</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <div class="small-box bg-secondary">
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="small-box lab-stat-box bg-secondary">
                                 <div class="inner">
-                                    <h3>{{ summary.total_weight_grams }}g</h3>
+                                    <h3>{{ formatWeight(summary.total_weight_grams) }}g</h3>
                                     <p>Total Weight</p>
                                 </div>
                             </div>
@@ -47,15 +47,15 @@
                     </div>
 
                     <div class="form-row mb-3">
-                        <div class="col-md-2">
+                        <div class="form-group col-md-2 col-sm-6">
                             <label>From Date</label>
                             <input type="date" class="form-control" v-model="filters.from_date" @change="loadJobs">
                         </div>
-                        <div class="col-md-2">
+                        <div class="form-group col-md-2 col-sm-6">
                             <label>To Date</label>
                             <input type="date" class="form-control" v-model="filters.to_date" @change="loadJobs">
                         </div>
-                        <div class="col-md-3">
+                        <div class="form-group col-md-4 col-sm-6">
                             <label>Investor</label>
                             <select class="form-control" v-model="filters.investor_id" @change="loadJobs">
                                 <option value="">All investors</option>
@@ -64,7 +64,7 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="form-group col-md-2 col-sm-6">
                             <label>Status</label>
                             <select class="form-control" v-model="filters.job_status" @change="loadJobs">
                                 <option value="">All</option>
@@ -75,54 +75,57 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
+                        <table class="table table-bordered table-sm lab-jobs-table">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Ref</th>
-                                    <th>Investor</th>
+                                    <th>Investors</th>
                                     <th>Metal</th>
                                     <th class="text-right">Weight (g)</th>
-                                    <th class="text-right">Base (₹)</th>
-                                    <th class="text-right">Cash (₹)</th>
-                                    <th class="text-right">Refinery (₹)</th>
-                                    <th class="text-right">Sold (₹)</th>
-                                    <th class="text-right">Profit (₹)</th>
+                                    <th class="text-right">Base</th>
+                                    <th class="text-right">Refinery</th>
+                                    <th class="text-right">Sold</th>
+                                    <th class="text-right">Profit</th>
                                     <th>Status</th>
-                                    <th width="12%">Action</th>
+                                    <th class="text-center" width="90">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="job in jobs.data" :key="job.lab_job_id">
-                                    <td>{{ job.job_date }}</td>
+                                    <td class="text-nowrap">{{ formatDate(job.job_date) }}</td>
                                     <td>{{ job.job_reference || '-' }}</td>
-                                    <td>{{ job.investor ? job.investor.investor_name : '-' }}</td>
-                                    <td>{{ job.metal_type }}</td>
-                                    <td class="text-right">{{ job.weight_grams }}</td>
-                                    <td class="text-right">{{ formatMoney(job.base_price) }}</td>
-                                    <td class="text-right">{{ formatMoney(job.cash_amount) }}</td>
-                                    <td class="text-right">{{ formatMoney(job.refinery_cost) }}</td>
-                                    <td class="text-right">{{ job.sold_amount != null ? formatMoney(job.sold_amount) : '-' }}</td>
-                                    <td class="text-right">{{ job.profit_amount != null ? formatMoney(job.profit_amount) : '-' }}</td>
+                                    <td class="investor-cell">{{ formatParticipants(job) }}</td>
+                                    <td class="text-capitalize">{{ job.metal_type }}</td>
+                                    <td class="text-right">{{ formatWeight(job.weight_grams) }}</td>
+                                    <td class="text-right text-nowrap">{{ formatAmount(job.base_price) }}</td>
+                                    <td class="text-right text-nowrap">{{ formatAmount(job.refinery_cost) }}</td>
+                                    <td class="text-right text-nowrap">{{ job.sold_amount != null ? formatAmount(job.sold_amount) : '-' }}</td>
+                                    <td class="text-right text-nowrap">{{ job.profit_amount != null ? formatAmount(job.profit_amount) : '-' }}</td>
                                     <td>
-                                        <span class="badge" :class="job.job_status === 'sold' ? 'badge-success' : 'badge-warning'">
+                                        <span class="badge text-capitalize" :class="job.job_status === 'sold' ? 'badge-success' : 'badge-warning'">
                                             {{ job.job_status }}
                                         </span>
                                     </td>
-                                    <td class="text-center">
-                                        <button class="btn btn-primary btn-sm" @click="startEdit(job)"><i class="fas fa-pen"></i></button>
-                                        <button class="btn btn-danger btn-sm" @click="deleteJob(job.lab_job_id)"><i class="fas fa-trash"></i></button>
+                                    <td class="text-center text-nowrap">
+                                        <button class="btn btn-primary btn-sm" @click="startEdit(job)" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-sm ml-1" @click="deleteJob(job.lab_job_id)" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <tr v-if="!jobs.data || !jobs.data.length">
-                                    <td colspan="12" class="text-center text-muted">No laboratory jobs found.</td>
+                                    <td colspan="11" class="text-center text-muted py-3">No laboratory jobs found.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                    <p class="text-muted small mb-0 mt-2">Amounts in Rs.</p>
 
                     <div class="row mt-3" v-if="jobs.data && jobs.data.length">
-                        <div class="col-sm-6 offset-5">
+                        <div class="col-sm-6 offset-sm-3 col-md-4 offset-md-4">
                             <pagination :data="jobs" @pagination-change-page="loadJobs"></pagination>
                         </div>
                     </div>
@@ -139,17 +142,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label>Job Date</label>
-                                <input type="date" class="form-control" v-model="editForm.job_date">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label>Investor</label>
-                                <select class="form-control" v-model="editForm.investor_id">
-                                    <option v-for="inv in investors" :key="inv.investor_id" :value="inv.investor_id">
-                                        {{ inv.investor_name }}
-                                    </option>
-                                </select>
+                            <div class="form-group col-md-6">
+                                <label>Investors *</label>
+                                <investor-multi-select
+                                    :investors="investors"
+                                    v-model="editForm.investor_ids"
+                                    placeholder="Select investors..."
+                                />
                             </div>
                             <div class="form-group col-md-4">
                                 <label>Reference</label>
@@ -157,6 +156,10 @@
                             </div>
                         </div>
                         <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>Job Date</label>
+                                <input type="datetime-local" class="form-control" v-model="editForm.job_date">
+                            </div>
                             <div class="form-group col-md-3">
                                 <label>Metal</label>
                                 <select class="form-control" v-model="editForm.metal_type">
@@ -169,24 +172,20 @@
                                 <input type="number" class="form-control" v-model="editForm.weight_grams" step="0.001">
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Base Price (₹)</label>
+                                <label>Base Price (Rs.)</label>
                                 <input type="number" class="form-control" v-model="editForm.base_price" step="0.01">
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Cash (₹)</label>
-                                <input type="number" class="form-control" v-model="editForm.cash_amount" step="0.01">
+                                <label>Refinery Cost (Rs.)</label>
+                                <input type="number" class="form-control" v-model="editForm.refinery_cost" step="0.01">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label>Refinery Cost (₹)</label>
-                                <input type="number" class="form-control" v-model="editForm.refinery_cost" step="0.01">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label>Sold Amount (₹)</label>
+                                <label>Sold Amount (Rs.)</label>
                                 <input type="number" class="form-control" v-model="editForm.sold_amount" step="0.01">
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-8">
                                 <label>Notes</label>
                                 <input type="text" class="form-control" v-model="editForm.notes">
                             </div>
@@ -205,6 +204,8 @@
 <script>
 import toastr from 'toastr';
 import swal from 'sweetalert2';
+import { formatCurrency, formatAmount as formatAmountValue, formatDate, toInputDateTime } from '../../currency';
+import InvestorMultiSelect from './InvestorMultiSelect.vue';
 
 toastr.options = {
     closeButton: true,
@@ -214,6 +215,7 @@ toastr.options = {
 
 export default {
     name: 'SMLabJob',
+    components: { InvestorMultiSelect },
     data() {
         return {
             jobs: { data: [] },
@@ -223,7 +225,6 @@ export default {
                 open_jobs: 0,
                 sold_jobs: 0,
                 total_weight_grams: 0,
-                total_cash_amount: 0,
                 total_lab_profit: 0,
             },
             filters: {
@@ -250,7 +251,24 @@ export default {
             this.filters.to_date = `${year}-${month}-${String(d.getDate()).padStart(2, '0')}`;
         },
         formatMoney(value) {
-            return parseFloat(value || 0).toFixed(2);
+            return formatCurrency(value);
+        },
+        formatAmount(value) {
+            return formatAmountValue(value);
+        },
+        formatDate(value) {
+            return formatDate(value);
+        },
+        formatWeight(value) {
+            const weight = parseFloat(value || 0);
+            return Number.isNaN(weight) ? '0.000' : weight.toFixed(3);
+        },
+        formatParticipants(job) {
+            const rows = job.participants || [];
+            if (!rows.length) {
+                return job.investor ? job.investor.investor_name : '-';
+            }
+            return rows.map((row) => `${row.investor_name} (${row.share_percentage}%)`).join(', ');
         },
         loadInvestors() {
             axios.get('/api/investor/list')
@@ -294,13 +312,12 @@ export default {
         startEdit(job) {
             this.editForm = {
                 lab_job_id: job.lab_job_id,
-                job_date: job.job_date,
-                investor_id: job.investor_id,
+                job_date: toInputDateTime(job.job_date),
+                investor_ids: (job.participants || []).map((row) => parseInt(row.investor_id, 10)),
                 job_reference: job.job_reference || '',
                 metal_type: job.metal_type,
                 weight_grams: job.weight_grams,
                 base_price: job.base_price,
-                cash_amount: job.cash_amount,
                 refinery_cost: job.refinery_cost,
                 sold_amount: job.sold_amount,
                 notes: job.notes || '',
@@ -308,7 +325,12 @@ export default {
             $('#editLabJobModal').modal('show');
         },
         updateJob() {
-            axios.put(`/api/lab/jobs/${this.editForm.lab_job_id}`, this.editForm)
+            const investorIds = (this.editForm.investor_ids || []).map((id) => parseInt(id, 10)).filter((id) => !Number.isNaN(id));
+            if (!investorIds.length) {
+                toastr['error']('Select at least one investor.');
+                return;
+            }
+            axios.put(`/api/lab/jobs/${this.editForm.lab_job_id}`, { ...this.editForm, investor_ids: investorIds })
                 .then((res) => {
                     if (res.data.status === 1) {
                         swal.fire({
@@ -352,3 +374,33 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.lab-stat-box .inner {
+    padding-right: 4.75rem;
+    overflow: hidden;
+}
+
+.lab-stat-box h3.stat-amount {
+    font-size: clamp(0.9rem, 1.1rem + 0.35vw, 1.45rem);
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0 0 0.35rem;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.lab-jobs-table th,
+.lab-jobs-table td {
+    vertical-align: middle;
+    padding: 0.45rem 0.6rem;
+}
+
+.lab-jobs-table .investor-cell {
+    min-width: 8rem;
+    max-width: 12rem;
+    white-space: normal;
+    word-break: break-word;
+}
+</style>

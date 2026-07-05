@@ -68,7 +68,7 @@
                       <a
                         href="#"
                         @click.prevent="updateSorting('customer_company_name')"
-                        >Company Name</a
+                        >Customer</a
                       >
                       <span
                         v-if="sort_field == 'customer_company_name' ? 1 : 0"
@@ -169,21 +169,22 @@
                 justify-content: center;
               "
             >
-              <label for="companyName" class="text-md col-md-2">Company Name <span class="required-mark" style="color: red;">*</span></label>
+              <label for="companyName" class="text-md col-md-2">Customer <span class="required-mark" style="color: red;">*</span></label>
               <input
                 type="text"
                 class="form-control col-md-5"
                 v-model="companyName"
-                placeholder="Enter Company Name..."
+                placeholder="Enter Customer Name..."
               />
               <div class="col-md-1"></div>
               <label for="companyContact" class="text-md col-md-2"
-                >Contact Number <span class="required-mark" style="color: red;">*</span></label
+                >Contact Number</label
               >
               <input
                 type="tel"
                 class="form-control col-md-2"
                 v-model="companyContact"
+                maxlength="11"
                 placeholder="Enter Contact Number..."
               />
             </div>
@@ -197,7 +198,7 @@
               "
             >
               <label for="companyAddress" class="text-md col-md-2"
-                >Company Address <span class="required-mark" style="color: red;">*</span></label
+                >Company Address</label
               >
               <textarea
                 class="form-control col-md-10"
@@ -222,7 +223,7 @@
                 placeholder="Enter Email Address..."
               />
               <div class="col-md-1"></div>
-              <label for="gstNumber" class="text-md col-md-1">GST No.<span class="required-mark" style="color: red;">*</span></label>
+              <label for="gstNumber" class="text-md col-md-1">GST No.</label>
               <input
                 type="text"
                 class="form-control col-md-2"
@@ -230,7 +231,7 @@
                 placeholder="Enter GST Number..."
               />
               <div class="col-md-1"></div>
-              <label for="gstCode" class="text-md col-md-1">GST Code<span class="required-mark" style="color: red;">*</span></label>
+              <label for="gstCode" class="text-md col-md-1">GST Code</label>
               <input
                 type="text"
                 class="form-control col-md-2"
@@ -339,10 +340,10 @@ export default {
 
     validateCompanyName: function () {
       if (this.companyName == "") {
-        toastr.info("Please Enter Company Name!");
+        toastr.info("Please enter customer name!");
         return false;
       } else if (this.companyName.length > 50) {
-        toastr.warning("Company Name must be less than 50 characters!");
+        toastr.warning("Customer name must be less than 50 characters!");
         return false;
       } else {
         return true;
@@ -350,11 +351,10 @@ export default {
     },
 
     validateCompanyContact: function () {
-      if (this.companyContact == "") {
-        toastr.info("Please Enter Contact Number!");
-        return false;
-      } else if (this.companyContact.length != 10) {
-        toastr.warning("Contact Number must be equal to 10 characters!");
+      if (this.companyContact === "") {
+        return true;
+      } else if (this.companyContact.length < 10 || this.companyContact.length > 11) {
+        toastr.warning("Contact Number must be 10 or 11 digits!");
         return false;
       } else {
         return true;
@@ -362,9 +362,8 @@ export default {
     },
 
     validateCompanyAddress: function () {
-      if (this.companyAddress == "") {
-        toastr.info("Please Enter Company Address!");
-        return false;
+      if (this.companyAddress === "") {
+        return true;
       } else if (this.companyAddress.length > 255) {
         toastr.warning("Company Address must be less than 255 characters!");
         return false;
@@ -390,31 +389,31 @@ export default {
     },
 
     validateGSTNumber: function () {
-      if (this.gstNumber == "") {
-        toastr.info("Please Enter GST Number!");
-        return false;
-      } else if (this.gstNumber.length != 15) {
-        toastr.warning("GST Number must be equal to 15 characters!");
-        return false;
-      } else {
+      if (this.gstNumber === "") {
         return true;
       }
+      if (this.gstNumber.length != 15) {
+        toastr.warning("GST Number must be equal to 15 characters!");
+        return false;
+      }
+      return true;
     },
 
     validateGSTCode: function () {
-      if (this.gstCode == "") {
-        toastr.info("Please Enter GST Code!");
-        return false;
-      } else if (this.gstCode.length != 2) {
+      if (this.gstCode === "") {
+        return true;
+      }
+      if (this.gstCode.length != 2) {
         toastr.warning("GST Code must be equal to 2 characters!");
         return false;
-      } else if (this.gstCode != this.gstNumber.substring(0, 2)) {
+      }
+      if (this.gstNumber !== "" && this.gstCode !== this.gstNumber.substring(0, 2)) {
         toastr.warning(
           "GST Code must be equal to first 2 characters of GST Number!"
         );
-      } else {
-        return true;
+        return false;
       }
+      return true;
     },
 
     UpdateCustomer: function () {

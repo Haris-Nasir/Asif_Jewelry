@@ -15,6 +15,7 @@ return [
     'stock' => 'Stock ledger',
     'laboratory' => 'Laboratory jobs',
     'laboratory_delete' => 'Delete laboratory jobs',
+    'karigar' => 'Karigar (outward/inward)',
   ],
 
   'worker_defaults' => [
@@ -24,6 +25,7 @@ return [
     'invoices',
     'expenses',
     'laboratory',
+    'karigar',
     'stock',
   ],
 ];

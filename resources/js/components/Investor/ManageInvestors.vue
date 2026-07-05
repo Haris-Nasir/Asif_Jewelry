@@ -21,10 +21,10 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Contact</label>
-                                        <input type="text" class="form-control" v-model="investorForm.contact_no">
+                                        <input type="text" class="form-control" v-model="investorForm.contact_no" maxlength="11">
                                     </div>
                                     <div class="form-group">
-                                        <label>Profit Share % *</label>
+                                        <label>Profit Share % <small class="text-muted">(lab job profit split)</small></label>
                                         <input type="number" class="form-control" v-model="investorForm.profit_share_percentage" min="0" max="100" step="0.01">
                                     </div>
                                     <div class="form-check mb-3">
@@ -49,6 +49,9 @@
                                     <h3 class="card-title">Record Transaction</h3>
                                 </div>
                                 <div class="card-body">
+                                    <p class="text-muted small mb-3">
+                                        Use <strong>Payout / Redemption</strong> when paying the investor. This reduces their balance and is recorded in their transaction history.
+                                    </p>
                                     <div class="form-group">
                                         <label>Investor *</label>
                                         <select class="form-control" v-model="txnForm.investor_id">
@@ -60,16 +63,16 @@
                                     </div>
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
-                                            <label>Date *</label>
-                                            <input type="date" class="form-control" v-model="txnForm.transaction_date">
+                                            <label>Date &amp; Time *</label>
+                                            <input type="datetime-local" class="form-control" v-model="txnForm.transaction_date">
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label>Type *</label>
                                             <select class="form-control" v-model="txnForm.transaction_type" @change="onTxnTypeChange">
-                                                <option value="deposit">Cash Deposit (₹)</option>
-                                                <option value="withdrawal">Cash Withdrawal (₹)</option>
+                                                <option value="deposit">Cash Deposit (Rs.)</option>
+                                                <option value="withdrawal">Payout / Redemption (Rs.)</option>
                                                 <option value="gold_buy">Gold Buy</option>
-                                                <option value="gold_sell">Gold Sell</option>
+                                                <option value="gold_sell">Gold Sell / Redemption</option>
                                             </select>
                                         </div>
                                     </div>
@@ -91,7 +94,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group" v-if="!isGoldTxn">
-                                        <label>Amount (₹) *</label>
+                                        <label>Amount (Rs.) *</label>
                                         <input type="number" class="form-control" v-model="txnForm.amount" min="0" step="0.01">
                                     </div>
                                     <div class="form-group">
@@ -135,7 +138,7 @@
                                                     <span v-else>{{ inv.email || '-' }}</span>
                                                 </td>
                                                 <td>
-                                                    <input v-if="editingId === inv.investor_id" type="text" class="form-control form-control-sm" v-model="editForm.contact_no">
+                                                    <input v-if="editingId === inv.investor_id" type="text" class="form-control form-control-sm" v-model="editForm.contact_no" maxlength="11">
                                                     <span v-else>{{ inv.contact_no || '-' }}</span>
                                                 </td>
                                                 <td class="text-right">
@@ -149,7 +152,7 @@
                                                     </template>
                                                     <template v-else>
                                                         <button class="btn btn-primary btn-sm" @click="startEdit(inv)"><i class="fas fa-pen"></i></button>
-                                                        <a :href="pdfUrl(inv.investor_id, 'monthly')" target="_blank" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf"></i></a>
+                                                        <a :href="pdfUrl(inv.investor_id)" target="_blank" class="btn btn-danger btn-sm" title="Monthly PDF"><i class="fas fa-file-pdf"></i></a>
                                                     </template>
                                                 </td>
                                             </tr>
@@ -214,13 +217,18 @@ export default {
         },
     },
     mounted() {
-        this.txnForm.transaction_date = this.getTodaysDate();
+        this.txnForm.transaction_date = this.getNowDateTime();
         this.loadInvestors();
     },
     methods: {
-        getTodaysDate() {
+        getNowDateTime() {
             const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const pad = (value) => String(value).padStart(2, '0');
+
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        },
+        getTodaysDate() {
+            return this.getNowDateTime();
         },
         loadInvestors() {
             axios.get('/api/investor/list')
@@ -292,7 +300,7 @@ export default {
         resetTxnForm() {
             this.txnForm = {
                 investor_id: this.txnForm.investor_id,
-                transaction_date: this.getTodaysDate(),
+                transaction_date: this.getNowDateTime(),
                 transaction_type: 'deposit',
                 metal_type: 'gold',
                 weight_grams: '',
@@ -339,8 +347,12 @@ export default {
                     toastr['error'](err.response?.data?.message || 'Update failed.');
                 });
         },
-        pdfUrl(investorId, period) {
-            return pdfUrl(`/investor/pdf/${investorId}/${period}`);
+        pdfUrl(investorId) {
+            const d = new Date();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const today = `${d.getFullYear()}-${month}-${day}`;
+            return pdfUrl(`/investor/pdf/${investorId}/monthly?date=${today}`);
         },
     },
 };

@@ -8,8 +8,12 @@ require('../../node_modules/toastr/build/toastr.min.js');
 
 import App from './components/App';
 import router from '../router';
+import { CURRENCY_CODE, formatCurrency } from './currency';
 
 window.Vue = require('vue').default;
+
+Vue.prototype.$currencyCode = CURRENCY_CODE;
+Vue.prototype.$formatCurrency = formatCurrency;
 
 Vue.component('pagination', require('laravel-vue-pagination'));
 

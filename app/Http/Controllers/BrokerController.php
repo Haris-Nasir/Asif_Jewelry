@@ -38,7 +38,7 @@ class BrokerController extends Controller
     public function insertBroker(Request $request){
         $validated = validator($request->all(),[
             'brokerName' => 'required | regex:/^[\pL\s]+$/u | max:70',
-            'contactNo' => 'required | numeric | digits:10'
+            'contactNo' => 'required | numeric | digits_between:10,11'
         ]);
 
         if($validated->fails()){
@@ -94,7 +94,7 @@ class BrokerController extends Controller
     public function updateBroker(Request $request, $brokerId){
         $validated = validator($request->all(),[
             'editBrokerName' => 'required | regex:/^[\pL\s]+$/u | max:70',
-            'editContactNo' => 'required | numeric | digits:10'
+            'editContactNo' => 'required | numeric | digits_between:10,11'
         ]);
 
         if($validated->fails()){

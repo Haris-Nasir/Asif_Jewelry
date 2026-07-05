@@ -33,7 +33,7 @@
                                                 v-model="filters.toDate" />
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="company-name" class="text-md">Company Name</label>
+                                            <label for="company-name" class="text-md">Customer</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.customers"
@@ -138,7 +138,7 @@
                                                 <tr v-for="invoice in filters.invoices.data" v-bind:key="
                                                         invoice.invoice_mst_id
                                                     ">
-                                                    <td> {{ invoice.invoice_date }}</td>
+                                                    <td class="text-nowrap">{{ formatDate(invoice.invoice_date) }}</td>
                                                     <td> {{ invoice.due_date }}</td>
                                                     <td>{{ invoice.challan_no }}</td>
                                                     <td>{{ invoice.customer_company_name }}</td>
@@ -301,7 +301,7 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-1 text-md">
-                                            Rate
+                                            Rate / gram (Rs.)
                                         </div>
                                         <div class="col-md-3">
                                             <input type="text" class="form-control text-right"
@@ -380,7 +380,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="rate" class="text-md col-form-label">Rate <span
+                                            <label for="rate" class="text-md col-form-label">Rate / gram (Rs.) <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -454,6 +454,7 @@
     import swal from "sweetalert2";
     import { pdfUrl } from "../../auth";
     import { ModelSelect } from "vue-search-select";
+    import { formatDate } from "../../currency";
 
     toastr.options = {
         closeButton: true,
@@ -571,6 +572,7 @@
             this.filters.toDate = this.getTodaysDate();
         },
         methods: {
+            formatDate,
             pdfLink(path) {
                 return pdfUrl(path);
             },
@@ -733,7 +735,8 @@
                         let totalAmountOfPage = 0;
 
                         for (let i = 0; i < invoices.length; i++) {
-                            let totalAmount = invoices[i].total_qty * invoices[i].rate;
+                            let billableWeight = parseFloat(invoices[i].weight_grams) || parseFloat(invoices[i].total_qty);
+                            let totalAmount = billableWeight * invoices[i].rate;
                             let gstAmount = totalAmount * invoices[i].gst_percentage * 0.01;
                             let netAmount = totalAmount + gstAmount;
 
@@ -763,19 +766,22 @@
                         }
                         else if (response.data.status == 1) {
                             console.log(response);
-                            this.invoiceToView.invoiceDate = this.getStdDate(response.data.data.challan_mst_for_invoice_from_challan.challan_date);
+                            this.invoiceToView.invoiceDate = formatDate(response.data.data.challan_mst_for_invoice_from_challan.challan_date);
                             this.invoiceToView.invoiceNo = response.data.data.challan_mst_for_invoice_from_challan.challan_no;
                             this.invoiceToView.customer = response.data.data.challan_mst_for_invoice_from_challan.customer.customer_company_name;
                             this.invoiceToView.broker = response.data.data.challan_mst_for_invoice_from_challan.broker.broker_name + ' - ' + response.data.data.challan_mst_for_invoice_from_challan.broker.broker_contact_no;
                             this.invoiceToView.customerMobileNo = response.data.data.challan_mst_for_invoice_from_challan.customer.customer_contact_no;
                             this.invoiceToView.customerGSTNo = response.data.data.challan_mst_for_invoice_from_challan.customer.customer_gst_no;
                             this.invoiceToView.quality = response.data.data.challan_mst_for_invoice_from_challan.quality.quality_name;
-                            this.invoiceToView.noOfUnits = response.data.data.challan_mst_for_invoice_from_challan.challan_details.length;
+                            this.invoiceToView.noOfUnits = response.data.data.challan_mst_for_invoice_from_challan.total_qty;
                             this.invoiceToView.qty = response.data.data.challan_mst_for_invoice_from_challan.total_qty;
                             this.invoiceToView.unit = response.data.data.challan_mst_for_invoice_from_challan.qty_unit;
                             this.invoiceToView.rate = response.data.data.rate;
                             this.invoiceToView.gstPercentage = response.data.data.gst_percentage;
-                            let totalAmount = this.invoiceToView.qty * this.invoiceToView.rate;
+                            let billableWeight = parseFloat(response.data.data.weight_grams)
+                                || parseFloat(response.data.data.challan_mst_for_invoice_from_challan?.weight_grams)
+                                || parseFloat(this.invoiceToView.qty);
+                            let totalAmount = billableWeight * this.invoiceToView.rate;
                             let gstAmount = totalAmount * this.invoiceToView.gstPercentage * 0.01;
                             let netAmount = totalAmount + gstAmount;
                             this.invoiceToView.totalAmount = totalAmount.toFixed(2);
