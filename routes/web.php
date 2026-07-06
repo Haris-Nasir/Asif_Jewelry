@@ -15,7 +15,7 @@ use App\Http\Controllers\PDFController;
 */
 
 Route::get('/', function () {
-    return 'APP IS WORKING';
+    return view('app');
 });
 
 Route::get('/challan/pdf/{challan_id}', [PDFController::class,"generateChallanPDF"])->middleware('pdf.auth');
