@@ -35,7 +35,11 @@ RUN NODE_OPTIONS=--openssl-legacy-provider npm run production
 # Laravel runtime settings
 ENV APP_ENV=production
 ENV APP_DEBUG=false
+ENV PORT=8000
+
+RUN chmod -R 775 storage bootstrap/cache \
+    && chmod +x docker/start.sh
 
 EXPOSE 8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["./docker/start.sh"]
