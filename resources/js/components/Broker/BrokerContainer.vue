@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <NewBroker
                         @refreshBrokersTable="refreshBrokersTable"
@@ -10,8 +7,6 @@
                     <SMBroker ref="form" />
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

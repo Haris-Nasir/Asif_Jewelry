@@ -147,17 +147,21 @@ class KarigarController extends Controller
             'karigarId' => 'required|integer|exists:tbl_karigars,karigar_id',
             'jobDate' => 'required|date',
             'metalType' => 'required|in:gold,silver',
+            'sellQualityId' => 'required|integer|exists:tbl_sell_qualities,sell_quality_id',
             'issuedWeightGrams' => 'required|numeric|min:0.001',
+            'issuedPieces' => 'nullable|integer|min:1',
             'itemDescription' => 'nullable|max:255',
             'notes' => 'nullable|max:500',
         ]);
 
         if ($validated->fails()) {
+            $firstError = $validated->errors()->first();
+
             return response()->json([
                 'status' => -1,
-                'message' => 'The given data was invalid.',
+                'message' => $firstError ?: 'The given data was invalid.',
                 'errors' => $validated->errors(),
-            ]);
+            ], 422);
         }
 
         try {
@@ -165,7 +169,9 @@ class KarigarController extends Controller
                 'karigar_id' => (int) $request->input('karigarId'),
                 'job_date' => $request->input('jobDate'),
                 'metal_type' => $request->input('metalType'),
+                'sell_quality_id' => (int) $request->input('sellQualityId'),
                 'issued_weight_grams' => (float) $request->input('issuedWeightGrams'),
+                'issued_pieces' => (int) ($request->input('issuedPieces') ?? 1),
                 'item_description' => $request->input('itemDescription'),
                 'notes' => $request->input('notes'),
             ], optional($request->user())->id);
@@ -218,6 +224,32 @@ class KarigarController extends Controller
             ], optional($request->user())->id);
 
             return response()->json(['status' => 1, 'message' => 'Finished goods received from karigar (inward recorded).']);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => -1, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function deleteJob(Request $request, $jobId)
+    {
+        $job = tbl_karigar_job::where('karigar_job_id', $jobId)
+            ->where('karigar_job_status', true)
+            ->first();
+
+        if (!$job) {
+            return response()->json(['status' => -1, 'message' => 'Job not found.'], 404);
+        }
+
+        if ($job->invoice_mst_id) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Cannot delete: this job is linked to an invoice.',
+            ], 422);
+        }
+
+        try {
+            $this->karigarService->deleteJob($job, optional($request->user())->id);
+
+            return response()->json(['status' => 1, 'message' => 'Karigar job deleted and stock restored.']);
         } catch (\Throwable $e) {
             return response()->json(['status' => -1, 'message' => $e->getMessage()], 422);
         }

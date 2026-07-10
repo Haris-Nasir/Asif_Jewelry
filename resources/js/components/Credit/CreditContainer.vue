@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <NewCredit
                         @refreshDetailsTable="refreshDetailsTable"
@@ -10,8 +7,6 @@
                     <SMCredit ref="form" />
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

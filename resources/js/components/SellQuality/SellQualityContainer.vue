@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <NewSellQuality
                         @refreshSellQualityTable = "refreshSellQualityTable"
@@ -10,8 +7,6 @@
                     <SMSellQuality ref="form"/>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

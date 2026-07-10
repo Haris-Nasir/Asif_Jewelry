@@ -1,0 +1,599 @@
+// Internal app shell — matches Login page gold/silver jewelry theme
+
+.jewelry-app {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+    .jewelry-app-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+        background: #1c1c22;
+    }
+
+    .jewelry-app-bg .metal-bg {
+        position: absolute;
+        inset: 0;
+    }
+
+    .jewelry-app-bg .metal-bg--silver {
+        background: linear-gradient(
+            135deg,
+            #2a2a32 0%,
+            #3d3d48 38%,
+            #5a5a66 48%,
+            transparent 48%
+        );
+        opacity: 0.85;
+    }
+
+    .jewelry-app-bg .metal-bg--gold {
+        background: linear-gradient(
+            135deg,
+            transparent 0%,
+            transparent 46%,
+            #8b6914 46%,
+            #c9a227 62%,
+            #f0d875 78%,
+            #b8860b 100%
+        );
+        opacity: 0.55;
+    }
+
+    .jewelry-app-bg .jewelry-float {
+        position: absolute;
+        border-radius: 18px;
+        opacity: 0.1;
+    }
+
+    .jewelry-app-bg .jewelry-float--gold {
+        width: 180px;
+        height: 72px;
+        top: 8%;
+        right: 6%;
+        background: linear-gradient(145deg, #fff3b0, #d4af37 40%, #8b6914);
+        transform: rotate(24deg);
+    }
+
+    .jewelry-app-bg .jewelry-float--silver {
+        width: 150px;
+        height: 60px;
+        bottom: 10%;
+        left: 4%;
+        background: linear-gradient(145deg, #ffffff, #c8c8c8 45%, #787878);
+        transform: rotate(-16deg);
+    }
+
+    // Keep wrapper above the decorative background only — do not override
+    // .main-sidebar position (AdminLTE layout-fixed needs position: fixed).
+    > .wrapper {
+        position: relative;
+        z-index: 1;
+    }
+
+    // Single content area — pages must not add a second full content-wrapper offset
+    > .wrapper > .content-wrapper {
+        background: transparent !important;
+        min-height: calc(100vh - 3.5rem - 57px);
+        padding-top: 0;
+    }
+
+    // Legacy pages still wrap with content-wrapper + empty aside
+    aside:empty {
+        display: none !important;
+    }
+
+    .content-wrapper .content-wrapper {
+        margin-left: 0 !important;
+        padding-top: 0 !important;
+        min-height: 0 !important;
+        background: transparent !important;
+    }
+
+    .content {
+        padding-top: 0.25rem;
+    }
+
+    // Header — same height/border as brand-link so edges meet cleanly
+    .main-header.navbar {
+        background: linear-gradient(
+            90deg,
+            rgba(28, 28, 34, 0.96) 0%,
+            rgba(42, 37, 32, 0.96) 50%,
+            rgba(28, 28, 34, 0.96) 100%
+        ) !important;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+        box-shadow: none;
+        backdrop-filter: blur(8px);
+        min-height: calc(3.5rem + 1px);
+        height: calc(3.5rem + 1px);
+        padding-top: 0;
+        padding-bottom: 0;
+        align-items: center;
+    }
+
+    .main-header .nav-link {
+        color: rgba(255, 255, 255, 0.88) !important;
+        padding-top: 0.55rem;
+        padding-bottom: 0.55rem;
+    }
+
+    .main-header .btn-danger {
+        background: linear-gradient(145deg, #c0392b, #922b21);
+        border: none;
+        border-radius: 999px;
+        padding: 0.35rem 1rem;
+        box-shadow: 0 4px 12px rgba(192, 57, 43, 0.35);
+    }
+
+    // Sidebar
+    .main-sidebar.jewelry-sidebar {
+        background: linear-gradient(
+            180deg,
+            #1a1a20 0%,
+            #252530 55%,
+            #1e1e26 100%
+        ) !important;
+        border-right: 1px solid rgba(212, 175, 55, 0.2);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .main-sidebar .brand-link {
+        background: linear-gradient(
+            90deg,
+            rgba(28, 28, 34, 0.96) 0%,
+            rgba(42, 37, 32, 0.96) 100%
+        );
+        border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+    }
+
+    .main-sidebar .brand-text {
+        font-weight: 600 !important;
+        letter-spacing: 0.04em;
+        background: linear-gradient(90deg, #d4af37, #f0e6c8, #c0c0c0);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    // Section headers (Home, Setup, Stock…)
+    .main-sidebar .nav-section {
+        list-style: none;
+        margin: 0.35rem 0 0.15rem;
+        padding: 0;
+    }
+
+    .main-sidebar .nav-section + .nav-section {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin-top: 0.55rem;
+        padding-top: 0.35rem;
+    }
+
+    .main-sidebar .nav-section__toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: calc(100% - 1rem);
+        margin: 0 0.5rem;
+        padding: 0.4rem 0.55rem;
+        border: 0;
+        background: transparent;
+        color: rgba(240, 216, 117, 0.75);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: color 0.15s ease, background 0.15s ease;
+    }
+
+    .main-sidebar .nav-section__toggle:hover {
+        color: #f0d875;
+        background: rgba(212, 175, 55, 0.08);
+    }
+
+    .main-sidebar .nav-section__toggle .fas {
+        font-size: 0.65rem;
+        opacity: 0.7;
+    }
+
+    .main-sidebar .nav-section__items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    // Menu item hover / active — gold highlight like current UI
+    .main-sidebar .nav-sidebar .nav-item > .nav-link {
+        border-radius: 10px;
+        margin: 2px 0.5rem;
+        color: rgba(255, 255, 255, 0.9);
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link:hover {
+        background: rgba(212, 175, 55, 0.18) !important;
+        color: #f0d875 !important;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link:hover .nav-icon,
+    .main-sidebar .nav-sidebar .nav-item > .nav-link:hover p {
+        color: #f0d875 !important;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link.active,
+    .main-sidebar .nav-sidebar .nav-item.menu-open > .nav-link {
+        background: linear-gradient(
+            90deg,
+            rgba(212, 175, 55, 0.22),
+            rgba(192, 192, 192, 0.12)
+        ) !important;
+        color: #fff !important;
+        box-shadow: inset 3px 0 0 #d4af37;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link.active .nav-icon,
+    .main-sidebar .nav-sidebar .nav-item > .nav-link.active p,
+    .main-sidebar .nav-sidebar .nav-item.menu-open > .nav-link .nav-icon,
+    .main-sidebar .nav-sidebar .nav-item.menu-open > .nav-link p {
+        color: #fff !important;
+    }
+
+    .main-sidebar .nav-treeview > .nav-item > .nav-link.active {
+        background: rgba(212, 175, 55, 0.15) !important;
+        color: #f4e4a6 !important;
+    }
+
+    .main-sidebar .nav-treeview > .nav-item > .nav-link:hover {
+        background: rgba(212, 175, 55, 0.12) !important;
+        color: #f0d875 !important;
+    }
+
+    // Footer
+    .main-footer {
+        background: rgba(26, 26, 32, 0.92) !important;
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+        color: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(6px);
+    }
+
+    .main-footer a {
+        color: #d4af37;
+    }
+
+    // Cards across all internal pages
+    .card {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 253, 248, 0.98) 0%,
+            rgba(255, 255, 255, 0.96) 100%
+        );
+        border-radius: 16px;
+        border: 1px solid rgba(212, 175, 55, 0.22);
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.22);
+        overflow: hidden;
+        color: #2a2520;
+    }
+
+    .card-body {
+        color: #2a2520;
+        flex: 0 1 auto;
+    }
+
+  // Dark-mode body sets light text globally — restore readable labels on cream cards
+    .card label,
+    .card .col-form-label,
+    .card .text-md,
+    .card .form-group > label,
+    .content-wrapper label:not(.nav-link) {
+        color: #4a4035 !important;
+    }
+
+    .card-header,
+    .card-header .card-title,
+    .card-primary > .card-header,
+    .card-info > .card-header,
+    .card-success > .card-header,
+    .card-warning > .card-header,
+    .card-danger > .card-header {
+        color: #fff !important;
+    }
+
+    .card .text-muted,
+    .card small.text-muted {
+        color: #7a7060 !important;
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+        font-weight: 600;
+    }
+
+    .card-primary .card-header,
+    .card-info .card-header,
+    .card-success .card-header,
+    .card-warning .card-header,
+    .card-danger .card-header {
+        border-top: 3px solid transparent;
+        border-image: linear-gradient(
+                90deg,
+                #c0c0c0,
+                #d4af37,
+                #f4e4a6,
+                #d4af37,
+                #c0c0c0
+            )
+            1;
+    }
+
+    .card-primary .card-header {
+        background: linear-gradient(90deg, #2c5282, #3182ce) !important;
+        color: #fff;
+    }
+
+    .card-info .card-header {
+        background: linear-gradient(90deg, #2b6cb0, #4299e1) !important;
+        color: #fff;
+    }
+
+    .card-success .card-header {
+        background: linear-gradient(90deg, #276749, #38a169) !important;
+        color: #fff;
+    }
+
+    .card-warning .card-header {
+        background: linear-gradient(90deg, #975a16, #d69e2e) !important;
+        color: #fff;
+    }
+
+    .card-danger .card-header {
+        background: linear-gradient(90deg, #9b2c2c, #e53e3e) !important;
+        color: #fff;
+    }
+
+    // Tables
+    .table {
+        color: #2a2520;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid rgba(212, 175, 55, 0.25);
+        color: #5c4a1a;
+        font-weight: 600;
+    }
+
+    // Form controls
+    .form-control {
+        border-radius: 10px;
+        border-color: rgba(212, 175, 55, 0.25);
+        background: linear-gradient(180deg, #faf6ee 0%, #f8f4ec 100%);
+        color: #2a2520;
+    }
+
+    .form-control::placeholder {
+        color: #9a9080;
+    }
+
+    .form-control:focus {
+        border-color: rgba(212, 175, 55, 0.55);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        color: #2a2520;
+    }
+
+    .ui.selection.dropdown,
+    .ui.search.selection.dropdown {
+        border-radius: 10px !important;
+        border-color: rgba(212, 175, 55, 0.25) !important;
+        background: linear-gradient(180deg, #faf6ee 0%, #f8f4ec 100%) !important;
+        color: #2a2520 !important;
+    }
+
+    .ui.selection.dropdown > .text,
+    .ui.search.dropdown > input.search {
+        color: #2a2520 !important;
+    }
+
+    // Primary buttons — gold accent
+    .btn-primary {
+        background: linear-gradient(145deg, #d4af37, #b8860b);
+        border: none;
+        border-radius: 999px;
+        font-weight: 600;
+        box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(145deg, #f0d875, #d4af37);
+    }
+
+    .btn-success {
+        border-radius: 999px;
+        font-weight: 600;
+    }
+
+    .fade-enter-active,
+    .fade-leave-active {
+        transition: opacity 0.2s ease;
+    }
+
+    .fade-enter,
+    .fade-leave-to {
+        opacity: 0;
+    }
+}
+
+// Light theme — clear contrast when user toggles off dark mode
+body.jewelry-theme-light .jewelry-app {
+    .jewelry-app-bg {
+        background: #f0ebe0;
+    }
+
+    .jewelry-app-bg .metal-bg--silver {
+        background: linear-gradient(
+            135deg,
+            #e8e4dc 0%,
+            #f5f2eb 38%,
+            #faf8f4 48%,
+            transparent 48%
+        );
+        opacity: 0.95;
+    }
+
+    .jewelry-app-bg .metal-bg--gold {
+        opacity: 0.35;
+    }
+
+    .jewelry-app-bg .jewelry-float {
+        opacity: 0.06;
+    }
+
+    .main-header.navbar {
+        background: linear-gradient(
+            90deg,
+            #fffdf8 0%,
+            #faf6ee 50%,
+            #fffdf8 100%
+        ) !important;
+        border-bottom: 1px solid rgba(184, 134, 11, 0.25);
+        box-shadow: none;
+    }
+
+    .main-header .nav-link {
+        color: #3d3010 !important;
+    }
+
+    .main-sidebar.jewelry-sidebar {
+        background: linear-gradient(
+            180deg,
+            #fffdf8 0%,
+            #faf6ee 55%,
+            #f5f0e6 100%
+        ) !important;
+        border-right: 1px solid rgba(184, 134, 11, 0.2);
+        box-shadow: 2px 0 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .main-sidebar .brand-link {
+        background: linear-gradient(
+            90deg,
+            #fffdf8 0%,
+            #faf6ee 100%
+        );
+        border-bottom: 1px solid rgba(184, 134, 11, 0.25);
+    }
+
+    .main-sidebar .nav-section + .nav-section {
+        border-top-color: rgba(184, 134, 11, 0.15);
+    }
+
+    .main-sidebar .nav-section__toggle {
+        color: #8b6914;
+    }
+
+    .main-sidebar .nav-section__toggle:hover {
+        color: #5c4a1a;
+        background: rgba(212, 175, 55, 0.12);
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link {
+        color: #4a4035 !important;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link:hover {
+        background: rgba(212, 175, 55, 0.16) !important;
+        color: #8b6914 !important;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link:hover .nav-icon,
+    .main-sidebar .nav-sidebar .nav-item > .nav-link:hover p {
+        color: #8b6914 !important;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link.active,
+    .main-sidebar .nav-sidebar .nav-item.menu-open > .nav-link {
+        color: #2a2520 !important;
+    }
+
+    .main-sidebar .nav-sidebar .nav-item > .nav-link.active .nav-icon,
+    .main-sidebar .nav-sidebar .nav-item > .nav-link.active p,
+    .main-sidebar .nav-sidebar .nav-item.menu-open > .nav-link .nav-icon,
+    .main-sidebar .nav-sidebar .nav-item.menu-open > .nav-link p {
+        color: #2a2520 !important;
+    }
+
+    .main-footer {
+        background: rgba(255, 253, 248, 0.96) !important;
+        border-top: 1px solid rgba(184, 134, 11, 0.2);
+        color: #6b6050;
+    }
+
+    .card {
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-body {
+        flex: 0 1 auto;
+    }
+}
+
+// Dark mode: AdminLTE sets white text on inputs — override so typed text stays visible on cream fields
+body.dark-mode .jewelry-app {
+    .form-control,
+    .custom-select,
+    select,
+    textarea {
+        background: linear-gradient(180deg, #faf6ee 0%, #f8f4ec 100%) !important;
+        color: #2a2520 !important;
+        border-color: rgba(212, 175, 55, 0.25) !important;
+        -webkit-text-fill-color: #2a2520;
+    }
+
+    .form-control:focus,
+    .custom-select:focus,
+    select:focus,
+    textarea:focus {
+        color: #2a2520 !important;
+        -webkit-text-fill-color: #2a2520;
+    }
+
+    .form-control::placeholder {
+        color: #9a9080 !important;
+        opacity: 1;
+    }
+
+    .form-control:-webkit-autofill,
+    .form-control:-webkit-autofill:hover,
+    .form-control:-webkit-autofill:focus {
+        -webkit-text-fill-color: #2a2520 !important;
+        box-shadow: 0 0 0 1000px #faf6ee inset !important;
+    }
+
+    .ui.selection.dropdown,
+    .ui.search.selection.dropdown {
+        background: linear-gradient(180deg, #faf6ee 0%, #f8f4ec 100%) !important;
+        color: #2a2520 !important;
+        border-color: rgba(212, 175, 55, 0.25) !important;
+    }
+
+    .ui.selection.dropdown > .text,
+    .ui.selection.visible.dropdown > .text:not(.default),
+    .ui.search.dropdown > input.search {
+        color: #2a2520 !important;
+        -webkit-text-fill-color: #2a2520 !important;
+    }
+
+    .ui.dropdown .menu {
+        background: #fffdf8 !important;
+    }
+
+    .ui.dropdown .menu > .item {
+        color: #2a2520 !important;
+    }
+
+    .ui.dropdown .menu > .item:hover,
+    .ui.dropdown .menu > .item.active {
+        color: #2a2520 !important;
+    }
+}

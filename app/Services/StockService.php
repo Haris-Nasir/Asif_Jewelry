@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\tbl_karigar_job;
 use App\Models\tbl_metal_balance;
 use App\Models\tbl_sell_quality;
 use App\Models\tbl_stock_ledger;
@@ -22,27 +23,150 @@ class StockService
     {
         $quality = tbl_sell_quality::find($sellQualityId);
         $qualityName = $quality ? $quality->quality_name : 'Unknown item';
-
-        $purchasedWeight = (float) tbl_stock_ledger::where('sell_quality_id', $sellQualityId)
-            ->where('transaction_type', 'purchase')
-            ->sum('weight_grams');
-        $soldWeight = (float) tbl_stock_ledger::where('sell_quality_id', $sellQualityId)
-            ->where('transaction_type', 'sale')
-            ->sum('weight_grams');
-
-        $purchasedPieces = (int) tbl_stock_ledger::where('sell_quality_id', $sellQualityId)
-            ->where('transaction_type', 'purchase')
-            ->sum('quantity_pieces');
-        $soldPieces = (int) tbl_stock_ledger::where('sell_quality_id', $sellQualityId)
-            ->where('transaction_type', 'sale')
-            ->sum('quantity_pieces');
+        $availablePieceWeights = $this->getAvailablePieceWeights($sellQualityId);
 
         return [
             'sell_quality_id' => $sellQualityId,
             'quality_name' => $qualityName,
-            'weight_grams' => round(max($purchasedWeight - $soldWeight, 0), 3),
-            'pieces' => max($purchasedPieces - $soldPieces, 0),
+            'weight_grams' => round(array_sum($availablePieceWeights), 3),
+            'pieces' => count($availablePieceWeights),
+            'available_piece_weights' => $availablePieceWeights,
+            'available_piece_weights_label' => $this->formatAvailablePieceWeights($availablePieceWeights),
+            'grams_per_piece' => $this->getUniformGramsPerPiece($availablePieceWeights),
         ];
+    }
+
+    public function getAvailablePieceWeights(int $sellQualityId): array
+    {
+        $events = tbl_stock_ledger::where('sell_quality_id', $sellQualityId)
+            ->where(function ($query) {
+                $query->whereIn('transaction_type', ['purchase', 'sale'])
+                    ->orWhere(function ($nested) {
+                        $nested->where('transaction_type', 'adjustment')
+                            ->where('reference_type', 'karigar_issue');
+                    });
+            })
+            ->orderBy('created_at')
+            ->orderBy('stock_ledger_id')
+            ->get(['transaction_type', 'weight_grams', 'quantity_pieces']);
+
+        $pool = [];
+
+        foreach ($events as $event) {
+            $pieces = (int) $event->quantity_pieces;
+            $weight = (float) $event->weight_grams;
+
+            if ($pieces <= 0 || $weight <= 0) {
+                continue;
+            }
+
+            $weightPerPiece = round($weight / $pieces, 3);
+
+            if ($event->transaction_type === 'purchase') {
+                for ($i = 0; $i < $pieces; $i++) {
+                    $pool[] = $weightPerPiece;
+                }
+                continue;
+            }
+
+            for ($i = 0; $i < $pieces; $i++) {
+                $removed = false;
+
+                foreach ($pool as $idx => $pieceWeight) {
+                    if (abs($pieceWeight - $weightPerPiece) <= 0.0005) {
+                        unset($pool[$idx]);
+                        $removed = true;
+                        break;
+                    }
+                }
+
+                if (!$removed && !empty($pool)) {
+                    array_shift($pool);
+                }
+            }
+        }
+
+        return array_values($pool);
+    }
+
+    public function getGramsPerPiece(int $sellQualityId): ?float
+    {
+        return $this->getUniformGramsPerPiece($this->getAvailablePieceWeights($sellQualityId));
+    }
+
+    public function assertSaleWeightMatchesStockRatio(
+        int $sellQualityId,
+        float $totalWeightGrams,
+        int $pieces,
+        string $actionVerb = 'sell'
+    ): void {
+        if ($pieces <= 0 || $totalWeightGrams <= 0) {
+            return;
+        }
+
+        $balance = $this->getQualityBalance($sellQualityId);
+        $name = $balance['quality_name'];
+        $weightPerPiece = round($totalWeightGrams / $pieces, 3);
+        $available = $balance['available_piece_weights'];
+
+        if (empty($available)) {
+            throw new RuntimeException(
+                'No stock for "' . $name . '". Purchase this item type first.'
+            );
+        }
+
+        $matchingCount = 0;
+        foreach ($available as $pieceWeight) {
+            if (abs($pieceWeight - $weightPerPiece) <= 0.0005) {
+                $matchingCount++;
+            }
+        }
+
+        if ($matchingCount < $pieces) {
+            throw new RuntimeException(
+                'Cannot ' . $actionVerb . ' ' . $pieces . ' pc at ' . number_format($weightPerPiece, 3) . 'g each for "' . $name . '". '
+                . 'Available piece weights: ' . $balance['available_piece_weights_label'] . '.'
+            );
+        }
+    }
+
+    protected function getUniformGramsPerPiece(array $availablePieceWeights): ?float
+    {
+        if (empty($availablePieceWeights)) {
+            return null;
+        }
+
+        $first = round($availablePieceWeights[0], 3);
+
+        foreach ($availablePieceWeights as $pieceWeight) {
+            if (abs($pieceWeight - $first) > 0.0005) {
+                return null;
+            }
+        }
+
+        return $first;
+    }
+
+    protected function formatAvailablePieceWeights(array $weights): string
+    {
+        if (empty($weights)) {
+            return 'none';
+        }
+
+        $counts = [];
+
+        foreach ($weights as $weight) {
+            $key = number_format($weight, 3, '.', '');
+            $counts[$key] = ($counts[$key] ?? 0) + 1;
+        }
+
+        $parts = [];
+
+        foreach ($counts as $weight => $count) {
+            $parts[] = $count > 1 ? $count . ' x ' . $weight . 'g' : $weight . 'g';
+        }
+
+        return implode(', ', $parts);
     }
 
     public function getAllQualityBalances()
@@ -252,6 +376,48 @@ class StockService
         });
     }
 
+    public function reverseSale(
+        string $referenceType,
+        int $referenceId,
+        ?int $userId = null
+    ): void {
+        $entry = tbl_stock_ledger::where('reference_type', $referenceType)
+            ->where('reference_id', $referenceId)
+            ->where('transaction_type', 'sale')
+            ->first();
+
+        if (!$entry) {
+            return;
+        }
+
+        DB::transaction(function () use ($entry, $referenceType, $referenceId, $userId) {
+            $weightGrams = (float) $entry->weight_grams;
+            $pieces = (int) $entry->quantity_pieces;
+            $balance = $this->getBalance($entry->metal_type);
+
+            $balance->total_weight_grams = round((float) $balance->total_weight_grams + $weightGrams, 3);
+            $balance->total_pieces = (int) $balance->total_pieces + $pieces;
+            $balance->save();
+
+            tbl_stock_ledger::create([
+                'metal_type' => $entry->metal_type,
+                'sell_quality_id' => $entry->sell_quality_id,
+                'transaction_type' => 'adjustment',
+                'weight_grams' => $weightGrams,
+                'quantity_pieces' => $pieces,
+                'rate_per_gram' => $entry->rate_per_gram,
+                'amount' => $entry->amount ? -((float) $entry->amount) : null,
+                'balance_weight_after' => $balance->total_weight_grams,
+                'reference_type' => $referenceType . '_reversal',
+                'reference_id' => $referenceId,
+                'created_by' => $userId,
+                'notes' => 'Sale deleted — stock restored (' . $pieces . ' pcs, ' . $weightGrams . 'g)',
+            ]);
+
+            $entry->delete();
+        });
+    }
+
     public function resolveMetalTypeFromCategory(int $categoryId): string
     {
         $category = DB::table('tbl_sell_quality_categories')
@@ -261,18 +427,100 @@ class StockService
         return $category && $category->metal_type === 'silver' ? 'silver' : 'gold';
     }
 
-    public function issueMetalToKarigar(
+    public function reverseKarigarIssue(int $referenceId, ?int $userId = null): bool
+    {
+        $entry = tbl_stock_ledger::where('reference_type', 'karigar_issue')
+            ->where('reference_id', $referenceId)
+            ->where('transaction_type', 'adjustment')
+            ->first();
+
+        if (!$entry) {
+            return false;
+        }
+
+        DB::transaction(function () use ($entry, $referenceId, $userId) {
+            $weightGrams = (float) $entry->weight_grams;
+            $pieces = (int) $entry->quantity_pieces;
+            $balance = $this->getBalance($entry->metal_type);
+
+            $balance->total_weight_grams = round((float) $balance->total_weight_grams + $weightGrams, 3);
+            $balance->total_pieces = (int) $balance->total_pieces + $pieces;
+            $balance->save();
+
+            tbl_stock_ledger::create([
+                'metal_type' => $entry->metal_type,
+                'sell_quality_id' => $entry->sell_quality_id,
+                'transaction_type' => 'adjustment',
+                'weight_grams' => $weightGrams,
+                'quantity_pieces' => $pieces,
+                'rate_per_gram' => $entry->rate_per_gram,
+                'amount' => $entry->amount ? -((float) $entry->amount) : null,
+                'balance_weight_after' => $balance->total_weight_grams,
+                'reference_type' => 'karigar_issue_reversal',
+                'reference_id' => $referenceId,
+                'created_by' => $userId,
+                'notes' => 'Karigar job deleted — stock restored (' . $pieces . ' pcs, ' . $weightGrams . 'g)',
+            ]);
+
+            $entry->delete();
+        });
+
+        return true;
+    }
+
+    public function restoreLegacyKarigarIssue(tbl_karigar_job $job, ?int $userId = null): void
+    {
+        $weightGrams = (float) $job->issued_weight_grams;
+        if ($weightGrams <= 0) {
+            return;
+        }
+
+        DB::transaction(function () use ($job, $weightGrams, $userId) {
+            $balance = $this->getBalance($job->metal_type);
+            $balance->total_weight_grams = round((float) $balance->total_weight_grams + $weightGrams, 3);
+            $balance->save();
+
+            tbl_stock_ledger::create([
+                'metal_type' => $job->metal_type,
+                'sell_quality_id' => $job->sell_quality_id,
+                'transaction_type' => 'adjustment',
+                'weight_grams' => $weightGrams,
+                'quantity_pieces' => 0,
+                'rate_per_gram' => $this->getAverageRate($job->metal_type),
+                'amount' => null,
+                'balance_weight_after' => $balance->total_weight_grams,
+                'reference_type' => 'karigar_issue_reversal',
+                'reference_id' => (int) $job->karigar_job_id,
+                'created_by' => $userId,
+                'notes' => 'Legacy karigar job deleted — metal stock restored (' . $weightGrams . 'g)',
+            ]);
+        });
+    }
+
+    public function issueQualityToKarigar(
         string $metalType,
+        int $sellQualityId,
         float $weightGrams,
+        int $pieces,
         int $referenceId,
         ?int $userId = null,
         ?string $notes = null
     ): tbl_stock_ledger {
-        if ($weightGrams <= 0) {
-            throw new RuntimeException('Issue weight must be greater than zero.');
+        if ($weightGrams <= 0 || $pieces <= 0) {
+            throw new RuntimeException('Issue weight and pieces must be greater than zero.');
         }
 
-        return DB::transaction(function () use ($metalType, $weightGrams, $referenceId, $userId, $notes) {
+        return DB::transaction(function () use (
+            $metalType,
+            $sellQualityId,
+            $weightGrams,
+            $pieces,
+            $referenceId,
+            $userId,
+            $notes
+        ) {
+            $this->assertSaleWeightMatchesStockRatio($sellQualityId, $weightGrams, $pieces, 'issue to karigar');
+
             $balance = $this->getBalance($metalType);
             $available = (float) $balance->total_weight_grams;
 
@@ -287,14 +535,15 @@ class StockService
             $amount = round($weightGrams * $avgRate, 2);
 
             $balance->total_weight_grams = round($available - $weightGrams, 3);
+            $balance->total_pieces = max(0, (int) $balance->total_pieces - $pieces);
             $balance->save();
 
             return tbl_stock_ledger::create([
                 'metal_type' => $metalType,
-                'sell_quality_id' => null,
+                'sell_quality_id' => $sellQualityId,
                 'transaction_type' => 'adjustment',
                 'weight_grams' => $weightGrams,
-                'quantity_pieces' => 0,
+                'quantity_pieces' => $pieces,
                 'rate_per_gram' => $avgRate,
                 'amount' => $amount,
                 'balance_weight_after' => $balance->total_weight_grams,
@@ -304,6 +553,17 @@ class StockService
                 'notes' => $notes ?: 'Metal issued to karigar',
             ]);
         });
+    }
+
+    /** @deprecated Use issueQualityToKarigar */
+    public function issueMetalToKarigar(
+        string $metalType,
+        float $weightGrams,
+        int $referenceId,
+        ?int $userId = null,
+        ?string $notes = null
+    ): tbl_stock_ledger {
+        throw new RuntimeException('Karigar outward requires an item type from stock.');
     }
 
     public function returnMetalFromKarigar(
@@ -360,5 +620,7 @@ class StockService
                 . $balance['pieces'] . ', requested: ' . $pieces . '.'
             );
         }
+
+        $this->assertSaleWeightMatchesStockRatio($sellQualityId, $weightGrams, $pieces);
     }
 }

@@ -23,26 +23,41 @@
 
 @import "vue-search-select/dist/VueSearchSelect.css";
 
+@import "jewelry-shell";
+
 /* Sidebar scrolls independently; wheel over sidebar does not move main content */
 .layout-fixed .main-sidebar {
     overflow: hidden;
 }
 
+/* Match AdminLTE navbar height so brand bottom edge aligns with header */
+.layout-navbar-fixed .wrapper .brand-link,
 .layout-fixed .main-sidebar .brand-link {
-    position: sticky;
-    top: 0;
-    z-index: 10;
     display: flex;
     align-items: center;
-    gap: 0.65rem;
-    padding: 0.75rem 0.85rem;
+    gap: 0.55rem;
+    box-sizing: border-box;
+    height: calc(3.5rem + 1px);
+    min-height: calc(3.5rem + 1px);
+    max-height: calc(3.5rem + 1px);
+    padding: 0 0.85rem;
+    line-height: 1.2;
+    overflow: hidden;
+}
+
+.layout-fixed .main-sidebar .sidebar {
+    height: calc(100vh - 3.5rem - 1px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .main-sidebar .brand-link .brand-image {
     float: none;
-    width: 38px;
-    height: 38px;
-    max-height: 38px;
+    width: 33px;
+    height: 33px;
+    max-height: 33px;
     margin: 0;
     object-fit: cover;
     object-position: center;
@@ -53,16 +68,9 @@
 }
 
 .main-sidebar .brand-link .brand-text {
+    font-size: 1.05rem;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.layout-fixed .main-sidebar .sidebar {
-    height: calc(100vh - 3.5rem);
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
 }

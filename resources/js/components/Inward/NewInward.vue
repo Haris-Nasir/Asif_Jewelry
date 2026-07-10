@@ -1,9 +1,6 @@
 <!-- Template is to design New Inward UI -->
 <template>
-  <div>
-    <aside></aside>
-    <div class="content-wrapper">
-      <section class="content">
+  <section class="content">
         <div class="container-fluid">
           <div>
             <div class="row">
@@ -345,8 +342,6 @@
           </div>
         </div>
       </section>
-    </div>
-  </div>
 </template>
 <!-- Template is to design New Inward UI end -->
 

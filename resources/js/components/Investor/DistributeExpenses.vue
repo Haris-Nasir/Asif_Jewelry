@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-lg-5 mt-3">
@@ -240,8 +237,6 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

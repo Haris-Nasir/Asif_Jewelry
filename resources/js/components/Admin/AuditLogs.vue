@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <div class="col-md-12 mt-3">
                         <div class="card card-primary">
@@ -76,8 +73,6 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

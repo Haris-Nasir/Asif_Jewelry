@@ -9,10 +9,19 @@ use Illuminate\Database\Query\Builder;
 use App\Models\tbl_challan_details;
 use App\Models\tbl_challan_mst;
 use App\Models\tbl_sell_quality;
+use App\Services\StockService;
 use Carbon\Carbon;
+use RuntimeException;
 
 class ChallanController extends Controller
 {
+    protected StockService $stockService;
+
+    public function __construct(StockService $stockService)
+    {
+        $this->stockService = $stockService;
+    }
+
     /* will sends challans to datatale according to request recieved */
     function getChallans(Request $req){
         $paginate = request("paginate", 10);
@@ -247,6 +256,19 @@ class ChallanController extends Controller
                     return response()->json($res);
                 }
             }
+        }
+
+        try {
+            $this->stockService->assertSaleWeightMatchesStockRatio(
+                (int) $sellQualityId,
+                $weightGrams,
+                max(1, (int) round((float) $totalQty))
+            );
+        } catch (RuntimeException $e) {
+            return response()->json([
+                'status' => -1,
+                'message' => $e->getMessage(),
+            ]);
         }
 
         DB::beginTransaction();

@@ -11,11 +11,7 @@ NOTES
 -->
 
 <template>
-    <div>
-        <aside></aside>
-
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12 mt-3">
@@ -217,6 +213,10 @@ NOTES
                                             <p class="text-muted small mt-2 mb-0">
                                                 In stock for <strong>{{ qualityStock.quality_name }}</strong>:
                                                 {{ qualityStock.weight_grams }}g, {{ qualityStock.pieces }} pcs
+                                                <span v-if="qualityStock.available_piece_weights_label">
+                                                    (pieces in stock:
+                                                    {{ qualityStock.available_piece_weights_label }})
+                                                </span>
                                             </p>
                                         </div>
                                     </div>
@@ -233,8 +233,6 @@ NOTES
                     </div>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 
@@ -522,6 +520,39 @@ NOTES
 
             },
 
+            validateSaleWeightRatio() {
+                if (
+                    !this.qualityStock ||
+                    !this.qualityStock.available_piece_weights ||
+                    !this.qualityStock.available_piece_weights.length
+                ) {
+                    return true;
+                }
+
+                const pieces = parseInt(this.totalQty || 0, 10);
+                const totalWeight = parseFloat(this.weightGrams || 0);
+
+                if (pieces <= 0 || totalWeight <= 0) {
+                    return true;
+                }
+
+                const weightPerPiece = Number((totalWeight / pieces).toFixed(3));
+                const matchingCount = this.qualityStock.available_piece_weights.filter(
+                    weight => Math.abs(parseFloat(weight) - weightPerPiece) <= 0.0005
+                ).length;
+
+                if (matchingCount < pieces) {
+                    toastr.error(
+                        'Cannot sell ' + pieces + ' pc at ' + weightPerPiece.toFixed(3) +
+                        'g each for "' + this.qualityStock.quality_name + '". Available piece weights: ' +
+                        this.qualityStock.available_piece_weights_label + '.'
+                    );
+                    return false;
+                }
+
+                return true;
+            },
+
             //this function will be called when we click on add challan button and take all the field values and enter it into the database by calling api
             addChallan() {
                 //below addData objects conatins all field values information
@@ -556,10 +587,19 @@ NOTES
                             }
                         }
 
+                        if (!this.validateSaleWeightRatio()) {
+                            return;
+                        }
+
                         axios.post('../api/challan/insert', addData)
                             .then((res) => {
                                 //status -1 indiactes an error 0 indictaes an warning and 1 indictaes an success message 
                                 if (res.data.status == -1) {
+                                    if (res.data.message && (!res.data.errors || !Object.keys(res.data.errors).length)) {
+                                        toastr["error"](res.data.message);
+                                        return;
+                                    }
+
                                     var errormsg = res.data.errors;
 
                                     try {

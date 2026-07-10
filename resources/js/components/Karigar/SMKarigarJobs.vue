@@ -40,6 +40,15 @@
                 <button v-if="job.job_status === 'issued'" class="btn btn-sm btn-primary" @click="openReturn(job)">
                   Record Inward
                 </button>
+                <button
+                  v-if="!job.invoice_mst_id"
+                  class="btn btn-sm btn-danger"
+                  :class="{ 'ml-1': job.job_status === 'issued' }"
+                  @click="deleteJob(job)"
+                  title="Delete job and restore stock"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
                 <span v-else-if="job.invoice_mst_id" class="text-muted small">Invoiced</span>
               </td>
             </tr>
@@ -152,7 +161,7 @@ export default {
       this.returnJob = job;
       this.returnForm = {
         returnDate: getNowDateTime(),
-        sellQualityId: '',
+        sellQualityId: job.sell_quality_id || '',
         returnedWeightGrams: job.issued_weight_grams,
         returnedPieces: 1,
         wastageGrams: 0,
@@ -181,6 +190,40 @@ export default {
           toastr.error(res.data.message);
         }
       }).catch(err => toastr.error(err.response?.data?.message || 'Return failed.'));
+    },
+    deleteJob(job) {
+      swal.fire({
+        title: 'Delete karigar job?',
+        html: 'This will remove the job and <strong>restore stock</strong> to your inventory.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Delete',
+      }).then(result => {
+        if (!result.isConfirmed) {
+          return;
+        }
+        axios.delete('/api/karigar/jobs/' + job.karigar_job_id).then(res => {
+          if (res.data.status === 1) {
+            swal.fire('Deleted', res.data.message, 'success');
+            if (this.returnJob && this.returnJob.karigar_job_id === job.karigar_job_id) {
+              this.returnJob = null;
+            }
+            this.loadJobs();
+            this.$emit('job-changed');
+          } else {
+            toastr.error(res.data.message);
+          }
+        }).catch(err => {
+          const status = err.response?.status;
+          const data = err.response?.data;
+          const msg = data?.message
+            || (data?.errors && Object.values(data.errors).flat()[0])
+            || (status === 404 ? 'Delete route not found — restart the server or run: php artisan route:clear' : null)
+            || 'Delete failed.';
+          toastr.error(msg);
+        });
+      });
     },
   },
 };
