@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <NewExpenseManagement
                         @refreashExpenseTable="refreashExpenseTable"
@@ -10,8 +7,6 @@
                     <SMExpenseManagement ref="form" />
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

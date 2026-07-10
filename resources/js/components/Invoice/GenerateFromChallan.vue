@@ -1,9 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12 mt-3">
@@ -220,19 +216,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
-                                        <div class="col-md-2">
-                                            <label class="text-md col-form-label">Refinery Cost (Rs.)</label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="number" step="0.01" min="0" class="text-md text-right form-control"
-                                                v-model="refineryCost">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <small class="text-muted">Applied to gold and silver sales</small>
-                                        </div>
-                                    </div>
-
                                     <div class="form-group row" v-if="metalType === 'gold'">
                                         <div class="col-md-2">
                                             <label class="text-md col-form-label">Polish / g (Rs.)</label>
@@ -273,7 +256,7 @@
                                             <input type="text" class="text-md text-right form-control" :value="totalProcessingCost" disabled>
                                         </div>
                                         <div class="col-md-8">
-                                            <small class="text-muted">Deducted from profit (refinery + polish or mazduri)</small>
+                                            <small class="text-muted">Deducted from profit (polish for gold, mazduri for silver)</small>
                                         </div>
                                     </div>
 
@@ -322,8 +305,6 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>
@@ -412,7 +393,6 @@
                 branch: '',
 
                 metalType: 'gold',
-                refineryCost: '',
                 polishRatePerGram: '',
                 mazduriCost: '',
                 sellQualityId: '',
@@ -429,13 +409,22 @@
                 return Number.isNaN(total) ? '0.00' : total.toFixed(2);
             },
             totalProcessingCost() {
-                const refinery = parseFloat(this.refineryCost || 0) || 0;
-                const polish = parseFloat(this.polishCostTotal || 0) || 0;
-                const mazduri = this.showMazduriField ? (parseFloat(this.mazduriCost || 0) || 0) : 0;
-                return (refinery + polish + mazduri).toFixed(2);
+                const polish = this.metalType === 'gold'
+                    ? (parseFloat(this.polishCostTotal || 0) || 0)
+                    : 0;
+                return (polish + this.appliedMazduriAmount).toFixed(2);
+            },
+            appliedMazduriAmount() {
+                if (this.metalType === 'silver') {
+                    return parseFloat(this.mazduriCost || 0) || 0;
+                }
+                if (this.karigarJobId) {
+                    return parseFloat(this.mazduriCost || 0) || 0;
+                }
+                return 0;
             },
             showMazduriField() {
-                return this.metalType === 'silver' || !!this.karigarJobId;
+                return this.metalType === 'silver';
             },
             mazduriHelpText() {
                 if (this.karigarJobId) {
@@ -600,7 +589,6 @@
                 this.grandTotal = '';
 
                 this.metalType = 'gold';
-                this.refineryCost = '';
                 this.polishRatePerGram = '';
                 this.mazduriCost = '';
                 this.sellQualityId = '';
@@ -685,7 +673,6 @@
 
                 addData["fromDate"] = fromDate;
                 addData["toDate"] = toDate;
-                addData["refineryCost"] = this.refineryCost || 0;
                 addData["polishRatePerGram"] = this.polishRatePerGram || 0;
                 addData["mazduriCost"] = this.mazduriCost || 0;
                 if (this.karigarJobId) {

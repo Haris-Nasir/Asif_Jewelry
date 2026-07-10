@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <NewInwardQuality
                         @refreshInwardQualityTable = "refreshInwardQualityTable"
@@ -10,8 +7,6 @@
                     <SMInwardQuality ref="form"/>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

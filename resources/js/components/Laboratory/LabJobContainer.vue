@@ -1,15 +1,10 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <NewLabJob @refreshLabJobs="refreshLabJobs" />
                     <SMLabJob ref="labJobsTable" />
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

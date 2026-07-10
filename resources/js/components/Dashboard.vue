@@ -1,12 +1,9 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <div class="row dashboard-stat-row">
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-warning">
+                            <div class="small-box dashboard-stat-box stat-gold">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(goldWeight + 'g')]">
                                         {{ goldWeight }}<sup class="stat-unit">g</sup>
@@ -19,7 +16,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-secondary">
+                            <div class="small-box dashboard-stat-box stat-silver">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(silverWeight + 'g')]">
                                         {{ silverWeight }}<sup class="stat-unit">g</sup>
@@ -32,7 +29,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-info has-footer">
+                            <div class="small-box dashboard-stat-box stat-blue has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(inward)]">
                                         <span v-html="inward"></span>
@@ -48,7 +45,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-success has-footer">
+                            <div class="small-box dashboard-stat-box stat-emerald has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(invoice)]">
                                         <span v-html="invoice"></span>
@@ -64,7 +61,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-primary">
+                            <div class="small-box dashboard-stat-box stat-indigo">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(profit)]">{{ profit }}</h3>
                                     <p class="stat-label">Profit (FY)</p>
@@ -76,7 +73,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-orange has-footer">
+                            <div class="small-box dashboard-stat-box stat-amber has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(credit)]">{{ credit }}</h3>
                                     <p class="stat-label">Credit</p>
@@ -90,7 +87,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-dark has-footer">
+                            <div class="small-box dashboard-stat-box stat-slate has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(labJobs)]">
                                         <span v-html="labJobs"></span>
@@ -106,7 +103,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-teal">
+                            <div class="small-box dashboard-stat-box stat-teal">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(labProfit)]">{{ labProfit }}</h3>
                                     <p class="stat-label">Lab Profit (FY)</p>
@@ -118,7 +115,7 @@
                         </div>
 
                         <div class="col-xl-4 col-lg-4 col-md-6 col-6 mt-3">
-                            <div class="small-box dashboard-stat-box bg-danger has-footer">
+                            <div class="small-box dashboard-stat-box stat-rose has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(expense)]">{{ expense }}</h3>
                                     <p class="stat-label">Expense</p>
@@ -133,8 +130,6 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>
@@ -241,10 +236,53 @@ export default {
     min-height: 8.5rem;
     display: flex;
     flex-direction: column;
-    border-radius: 0.45rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
     overflow: hidden;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.stat-gold {
+    background: linear-gradient(145deg, #f0d875 0%, #d4af37 45%, #8b6914 100%);
+}
+
+.stat-silver {
+    background: linear-gradient(145deg, #f5f5f5 0%, #c0c0c0 45%, #6b6b6b 100%);
+    color: #1a1a1a;
+}
+
+.stat-silver .stat-fy {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.stat-blue {
+    background: linear-gradient(145deg, #63b3ed 0%, #3182ce 55%, #2c5282 100%);
+}
+
+.stat-emerald {
+    background: linear-gradient(145deg, #68d391 0%, #38a169 55%, #276749 100%);
+}
+
+.stat-indigo {
+    background: linear-gradient(145deg, #7f9cf5 0%, #5a67d8 55%, #434190 100%);
+}
+
+.stat-amber {
+    background: linear-gradient(145deg, #fbd38d 0%, #ed8936 55%, #c05621 100%);
+}
+
+.stat-slate {
+    background: linear-gradient(145deg, #4a5568 0%, #2d3748 55%, #1a202c 100%);
+}
+
+.stat-teal {
+    background: linear-gradient(145deg, #81e6d9 0%, #38b2ac 55%, #285e61 100%);
+}
+
+.stat-rose {
+    background: linear-gradient(145deg, #fc8181 0%, #e53e3e 55%, #9b2c2c 100%);
 }
 
 .dashboard-stat-box:hover {
@@ -323,16 +361,13 @@ export default {
     position: relative;
     z-index: 1;
     margin-top: auto;
+    background: rgba(0, 0, 0, 0.18) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
 }
 
-.bg-orange {
-    background-color: #fd7e14 !important;
-    color: #fff;
-}
-
-.bg-teal {
-    background-color: #20c997 !important;
-    color: #fff;
+.stat-silver .small-box-footer {
+    background: rgba(0, 0, 0, 0.12) !important;
+    color: rgba(0, 0, 0, 0.85) !important;
 }
 
 @media (max-width: 576px) {

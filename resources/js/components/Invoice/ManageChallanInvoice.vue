@@ -1,8 +1,5 @@
 <template>
-    <div>
-        <aside></aside>
-        <div class="content-wrapper">
-            <section class="content">
+    <section class="content">
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12 mt-3">
@@ -205,22 +202,22 @@
 
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-1 text-md">
-                                            Invoice Date:
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Invoice Date</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceDate"
                                                 disabled>
                                         </div>
-                                        <div class="col-md-1 text-md">
-                                            Challan Date:
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Challan Date</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceDate"
                                                 disabled>
                                         </div>
-                                        <div class="col-md-2 text-md mt-2">
-                                            ChallanNo/InvoiceNo:
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Challan No / Invoice No</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceNo"
@@ -228,124 +225,113 @@
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md mt-2">
-                                            Customer
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Customer</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.customer"
                                                 disabled>
                                         </div>
                                         <div class="col-md-2">
-
+                                            <label class="text-md mt-1">Broker</label>
                                         </div>
-                                        <div class="col-md-1 text-md mt-2">
-                                            Broker
-                                        </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.broker"
                                                 disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            Customer Mobile
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Customer Mobile</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control"
                                                 v-model="invoiceToView.customerMobileNo" disabled>
                                         </div>
-                                        <div class="col-md-2"></div>
-                                        <div class="col-md-1 text-md">
-                                            Customer GST No
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Customer GST No</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control"
                                                 v-model="invoiceToView.customerGSTNo" disabled>
                                         </div>
-
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            Quality
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Quality</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.quality"
                                                 disabled>
                                         </div>
-                                    </div>
-                                    <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            No Of Units
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">No Of Units</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.noOfUnits"
                                                 disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            Total Quantity
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Total Quantity</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.qty" disabled>
                                         </div>
-                                        <div class="col-md-2"></div>
-                                        <div class="col-md-1 text-md">
-                                            Unit
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Unit</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.unit"
                                                 disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            Rate / gram (Rs.)
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Rate / gram (Rs.)</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.rate" disabled>
                                         </div>
-                                        <div class="col-md-2"></div>
-                                        <div class="col-md-1 text-md">
-                                            GST
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">GST</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.gstPercentage" disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            Total Amount
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Total Amount</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.totalAmount" disabled>
                                         </div>
-                                        <div class="col-md-2"></div>
-                                        <div class="col-md-1 text-md">
-                                            GST Amount
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">GST Amount</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.gstAmount" disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
-                                        <div class="col-md-1 text-md">
-                                            Bank
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Bank</label>
                                         </div>
-                                        <div class="col-md-3">
-                                            <input type="text" class="form-control text-right"
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control"
                                                 v-model="invoiceToView.bankDetails" disabled>
                                         </div>
-                                        <div class="col-md-2"></div>
-                                        <div class="col-md-1 text-md">
-                                            Net Amount
+                                        <div class="col-md-2">
+                                            <label class="text-md mt-1">Net Amount</label>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.netAmount" disabled>
                                         </div>
@@ -444,8 +430,6 @@
                     </div>
                 </div>
             </section>
-        </div>
-    </div>
 </template>
 
 <script>

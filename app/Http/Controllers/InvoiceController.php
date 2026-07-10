@@ -211,9 +211,9 @@ class InvoiceController extends Controller
             $processingCosts = $this->resolveSaleProcessingCosts(
                 $metalType,
                 $weightGrams,
-                $request->input('refineryCost'),
                 $request->input('polishRatePerGram'),
-                $mazduriCost
+                $mazduriCost,
+                $request->filled('karigarJobId')
             );
             $baseAmount = round($weightGrams * (float) $rate, 2);
             $gstAmount = round($baseAmount * ((float) $gstPercentage / 100), 2);
@@ -650,6 +650,19 @@ class InvoiceController extends Controller
             ], 422);
         }
 
+        try {
+            $this->stockService->assertSaleWeightMatchesStockRatio(
+                (int) $qualityId,
+                $totalWeightGrams,
+                $pieces
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => -1,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
         $financialYear = $this->getFinancialYearOfDate($invoiceDate);
 
         if(tbl_invoice_mst::hasChallanOrInvoiceWithInGivenInvoceNoAndFinancialYear($invoiceNo, $financialYear)){
@@ -669,9 +682,9 @@ class InvoiceController extends Controller
             $processingCosts = $this->resolveSaleProcessingCosts(
                 $metalType,
                 $totalWeightGrams,
-                $req->input('refineryCost'),
                 $req->input('polishRatePerGram'),
-                $mazduriCost
+                $mazduriCost,
+                $req->filled('karigarJobId')
             );
             $baseAmount = round($totalWeightGrams * $rate, 2);
             $gstAmount = round($baseAmount * ($gstPercentage / 100), 2);
@@ -950,12 +963,41 @@ class InvoiceController extends Controller
         DB::beginTransaction();
         try{
             $invoiceMst = tbl_invoice_mst::find($invoiceMstId);
+
+            if (!$invoiceMst || !$invoiceMst->invoice_mst_status) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Invoice not found or already deleted.',
+                ]);
+            }
+
+            $challanMst = tbl_challan_mst::find($invoiceMstId);
+
+            if (!$challanMst || !$challanMst->challan_mst_status) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Sales bill not found for this invoice.',
+                ]);
+            }
+
+            $this->stockService->reverseSale(
+                'sale',
+                (int) $invoiceMstId,
+                optional($req->user())->id
+            );
+
+            if ($invoiceMst->karigar_job_id) {
+                tbl_karigar_job::where('karigar_job_id', $invoiceMst->karigar_job_id)
+                    ->update(['invoice_mst_id' => null]);
+            }
+
             $invoiceMst->invoice_mst_status = false;
             $invoiceMst->save();
 
-            $challanMst = tbl_challan_mst::find($invoiceMstId);
-            $challanMst->challan_mst_status = false;
             $invoiceNo = $challanMst->challan_no;
+            $challanMst->challan_mst_status = false;
             $challanMst->save();
 
             DB::commit();
@@ -963,14 +1005,14 @@ class InvoiceController extends Controller
             return response()->json(array(
                 "status" => 1,
                 'invoiceNo' => $invoiceNo,
-                "message" => "Invoice Deleted Successfully"
+                "message" => "Invoice deleted and stock restored."
             ));
         }
-        catch(Exception $e){
+        catch(\Exception $e){
             DB::rollback();
             return response()->json(array(
                 "status" => -1,
-                "message" => "Invoice Deletation Failed"
+                "message" => $e->getMessage() ?: "Invoice deletion failed."
             ));
         }
     }
@@ -1000,9 +1042,9 @@ class InvoiceController extends Controller
         $processingCosts = $this->resolveSaleProcessingCosts(
             $metalType,
             $weightGrams,
-            $refineryCost ?? $invoice->refinery_cost,
             $polishRatePerGram ?? $invoice->polish_rate_per_gram,
-            $mazduriCost ?? $invoice->mazduri_cost
+            $mazduriCost ?? $invoice->mazduri_cost,
+            (bool) $invoice->karigar_job_id
         );
 
         $baseAmount = round($weightGrams * $rate, 2);
@@ -1047,25 +1089,30 @@ class InvoiceController extends Controller
     private function resolveSaleProcessingCosts(
         string $metalType,
         float $weightGrams,
-        $refineryCost,
         $polishRatePerGram,
-        $mazduriCost
+        $mazduriCost,
+        bool $karigarJobLinked = false
     ): array {
-        $refinery = round(max((float) ($refineryCost ?? 0), 0), 2);
         $polishRate = $metalType === 'gold'
             ? round(max((float) ($polishRatePerGram ?? 0), 0), 2)
             : 0.0;
         $polishTotal = $metalType === 'gold'
             ? round($polishRate * $weightGrams, 2)
             : 0.0;
-        $mazduri = round(max((float) ($mazduriCost ?? 0), 0), 2);
+
+        $mazduri = 0.0;
+        if ($metalType === 'silver') {
+            $mazduri = round(max((float) ($mazduriCost ?? 0), 0), 2);
+        } elseif ($karigarJobLinked) {
+            $mazduri = round(max((float) ($mazduriCost ?? 0), 0), 2);
+        }
 
         return [
-            'refinery_cost' => $refinery,
+            'refinery_cost' => 0.0,
             'polish_rate_per_gram' => $polishRate,
             'polish_cost' => $polishTotal,
             'mazduri_cost' => $mazduri,
-            'processing_cost_total' => round($refinery + $polishTotal + $mazduri, 2),
+            'processing_cost_total' => round($polishTotal + $mazduri, 2),
         ];
     }
 

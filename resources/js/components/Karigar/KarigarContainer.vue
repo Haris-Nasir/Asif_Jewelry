@@ -1,16 +1,11 @@
 <template>
-  <div>
-    <aside></aside>
-    <div class="content-wrapper">
-      <section class="content">
+  <section class="content">
         <div class="container-fluid">
           <IssueKarigar :karigars="karigarList" @job-changed="refreshAll" />
           <SMKarigarJobs ref="jobsTable" @job-changed="refreshAll" />
           <ManageKarigars @karigars-changed="loadKarigars" />
         </div>
       </section>
-    </div>
-  </div>
 </template>
 
 <script>

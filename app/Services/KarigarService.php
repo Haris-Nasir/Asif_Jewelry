@@ -18,10 +18,26 @@ class KarigarService
     public function issue(array $data, ?int $userId = null): tbl_karigar_job
     {
         return DB::transaction(function () use ($data, $userId) {
+            $pieces = max(1, (int) ($data['issued_pieces'] ?? 1));
+            $sellQualityId = (int) $data['sell_quality_id'];
+
+            $quality = \App\Models\tbl_sell_quality::with('category')->find($sellQualityId);
+            if (!$quality || !$quality->category) {
+                throw new RuntimeException('Invalid item type selected.');
+            }
+
+            $categoryMetal = $quality->category->metal_type ?? null;
+            if ($categoryMetal && $categoryMetal !== $data['metal_type']) {
+                throw new RuntimeException(
+                    'Metal type does not match the selected item type category (' . $categoryMetal . ').'
+                );
+            }
+
             $job = new tbl_karigar_job();
             $job->karigar_id = (int) $data['karigar_id'];
             $job->job_date = $data['job_date'];
             $job->metal_type = $data['metal_type'];
+            $job->sell_quality_id = $sellQualityId;
             $job->issued_weight_grams = (float) $data['issued_weight_grams'];
             $job->item_description = $data['item_description'] ?? null;
             $job->notes = $data['notes'] ?? null;
@@ -29,9 +45,11 @@ class KarigarService
             $job->created_by = $userId;
             $job->save();
 
-            $this->stockService->issueMetalToKarigar(
+            $this->stockService->issueQualityToKarigar(
                 $job->metal_type,
+                $sellQualityId,
                 (float) $job->issued_weight_grams,
+                $pieces,
                 (int) $job->karigar_job_id,
                 $userId,
                 'Karigar outward #' . $job->karigar_job_id
@@ -80,6 +98,36 @@ class KarigarService
             );
 
             return $job->fresh(['karigar', 'quality']);
+        });
+    }
+
+    public function deleteJob(tbl_karigar_job $job, ?int $userId = null): void
+    {
+        if ($job->invoice_mst_id) {
+            throw new RuntimeException('Cannot delete: this job is linked to an invoice.');
+        }
+
+        if (!$job->karigar_job_status) {
+            throw new RuntimeException('Job not found.');
+        }
+
+        DB::transaction(function () use ($job, $userId) {
+            $jobId = (int) $job->karigar_job_id;
+
+            if ($job->job_status === 'returned') {
+                $this->stockService->reversePurchase('karigar_return', $jobId, $userId);
+            }
+
+            if (in_array($job->job_status, ['issued', 'returned'], true)) {
+                $reversed = $this->stockService->reverseKarigarIssue($jobId, $userId);
+                if (!$reversed) {
+                    $this->stockService->restoreLegacyKarigarIssue($job, $userId);
+                }
+            }
+
+            $job->karigar_job_status = false;
+            $job->job_status = 'cancelled';
+            $job->save();
         });
     }
 
