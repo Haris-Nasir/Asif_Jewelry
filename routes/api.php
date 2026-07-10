@@ -22,6 +22,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LabJobController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KarigarController;
+use App\Http\Controllers\AuditLogController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
