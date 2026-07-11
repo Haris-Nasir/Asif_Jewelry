@@ -7,7 +7,7 @@
                                 <div class="card-header">
                                     <h3 class="card-title">Stock Ledger</h3>
                                 </div>
-                                <div class="card-body table-responsive">
+                                <div class="card-body">
                                     <div class="row mb-3">
                                         <div class="col-md-2">
                                             <label class="text-md">Metal</label>
@@ -55,7 +55,8 @@
                                     </div>
 
                                     <h5 class="mt-2">Stock by Item Type</h5>
-                                    <table class="table table-bordered table-sm mb-3">
+                                    <div class="table-responsive mb-3">
+                                    <table class="table table-bordered table-sm mb-0">
                                         <thead>
                                             <tr>
                                                 <th>Item Type</th>
@@ -74,7 +75,9 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
 
+                                    <div class="table-responsive">
                                     <table class="table table-bordered table-striped table-sm">
                                         <thead class="text-md">
                                             <tr>
@@ -106,6 +109,7 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
 
                                     <div class="row mt-3">
                                         <div class="col-sm-6 offset-5">

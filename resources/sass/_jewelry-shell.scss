@@ -533,10 +533,29 @@
             padding-right: 0.5rem;
         }
 
+        // Keep page from expanding sideways; tables get their own slider
+        .content-wrapper,
+        .content,
+        .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .row,
+        [class*="col-"] {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .card {
+            max-width: 100%;
+        }
+
         .card-body {
             padding: 0.85rem 0.75rem;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+            overflow-x: hidden;
+            min-width: 0;
         }
 
         .card-footer {
@@ -544,6 +563,49 @@
             flex-wrap: wrap;
             gap: 0.5rem;
             align-items: center;
+        }
+
+        // Horizontal slider for data tables (Manage Purchase, Karigar jobs, etc.)
+        .table-responsive,
+        .card-body.table-responsive {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+
+        .table-responsive > .table,
+        .card-body.table-responsive > .table,
+        .card-body.table-responsive .table {
+            width: max-content;
+            min-width: 100%;
+            margin-bottom: 0;
+        }
+
+        .table-responsive .table th,
+        .table-responsive .table td,
+        .card-body.table-responsive .table th,
+        .card-body.table-responsive .table td {
+            white-space: nowrap;
+        }
+
+        // Workers permissions cell can wrap a bit; keep action button readable
+        .worker-perm-list {
+            display: inline-block;
+            max-width: 14rem;
+            white-space: normal;
+            word-break: break-word;
+            font-size: 0.8rem;
+            line-height: 1.35;
+        }
+
+        // Keep data tables usable via horizontal scroll
+        .table {
+            margin-bottom: 0;
         }
 
         // Inline flex rows used across Customer, Inward, Vendor, Credit, etc.
@@ -616,16 +678,6 @@
         .ui.selection.dropdown,
         .ui.search.selection.dropdown {
             display: block !important;
-        }
-
-        // Keep data tables usable via horizontal scroll
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         .main-header.navbar {

@@ -59,33 +59,48 @@
                                 <div class="card-header">
                                     <h3 class="card-title">Workers</h3>
                                 </div>
-                                <div class="card-body table-responsive">
+                                <div class="card-body">
+                                    <div class="table-responsive">
                                     <table class="table table-bordered table-sm">
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
                                                 <th>Email</th>
                                                 <th>Permissions</th>
-                                                <th width="15%">Action</th>
+                                                <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr v-for="worker in workers" :key="worker.id">
                                                 <td>{{ worker.name }}</td>
                                                 <td>{{ worker.email }}</td>
-                                                <td>{{ (worker.permissions || defaultPermissions).join(', ') }}</td>
+                                                <td>
+                                                    <span class="worker-perm-list">{{ (worker.permissions || defaultPermissions).join(', ') }}</span>
+                                                </td>
                                                 <td class="text-center">
-                                                    <button class="btn btn-primary btn-sm" @click="selectWorker(worker)">Edit Permissions</button>
+                                                    <div class="table-actions">
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-primary btn-sm table-actions__label"
+                                                            title="Edit Permissions"
+                                                            @click="selectWorker(worker)"
+                                                        >
+                                                            <i class="fas fa-user-edit"></i>
+                                                            <span class="d-none d-md-inline ml-1">Edit Permissions</span>
+                                                            <span class="d-inline d-md-none ml-1">Edit</span>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+    </section>
 </template>
 
 <script>

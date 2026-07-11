@@ -11,7 +11,8 @@
           </select>
         </div>
       </div>
-      <div class="card-body table-responsive">
+      <div class="card-body">
+        <div class="table-responsive">
         <table class="table table-bordered table-sm">
           <thead>
             <tr>
@@ -70,6 +71,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
         <pagination :data="jobs" @pagination-change-page="loadJobs"></pagination>
       </div>
     </div>
