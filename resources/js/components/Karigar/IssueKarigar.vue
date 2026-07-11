@@ -69,7 +69,7 @@
         <div class="form-group row">
           <label class="col-md-2 col-form-label">Item to make</label>
           <div class="col-md-10">
-            <input type="text" class="form-control" v-model="form.itemDescription" placeholder="Optional notes, e.g. ring set...">
+            <input type="text" class="form-control" v-model="form.itemDescription" placeholder="Ready product name, e.g. Angothi (matches Item Type on inward)">
           </div>
         </div>
         <div class="form-group row">

@@ -129,7 +129,7 @@
                                                 >
                                             </span>
                                         </th>
-                                        <th width="20%">Action</th>
+                                        <th width="110" class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -145,8 +145,8 @@
                                         <td>{{ category.expense_category }}</td>
 
                                         <td class="text-center">
-                                            <button
-                                                class="btn btn-primary text-md btn-sm"
+                        <div class="table-actions"><button type="button"
+                                                class="btn btn-primary btn-sm"
                                                 @click="
                                                     editCategoryBtn(
                                                         category.expense_category_id,
@@ -157,13 +157,14 @@
                                                 <i class="fas fa-pen"></i>
                                             </button>
 
-                                            <button
-                                                class="btn btn-danger text-md btn-sm"
+                                            <button type="button"
+                                                class="btn btn-danger btn-sm"
                                                 @click="deleteCategory(category.expense_category_id)"
                                             >
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </td>
+                        </div>
+                      </td>
                                     </tr>
                                 </tbody>
                             </table>

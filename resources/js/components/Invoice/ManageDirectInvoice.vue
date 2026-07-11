@@ -129,7 +129,7 @@ NOTES
                                                     <th class="text-right">Sold Amount</th>
                                                     <th class="text-right">Profit</th>
                                                     <th class="text-right">Net Amount</th>
-                                                    <th width="15%">Action</th>
+                                                    <th width="140" class="text-center">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="text-md">
@@ -150,10 +150,12 @@ NOTES
                                                     <td class="text-right">{{ invoice.profit_amount != null ? invoice.profit_amount : '-' }}</td>
                                                     <td class="text-right">{{ invoice.netAmount }}</td>
                                                     <td class="text-center">
-                                                        <a :href="pdfLink('/directinvoice/pdf/' + invoice.invoice_mst_id)" target="_blank" class="btn btn-danger btn-sm text-md"><i class="fas fa-file-pdf"></i></a>
-                                                        <button class="btn btn-info btn-sm text-md" @click="viewInvoice(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-eye"></i></button>
-                                                        <button class="btn btn-primary btn-sm text-md" @click="editInvoice(invoice.invoice_mst_id)"><i class="fas fa-pen"></i></button>
-                                                        <button class="btn btn-danger btn-sm text-md" @click="confirmInvoiceDeletation(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-trash"></i></button>
+                                                        <div class="table-actions">
+                                                            <a :href="pdfLink('/directinvoice/pdf/' + invoice.invoice_mst_id)" target="_blank" class="btn btn-danger btn-sm" title="PDF"><i class="fas fa-file-pdf"></i></a>
+                                                            <button type="button" class="btn btn-info btn-sm" title="View" @click="viewInvoice(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-eye"></i></button>
+                                                            <button type="button" class="btn btn-primary btn-sm" title="Edit" @click="editInvoice(invoice.invoice_mst_id)"><i class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-danger btn-sm" title="Delete" @click="confirmInvoiceDeletation(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-trash"></i></button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             </tbody>

@@ -108,13 +108,14 @@
                                         </span>
                                     </td>
                                     <td class="text-center text-nowrap">
-                                        <button class="btn btn-primary btn-sm" @click="startEdit(job)" title="Edit">
+                        <div class="table-actions"><button type="button" class="btn btn-primary btn-sm" @click="startEdit(job)" title="Edit">
                                             <i class="fas fa-pen"></i>
                                         </button>
-                                        <button class="btn btn-danger btn-sm ml-1" @click="deleteJob(job.lab_job_id)" title="Delete">
+                                        <button type="button" class="btn btn-danger btn-sm ml-1" @click="deleteJob(job.lab_job_id)" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                    </td>
+                        </div>
+                      </td>
                                 </tr>
                                 <tr v-if="!jobs.data || !jobs.data.length">
                                     <td colspan="11" class="text-center text-muted py-3">No laboratory jobs found.</td>

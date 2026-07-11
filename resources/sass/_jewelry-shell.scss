@@ -364,6 +364,101 @@
         font-weight: 600;
     }
 
+    // Compact action buttons — one clean horizontal row
+    .table-actions,
+    .table tbody td.text-center:last-child {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .table-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        flex-wrap: nowrap;
+    }
+
+    .table tbody td:last-child .btn.btn-sm,
+    .table tbody td:last-child a.btn.btn-sm,
+    .table-actions .btn {
+        width: 2rem;
+        height: 2rem;
+        min-width: 2rem;
+        padding: 0 !important;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        border: none;
+        line-height: 1;
+        font-size: 0.78rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+        transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+        vertical-align: middle;
+    }
+
+    .table tbody td:last-child .btn.btn-sm + .btn.btn-sm,
+    .table tbody td:last-child a.btn.btn-sm + .btn.btn-sm,
+    .table tbody td:last-child .btn.btn-sm + a.btn.btn-sm,
+    .table-actions .btn + .btn {
+        margin-left: 0;
+    }
+
+    .table tbody td:last-child .btn.btn-sm:hover,
+    .table tbody td:last-child a.btn.btn-sm:hover,
+    .table-actions .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+        filter: brightness(1.05);
+    }
+
+    .table tbody td:last-child .btn.btn-sm i,
+    .table tbody td:last-child a.btn.btn-sm i,
+    .table-actions .btn i {
+        margin: 0;
+        line-height: 1;
+        font-size: inherit;
+    }
+
+    .table tbody td:last-child .btn-info,
+    .table-actions .btn-info {
+        background: linear-gradient(145deg, #63b3ed, #3182ce) !important;
+        color: #fff !important;
+    }
+
+    .table tbody td:last-child .btn-primary,
+    .table-actions .btn-primary {
+        background: linear-gradient(145deg, #d4af37, #b8860b) !important;
+        color: #fff !important;
+        box-shadow: 0 2px 6px rgba(212, 175, 55, 0.35);
+    }
+
+    .table tbody td:last-child .btn-danger,
+    .table-actions .btn-danger {
+        background: linear-gradient(145deg, #fc8181, #e53e3e) !important;
+        color: #fff !important;
+    }
+
+    .table tbody td:last-child .btn-success,
+    .table-actions .btn-success {
+        background: linear-gradient(145deg, #68d391, #38a169) !important;
+        color: #fff !important;
+    }
+
+    .table-actions .btn.table-actions__label,
+    .table tbody td:last-child .btn.btn-sm.table-actions__label {
+        width: auto;
+        min-width: auto;
+        height: 2rem;
+        padding: 0 0.7rem !important;
+        border-radius: 999px !important;
+        font-size: 0.72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
     // Form controls
     .form-control {
         border-radius: 10px;

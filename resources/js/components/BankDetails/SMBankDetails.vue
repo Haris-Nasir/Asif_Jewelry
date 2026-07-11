@@ -60,7 +60,7 @@
                                         </th>
                                         <th width="20%">IFSC Code</th>
                                         <th width="20%">Account No.</th>
-                                        <th width="20%">Action</th>
+                                        <th width="110" class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -81,7 +81,7 @@
                                             {{ bankdetail.account_no }}
                                         </td>
                                         <td class="text-center">
-                                            <button class="btn btn-primary btn-sm text-md" @click="
+                        <div class="table-actions"><button type="button" class="btn btn-primary btn-sm" @click="
                                                     updateBankDetailBtn(
                                                     bankdetail.bank_details_id,
                                                     bankdetail.bank_name,
@@ -93,11 +93,12 @@
                                                 <i class="fas fa-pen"></i>
                                             </button>
 
-                                            <button class="btn btn-danger btn-sm text-md"
+                                            <button type="button" class="btn btn-danger btn-sm"
                                                 @click="deleteBankDetail(bankdetail.bank_details_id)">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </td>
+                        </div>
+                      </td>
                                     </tr>
                                 </tbody>
                             </table>

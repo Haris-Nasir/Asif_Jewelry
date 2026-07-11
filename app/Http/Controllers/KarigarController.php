@@ -182,6 +182,51 @@ class KarigarController extends Controller
         }
     }
 
+    public function addIssueToJob(Request $request, $jobId)
+    {
+        $validated = validator($request->all(), [
+            'sellQualityId' => 'required|integer|exists:tbl_sell_qualities,sell_quality_id',
+            'issuedWeightGrams' => 'required|numeric|min:0.001',
+            'issuedPieces' => 'nullable|integer|min:1',
+            'notes' => 'nullable|max:500',
+        ]);
+
+        if ($validated->fails()) {
+            $firstError = $validated->errors()->first();
+
+            return response()->json([
+                'status' => -1,
+                'message' => $firstError ?: 'The given data was invalid.',
+                'errors' => $validated->errors(),
+            ], 422);
+        }
+
+        $job = tbl_karigar_job::where('karigar_job_id', $jobId)
+            ->where('karigar_job_status', true)
+            ->first();
+
+        if (!$job) {
+            return response()->json(['status' => -1, 'message' => 'Job not found.'], 404);
+        }
+
+        try {
+            $updated = $this->karigarService->addIssue($job, [
+                'sell_quality_id' => (int) $request->input('sellQualityId'),
+                'issued_weight_grams' => (float) $request->input('issuedWeightGrams'),
+                'issued_pieces' => (int) ($request->input('issuedPieces') ?? 1),
+                'notes' => $request->input('notes'),
+            ], optional($request->user())->id);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Extra outward added. Total issued: ' . number_format((float) $updated->issued_weight_grams, 3) . 'g.',
+                'job' => $updated,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => -1, 'message' => $e->getMessage()], 422);
+        }
+    }
+
     public function returnJob(Request $request, $jobId)
     {
         $validated = validator($request->all(), [
