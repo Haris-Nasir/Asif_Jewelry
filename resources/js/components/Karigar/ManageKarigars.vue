@@ -5,6 +5,11 @@
         <div class="card card-primary mt-3">
           <div class="card-header">
             <h3 class="card-title">Karigar (Craftsman)</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
           </div>
           <div class="card-body">
             <div class="form-group row">
@@ -31,7 +36,14 @@
         </div>
 
         <div class="card card-secondary mt-3">
-          <div class="card-header"><h3 class="card-title">Karigar List</h3></div>
+          <div class="card-header">
+            <h3 class="card-title">Karigar List</h3>
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </div>
           <div class="card-body table-responsive">
             <table class="table table-bordered table-sm">
               <thead>

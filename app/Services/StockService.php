@@ -21,13 +21,17 @@ class StockService
 
     public function getQualityBalance(int $sellQualityId): array
     {
-        $quality = tbl_sell_quality::find($sellQualityId);
+        $quality = tbl_sell_quality::with('category')->find($sellQualityId);
         $qualityName = $quality ? $quality->quality_name : 'Unknown item';
+        $metalType = $quality && $quality->category
+            ? ($quality->category->metal_type ?? null)
+            : null;
         $availablePieceWeights = $this->getAvailablePieceWeights($sellQualityId);
 
         return [
             'sell_quality_id' => $sellQualityId,
             'quality_name' => $qualityName,
+            'metal_type' => $metalType,
             'weight_grams' => round(array_sum($availablePieceWeights), 3),
             'pieces' => count($availablePieceWeights),
             'available_piece_weights' => $availablePieceWeights,
@@ -171,15 +175,17 @@ class StockService
 
     public function getAllQualityBalances()
     {
-        return tbl_sell_quality::where('sell_quality_status', true)
+        return tbl_sell_quality::with('category')
+            ->where('sell_quality_status', true)
             ->orderBy('quality_name')
-            ->get(['sell_quality_id', 'quality_name'])
+            ->get(['sell_quality_id', 'quality_name', 'sell_quality_category_id'])
             ->map(function ($quality) {
                 $balance = $this->getQualityBalance((int) $quality->sell_quality_id);
 
                 return [
                     'sell_quality_id' => $quality->sell_quality_id,
                     'quality_name' => $quality->quality_name,
+                    'metal_type' => $quality->category->metal_type ?? $balance['metal_type'] ?? null,
                     'weight_grams' => $balance['weight_grams'],
                     'pieces' => $balance['pieces'],
                 ];

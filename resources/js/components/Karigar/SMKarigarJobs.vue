@@ -3,12 +3,15 @@
     <div class="card card-info mt-3">
       <div class="card-header">
         <h3 class="card-title">Karigar Jobs — Outward / Inward</h3>
-        <div class="card-tools">
-          <select class="form-control form-control-sm" v-model="statusFilter" @change="loadJobs">
+        <div class="card-tools d-flex align-items-center">
+          <select class="form-control form-control-sm mr-2" v-model="statusFilter" @change="loadJobs">
             <option value="">All statuses</option>
             <option value="issued">Issued (with karigar)</option>
             <option value="returned">Returned (ready for sale)</option>
           </select>
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
         </div>
       </div>
       <div class="card-body">
@@ -82,6 +85,11 @@
         <h3 class="card-title">
           Add Outward — {{ addOutwardJob.karigar ? addOutwardJob.karigar.karigar_name : 'Karigar' }}
         </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
       </div>
       <div class="card-body">
         <p class="text-muted mb-3">
@@ -166,6 +174,11 @@
     <div v-if="returnJob" class="card card-warning mt-3">
       <div class="card-header">
         <h3 class="card-title">Inward — Receive from {{ returnJob.karigar ? returnJob.karigar.karigar_name : 'Karigar' }}</h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
       </div>
       <div class="card-body">
         <p class="text-muted mb-3">

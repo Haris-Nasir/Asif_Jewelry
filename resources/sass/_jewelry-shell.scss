@@ -468,7 +468,20 @@
     }
 
     .form-control::placeholder {
-        color: #9a9080;
+        color: #b9b0a4;
+        opacity: 1;
+        -webkit-text-fill-color: #b9b0a4;
+    }
+
+    .form-control::-webkit-input-placeholder {
+        color: #b9b0a4;
+        -webkit-text-fill-color: #b9b0a4;
+        opacity: 1;
+    }
+
+    .form-control::-moz-placeholder {
+        color: #b9b0a4;
+        opacity: 1;
     }
 
     .form-control:focus {
@@ -646,6 +659,31 @@
             width: 100% !important;
             max-width: 100% !important;
             min-width: 0 !important;
+        }
+
+        // col-md-* labels (e.g. GST No. uses col-md-1) keep Bootstrap
+        // gutter padding — reset so they line up with Email / Contact labels
+        .form-group[style*="flex-direction"] > label,
+        .form-group[style*="display: flex"] > label,
+        .form-group[style*="display:flex"] > label,
+        .form-group[style*="flex-direction"] > label[class*="col-"],
+        .form-group[style*="display: flex"] > label[class*="col-"],
+        .form-group[style*="display:flex"] > label[class*="col-"] {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            text-align: left !important;
+        }
+
+        .form-group[style*="flex-direction"] > .form-control[class*="col-"],
+        .form-group[style*="display: flex"] > .form-control[class*="col-"],
+        .form-group[style*="display:flex"] > .form-control[class*="col-"],
+        .form-group[style*="flex-direction"] > textarea[class*="col-"],
+        .form-group[style*="display: flex"] > textarea[class*="col-"],
+        .form-group[style*="display:flex"] > textarea[class*="col-"] {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
 
         // Bootstrap .form-group.row (Karigar, Issue, etc.)
@@ -856,7 +894,19 @@ body.dark-mode .jewelry-app {
     }
 
     .form-control::placeholder {
-        color: #9a9080 !important;
+        color: #b9b0a4 !important;
+        opacity: 1;
+        -webkit-text-fill-color: #b9b0a4 !important;
+    }
+
+    .form-control::-webkit-input-placeholder {
+        color: #b9b0a4 !important;
+        -webkit-text-fill-color: #b9b0a4 !important;
+        opacity: 1;
+    }
+
+    .form-control::-moz-placeholder {
+        color: #b9b0a4 !important;
         opacity: 1;
     }
 

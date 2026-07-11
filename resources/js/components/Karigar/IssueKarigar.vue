@@ -1,7 +1,14 @@
 <template>
   <div>
     <div class="card card-success mt-3">
-      <div class="card-header"><h3 class="card-title">Outward — Issue Metal to Karigar (g)</h3></div>
+      <div class="card-header">
+        <h3 class="card-title">Outward — Issue Metal to Karigar (g)</h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
       <div class="card-body">
         <div class="form-group row">
           <label class="col-md-2 col-form-label">Karigar <span style="color:red">*</span></label>

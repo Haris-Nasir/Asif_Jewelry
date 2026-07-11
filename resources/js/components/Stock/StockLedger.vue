@@ -60,6 +60,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Item Type</th>
+                                                <th>Metal</th>
                                                 <th class="text-right">Weight (g)</th>
                                                 <th class="text-right">Pieces</th>
                                             </tr>
@@ -67,11 +68,12 @@
                                         <tbody>
                                             <tr v-for="row in byQuality" :key="row.sell_quality_id">
                                                 <td>{{ row.quality_name }}</td>
+                                                <td>{{ row.metal_type || '-' }}</td>
                                                 <td class="text-right">{{ row.weight_grams }}</td>
                                                 <td class="text-right">{{ row.pieces }}</td>
                                             </tr>
                                             <tr v-if="!byQuality.length">
-                                                <td colspan="3" class="text-center text-muted">No item stock yet.</td>
+                                                <td colspan="4" class="text-center text-muted">No item stock yet.</td>
                                             </tr>
                                         </tbody>
                                     </table>
