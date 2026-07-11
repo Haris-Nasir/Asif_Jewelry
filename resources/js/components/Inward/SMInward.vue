@@ -125,7 +125,6 @@ NOTES
                           <th>Metal</th>
                           <th class="text-right">Weight (g)</th>
                           <th class="text-right">Rate/g</th>
-                          <th>Category</th>
                           <th class="text-right">Net Amount</th>
                           <th width="110" class="text-center">Action</th>
                         </tr>
@@ -144,8 +143,7 @@ NOTES
                           <td>{{ inward.metal_type || '-' }}</td>
                           <td class="text-right">{{ inward.weight_grams || inward.qty }}</td>
                           <td class="text-right">{{ inward.rate }}</td>
-                          <td>{{ inward.sell_category_name }}</td>
-                          <td>
+                          <td class="text-right">
                             {{ inward.nettotal }}
                           </td>
                           <td class="text-center">
