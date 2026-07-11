@@ -28,7 +28,7 @@ NOTES
                 </div>
 
                 <!--From Date, To Date and Company Name Filters to search and manage particular inward record-->
-                <div class="card-body table-responsive">
+                <div class="card-body">
                   <div class="row">
                     <div class="col-md-1">
                       <label for="from-date" class="text-md">From Date</label>
@@ -96,7 +96,7 @@ NOTES
                   </div>
 
                   <!-- // Table to display records related to inward -->
-                  <div class="p-0 mt-3">
+                  <div class="table-responsive mt-3">
                     <table class="
                         table table-hover table-bordered table-striped table-sm
                       ">

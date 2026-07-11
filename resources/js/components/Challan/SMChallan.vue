@@ -33,7 +33,7 @@ NOTES
                                     </div>
                                 </div>
                                 
-                                <div class="card-body table-responsive">
+                                <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-1">
                                             <label for="from-date" class="text-md">From Date</label>
@@ -110,7 +110,7 @@ NOTES
                                         </div> -->
                                     </div>
 
-                                    <div class="p-0 mt-3">
+                                    <div class="table-responsive mt-3">
                                         <table class="table table-hover table-bordered table-striped table-sm">
                                             <thead class="text-md">
                                                 <tr>
