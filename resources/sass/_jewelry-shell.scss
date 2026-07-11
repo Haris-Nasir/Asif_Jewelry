@@ -541,14 +541,15 @@
             overflow-x: hidden;
         }
 
-        .row,
-        [class*="col-"] {
+        // Do NOT set max-width on .row — Bootstrap rows use negative
+        // margins, and max-width:100% leaves a large empty gap on the right.
+        .row > [class*="col-"] {
             min-width: 0;
-            max-width: 100%;
         }
 
         .card {
             max-width: 100%;
+            width: 100%;
         }
 
         .card-body {
@@ -556,6 +557,16 @@
             max-width: 100%;
             overflow-x: hidden;
             min-width: 0;
+        }
+
+        // Full-width content when sidebar is off-canvas on phones
+        .content-wrapper,
+        .main-footer {
+            margin-left: 0 !important;
+        }
+
+        .main-header {
+            margin-left: 0 !important;
         }
 
         .card-footer {
