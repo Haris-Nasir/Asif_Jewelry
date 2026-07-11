@@ -632,9 +632,10 @@
             margin-bottom: 0.9rem;
         }
 
-        .form-group[style*="flex-direction"] > .col-md-1,
-        .form-group[style*="display: flex"] > .col-md-1,
-        .form-group[style*="display:flex"] > .col-md-1 {
+        // Hide only empty spacer columns — labels often use col-md-1 too
+        .form-group[style*="flex-direction"] > .col-md-1:empty,
+        .form-group[style*="display: flex"] > .col-md-1:empty,
+        .form-group[style*="display:flex"] > .col-md-1:empty {
             display: none !important;
         }
 
