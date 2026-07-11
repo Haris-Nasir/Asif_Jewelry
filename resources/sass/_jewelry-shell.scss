@@ -517,6 +517,144 @@
     .fade-leave-to {
         opacity: 0;
     }
+
+    // ------------------------------------------------------------------
+    // Phones only (< Bootstrap md). Do NOT run on laptop/desktop widths
+    // so the existing two-column form layouts stay exactly as they are.
+    // ------------------------------------------------------------------
+    @media (max-width: 767.98px) {
+        .content {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .container-fluid {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .card-body {
+            padding: 0.85rem 0.75rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        // Inline flex rows used across Customer, Inward, Vendor, Credit, etc.
+        .form-group[style*="flex-direction"],
+        .form-group[style*="display: flex"],
+        .form-group[style*="display:flex"] {
+            display: flex !important;
+            flex-direction: column !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            gap: 0.35rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .form-group[style*="flex-direction"] > .col-md-1,
+        .form-group[style*="display: flex"] > .col-md-1,
+        .form-group[style*="display:flex"] > .col-md-1 {
+            display: none !important;
+        }
+
+        .form-group[style*="flex-direction"] > *,
+        .form-group[style*="display: flex"] > *,
+        .form-group[style*="display:flex"] > * {
+            flex: 0 0 auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        // Bootstrap .form-group.row (Karigar, Issue, etc.)
+        .form-group.row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .form-group.row > [class*="col-"] {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        .form-group.row > .col-form-label,
+        .form-group.row label[class*="col-"] {
+            padding-top: 0;
+            margin-bottom: 0.2rem;
+            text-align: left !important;
+        }
+
+        // Filter / search rows that use plain .row (invoices, etc.)
+        .card-body > .row > [class*="col-md-"],
+        .card-body > form > .row > [class*="col-md-"],
+        .card-body > .row > [class*="col-lg-"] {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        .form-control,
+        .custom-select,
+        select.form-control,
+        textarea.form-control,
+        .ui.selection.dropdown,
+        .ui.search.selection.dropdown {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+
+        .ui.selection.dropdown,
+        .ui.search.selection.dropdown {
+            display: block !important;
+        }
+
+        // Keep data tables usable via horizontal scroll
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .main-header.navbar {
+            height: auto;
+            min-height: 3.5rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        }
+
+        .main-header .btn-danger,
+        .main-header .jewelry-logout-btn {
+            padding: 0.3rem 0.7rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .jewelry-theme-btn__label {
+            display: none !important;
+        }
+
+        .card-title {
+            font-size: 1rem;
+        }
+
+        .btn {
+            white-space: normal;
+        }
+    }
 }
 
 // Light theme — clear contrast when user toggles off dark mode
