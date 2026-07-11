@@ -79,7 +79,7 @@
                                         </th>
                                         <th width="25%">Expense Category</th>
                                         <th>Amount</th>
-                                        <th width="15%">Action</th>
+                                        <th width="110" class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -89,9 +89,10 @@
                                         <td>{{ expense.expense_category }}</td>
                                         <td class="text-right">{{ expense.expense_amount }}</td>
                                         <td class="text-center">
-                                            <button class="btn btn-primary btn-sm text-md" @click="editExpense(expense.expense_id,expense.expense_date,expense.expense_description,expense.expense_amount, expense.expense_category_id)"><i class="fas fa-pen"></i></button>
-                                            <button class="btn btn-danger btn-sm text-md" @click="deleteExpense(expense.expense_id)"><i class="fas fa-trash"></i></button>
-                                        </td>
+                        <div class="table-actions"><button type="button" class="btn btn-primary btn-sm" @click="editExpense(expense.expense_id,expense.expense_date,expense.expense_description,expense.expense_amount, expense.expense_category_id)"><i class="fas fa-pen"></i></button>
+                                            <button type="button" class="btn btn-danger btn-sm" @click="deleteExpense(expense.expense_id)"><i class="fas fa-trash"></i></button>
+                        </div>
+                      </td>
                                     </tr>
                                 </tbody>
                             </table>

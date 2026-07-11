@@ -127,7 +127,7 @@ NOTES
                           <th class="text-right">Rate/g</th>
                           <th>Category</th>
                           <th class="text-right">Net Amount</th>
-                          <th width="15%">Action</th>
+                          <th width="110" class="text-center">Action</th>
                         </tr>
                       </thead>
                       <!-- // Table Body -->
@@ -149,18 +149,17 @@ NOTES
                             {{ inward.nettotal }}
                           </td>
                           <td class="text-center">
-                            <!-- // Button to view detailed information about particular inward -->
-                            <button class="btn btn-info btn-sm text-md" @click="viewInward(inward.inward_mst_id)">
-                              <i class="fa fa-eye"></i>
-                            </button>
-                            <!-- // Button to edit information of particular inward -->
-                            <button class="btn btn-primary btn-sm text-md" @click="editInward(inward.inward_mst_id)">
-                              <i class="fas fa-pen"></i>
-                            </button>
-                            <!-- // Button to delete particular inward -->
-                            <button class="btn btn-danger btn-sm text-md" @click="deleteInward(inward.inward_mst_id)">
-                              <i class="fas fa-trash"></i>
-                            </button>
+                            <div class="table-actions">
+                              <button type="button" class="btn btn-info btn-sm" title="View" @click="viewInward(inward.inward_mst_id)">
+                                <i class="fa fa-eye"></i>
+                              </button>
+                              <button type="button" class="btn btn-primary btn-sm" title="Edit" @click="editInward(inward.inward_mst_id)">
+                                <i class="fas fa-pen"></i>
+                              </button>
+                              <button type="button" class="btn btn-danger btn-sm" title="Delete" @click="deleteInward(inward.inward_mst_id)">
+                                <i class="fas fa-trash"></i>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       </tbody>

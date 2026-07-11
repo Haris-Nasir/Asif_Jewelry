@@ -67,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/jobs/pending-for-sale', [KarigarController::class, 'getPendingJobsForSale'])->middleware('permission:invoices');
         Route::get('/jobs', [KarigarController::class, 'getJobs'])->middleware('permission:karigar');
         Route::post('/jobs/issue', [KarigarController::class, 'issueJob'])->middleware('permission:karigar');
+        Route::post('/jobs/{jobId}/add-issue', [KarigarController::class, 'addIssueToJob'])->middleware('permission:karigar');
         Route::post('/jobs/{jobId}/return', [KarigarController::class, 'returnJob'])->middleware('permission:karigar');
         Route::delete('/jobs/{jobId}', [KarigarController::class, 'deleteJob'])->middleware('permission:karigar');
         Route::get('/', [KarigarController::class, 'getKarigars'])->middleware('permission:karigar');

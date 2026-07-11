@@ -134,7 +134,7 @@ NOTES
                                                     <th>Category</th>
                                                     <th>Qty</th>
                                                     <th class="text-right">Weight (g)</th>
-                                                    <th width="18%">Action</th>
+                                                    <th width="140" class="text-center">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="text-md">
@@ -153,10 +153,12 @@ NOTES
                                                     <td class="text-right">{{ challan.totalqty }}</td>
                                                     <td class="text-right">{{ challan.weight_grams || '-' }}</td>
                                                     <td class="text-center">
-                                                        <a :href="pdfLink('/challan/pdf/' + challan.challan_mst_id)" target="_blank" class="btn btn-danger btn-sm text-md" ><i class="fas fa-file-pdf" style="font-size: 20px;"></i></a>
-                                                        <button class="btn btn-info btn-sm text-md" @click="viewChallan(challan.challan_mst_id, challan.challan_no)"><i class="fas fa-eye"></i></button>
-                                                        <button class="btn btn-primary btn-sm text-md" @click="editChallan(challan.challan_mst_id)"><i class="fas fa-pen"></i></button>
-                                                        <button class="btn btn-danger btn-sm text-md" @click="confirmChallandeletation(challan.challan_mst_id, challan.challan_no )"><i class="fas fa-trash"></i></button>
+                                                        <div class="table-actions">
+                                                            <a :href="pdfLink('/challan/pdf/' + challan.challan_mst_id)" target="_blank" class="btn btn-danger btn-sm" title="PDF"><i class="fas fa-file-pdf"></i></a>
+                                                            <button type="button" class="btn btn-info btn-sm" title="View" @click="viewChallan(challan.challan_mst_id, challan.challan_no)"><i class="fas fa-eye"></i></button>
+                                                            <button type="button" class="btn btn-primary btn-sm" title="Edit" @click="editChallan(challan.challan_mst_id)"><i class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-danger btn-sm" title="Delete" @click="confirmChallandeletation(challan.challan_mst_id, challan.challan_no )"><i class="fas fa-trash"></i></button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             </tbody>

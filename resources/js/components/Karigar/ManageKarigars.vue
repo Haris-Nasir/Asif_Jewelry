@@ -42,9 +42,11 @@
                   <td>{{ k.karigar_name }}</td>
                   <td>{{ k.contact_no || '-' }}</td>
                   <td>{{ k.address || '-' }}</td>
-                  <td>
-                    <button class="btn btn-sm btn-primary" @click="editKarigar(k)"><i class="fas fa-pen"></i></button>
-                    <button class="btn btn-sm btn-danger ml-1" @click="deleteKarigar(k.karigar_id)"><i class="fas fa-trash"></i></button>
+                  <td class="text-center">
+                    <div class="table-actions">
+                      <button type="button" class="btn btn-sm btn-primary" title="Edit" @click="editKarigar(k)"><i class="fas fa-pen"></i></button>
+                      <button type="button" class="btn btn-sm btn-danger" title="Delete" @click="deleteKarigar(k.karigar_id)"><i class="fas fa-trash"></i></button>
+                    </div>
                   </td>
                 </tr>
               </tbody>

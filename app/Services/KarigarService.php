@@ -59,6 +59,62 @@ class KarigarService
         });
     }
 
+    public function addIssue(tbl_karigar_job $job, array $data, ?int $userId = null): tbl_karigar_job
+    {
+        if ($job->job_status !== 'issued') {
+            throw new RuntimeException('Extra outward can only be added to issued jobs.');
+        }
+
+        return DB::transaction(function () use ($job, $data, $userId) {
+            $pieces = max(1, (int) ($data['issued_pieces'] ?? 1));
+            $extraWeight = (float) $data['issued_weight_grams'];
+            $sellQualityId = (int) ($data['sell_quality_id'] ?? $job->sell_quality_id);
+
+            if ($extraWeight <= 0) {
+                throw new RuntimeException('Additional weight must be greater than zero.');
+            }
+
+            if ($sellQualityId <= 0) {
+                throw new RuntimeException('Select an item type from stock for this outward.');
+            }
+
+            $quality = \App\Models\tbl_sell_quality::with('category')->find($sellQualityId);
+            if (!$quality || !$quality->category) {
+                throw new RuntimeException('Invalid item type selected.');
+            }
+
+            $categoryMetal = $quality->category->metal_type ?? null;
+            if ($categoryMetal && $categoryMetal !== $job->metal_type) {
+                throw new RuntimeException(
+                    'Extra outward item type must match this job metal (' . $job->metal_type . ').'
+                );
+            }
+
+            $qualityName = $quality->quality_name ?: ('#' . $sellQualityId);
+
+            $this->stockService->issueQualityToKarigar(
+                $job->metal_type,
+                $sellQualityId,
+                $extraWeight,
+                $pieces,
+                (int) $job->karigar_job_id,
+                $userId,
+                'Karigar extra outward #' . $job->karigar_job_id . ' (' . $qualityName . ')'
+            );
+
+            $job->issued_weight_grams = round((float) $job->issued_weight_grams + $extraWeight, 3);
+
+            $autoNote = 'Extra outward: ' . $qualityName . ' '
+                . number_format($extraWeight, 3) . 'g × ' . $pieces . ' pc';
+            $userNote = !empty($data['notes']) ? trim((string) $data['notes']) : '';
+            $combined = $userNote !== '' ? ($autoNote . ' — ' . $userNote) : $autoNote;
+            $job->notes = trim(($job->notes ? $job->notes . "\n" : '') . $combined);
+            $job->save();
+
+            return $job->fresh(['karigar', 'quality']);
+        });
+    }
+
     public function returnJob(tbl_karigar_job $job, array $data, ?int $userId = null): tbl_karigar_job
     {
         if ($job->job_status !== 'issued') {

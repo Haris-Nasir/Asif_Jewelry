@@ -64,7 +64,7 @@
                         <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                       </span>
                     </th>
-                    <th width="15%">Action</th>
+                    <th width="110" class="text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody class="text-md">
@@ -74,16 +74,17 @@
                     <td>{{ sellquality.sell_category_name }}</td>
 
                     <td class="text-center">
-                      <button class="btn btn-primary btn-sm text-md"
+                        <div class="table-actions"><button type="button" class="btn btn-primary btn-sm"
                         @click="editSellQuality(sellquality.sell_quality_id, sellquality.sell_quality_category_id,sellquality.sell_category_name,sellquality.quality_name)">
                         <i class="fas fa-pen"></i>
                       </button>
 
-                      <button class="btn btn-danger btn-sm text-md"
+                      <button type="button" class="btn btn-danger btn-sm"
                         @click="deleteSellQuality(sellquality.sell_quality_id)">
                         <i class="fas fa-trash"></i>
                       </button>
-                    </td>
+                        </div>
+                      </td>
                   </tr>
                 </tbody>
               </table>
