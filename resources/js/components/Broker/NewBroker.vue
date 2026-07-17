@@ -25,8 +25,7 @@
                             </div>
 
                             <div class="col-md-2 ml-auto">
-                                <label for="contactNo" class="text-md col-form-label">Contact Number <span
-                                        class="required-mark" style="color: red;">*</span></label>
+                                <label for="contactNo" class="text-md col-form-label">Contact Number</label>
                             </div>
 
                             <div class="col-md-3 mr-5">
@@ -72,12 +71,12 @@
         },
         methods: {
             addBroker() {
-                if (this.brokerName == '' || this.contactNo == '') {
-                    toastr["error"]('All Fields are Required');
+                if (this.brokerName == '') {
+                    toastr["error"]('Broker Name is Required');
                 } else {
                     let payload = {
                         brokerName: this.brokerName,
-                        contactNo: this.contactNo
+                        contactNo: this.contactNo || null
                     };
                     axios
                         .post("../api/broker/insert", payload)

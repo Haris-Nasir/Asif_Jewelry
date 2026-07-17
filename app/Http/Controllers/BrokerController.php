@@ -37,8 +37,8 @@ class BrokerController extends Controller
 
     public function insertBroker(Request $request){
         $validated = validator($request->all(),[
-            'brokerName' => 'required | regex:/^[\pL\s]+$/u | max:70',
-            'contactNo' => 'required | numeric | digits_between:10,11'
+            'brokerName' => 'required|regex:/^[\pL\s]+$/u|max:70',
+            'contactNo' => 'nullable|numeric|digits_between:10,11'
         ]);
 
         if($validated->fails()){
@@ -53,8 +53,9 @@ class BrokerController extends Controller
 
         $brokerName = $request->input('brokerName');
         $contactNo = $request->input('contactNo');
+        $contactNo = ($contactNo === null || $contactNo === '') ? null : $contactNo;
 
-        if (tbl_broker::where('broker_contact_no', "=", $contactNo)->exists()) {
+        if ($contactNo !== null && tbl_broker::where('broker_contact_no', "=", $contactNo)->exists()) {
             $res = array(
                 "status" => 0,
                 "message" => "Record Already Exists",
@@ -93,8 +94,8 @@ class BrokerController extends Controller
 
     public function updateBroker(Request $request, $brokerId){
         $validated = validator($request->all(),[
-            'editBrokerName' => 'required | regex:/^[\pL\s]+$/u | max:70',
-            'editContactNo' => 'required | numeric | digits_between:10,11'
+            'editBrokerName' => 'required|regex:/^[\pL\s]+$/u|max:70',
+            'editContactNo' => 'nullable|numeric|digits_between:10,11'
         ]);
 
         if($validated->fails()){
@@ -109,8 +110,14 @@ class BrokerController extends Controller
 
         $editBrokerName = $request->input('editBrokerName');
         $editContactNo = $request->input('editContactNo');
+        $editContactNo = ($editContactNo === null || $editContactNo === '') ? null : $editContactNo;
 
-        if(tbl_broker::where('broker_contact_no', '=', $editContactNo)->exists()){
+        if (
+            $editContactNo !== null
+            && tbl_broker::where('broker_contact_no', '=', $editContactNo)
+                ->where('broker_id', '!=', $brokerId)
+                ->exists()
+        ) {
             $res = array(
                 "status" => 0,
                 "message" => "Record Already Exists",
@@ -119,10 +126,13 @@ class BrokerController extends Controller
             return response()->json($res);
         }
 
-        tbl_broker::where('broker_id', '=', $brokerId)->update(['broker_name'=>$editBrokerName, 'broker_contact_no'=>$editContactNo]);
+        tbl_broker::where('broker_id', '=', $brokerId)->update([
+            'broker_name' => $editBrokerName,
+            'broker_contact_no' => $editContactNo,
+        ]);
         $res = array(
             "status" => 1,
-            "message" => "Sell Quality Updated Successfully.",
+            "message" => "Broker Details Updated Successfully.",
             "errors" => null
         );
         return response()->json($res);
