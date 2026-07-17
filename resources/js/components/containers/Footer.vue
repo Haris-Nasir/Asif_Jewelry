@@ -1,6 +1,6 @@
 <template>
     <footer class="main-footer text-md">
-    <strong>Copyright &copy; {{new Date().getFullYear()}} <a href="/">Asif Jewelry</a>.</strong>
+    <strong>Copyright &copy; {{new Date().getFullYear()}} <a href="/">Ayub Jewelers</a>.</strong>
     All rights reserved.
   </footer>
 </template>

@@ -13,7 +13,7 @@ class JewelrySeeder extends Seeder
     public function run()
     {
         $admin = User::updateOrCreate(
-            ['email' => 'admin@asifjewelry.com'],
+            ['email' => 'admin@ayubjewelers.com'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
@@ -22,7 +22,7 @@ class JewelrySeeder extends Seeder
         );
 
         $worker = User::updateOrCreate(
-            ['email' => 'worker@asifjewelry.com'],
+            ['email' => 'worker@ayubjewelers.com'],
             [
                 'name' => 'Worker',
                 'password' => Hash::make('password'),
@@ -32,7 +32,7 @@ class JewelrySeeder extends Seeder
         );
 
         $investorUser = User::updateOrCreate(
-            ['email' => 'investor@asifjewelry.com'],
+            ['email' => 'investor@ayubjewelers.com'],
             [
                 'name' => 'Investor',
                 'password' => Hash::make('password'),
@@ -45,7 +45,7 @@ class JewelrySeeder extends Seeder
             [
                 'investor_name' => 'Default Investor',
                 'contact_no' => '9999999999',
-                'email' => 'investor@asifjewelry.com',
+                'email' => 'investor@ayubjewelers.com',
                 'profit_share_percentage' => 25.00,
                 'investor_status' => true,
             ]

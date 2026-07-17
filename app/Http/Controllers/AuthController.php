@@ -26,7 +26,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('asif-jewelry')->plainTextToken;
+        $token = $user->createToken('ayub-jewelry')->plainTextToken;
 
         app(AuditLogService::class)->log($user, 'login', 'auth', $user->id, 'User logged in');
 

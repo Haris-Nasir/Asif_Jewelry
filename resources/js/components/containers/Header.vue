@@ -33,7 +33,7 @@
 <script>
 import { clearAuth, getUser } from '../../auth';
 
-const THEME_KEY = 'asif_jewelry_theme';
+const THEME_KEY = 'ayub_jewelry_theme';
 
 export default {
     name: "Header",

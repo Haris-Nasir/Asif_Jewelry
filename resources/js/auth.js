@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'asif_jewelry_token';
-const USER_KEY = 'asif_jewelry_user';
+const TOKEN_KEY = 'ayub_jewelry_token';
+const USER_KEY = 'ayub_jewelry_user';
 
 export function getToken() {
     return localStorage.getItem(TOKEN_KEY);
