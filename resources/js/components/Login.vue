@@ -12,10 +12,10 @@
             <div class="brand-mark">
                 <img
                     src="/images/logo-gold-jewelry.png"
-                    alt="Asif Jewelers"
+                    alt="Ayub Jewelers"
                     class="brand-logo"
                 />
-                <span class="brand-name">Asif Jewelers</span>
+                <span class="brand-name">Ayub Jewelers</span>
             </div>
 
             <div class="metal-tags" aria-hidden="true">
