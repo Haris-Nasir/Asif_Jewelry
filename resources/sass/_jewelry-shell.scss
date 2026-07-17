@@ -944,3 +944,39 @@ body.dark-mode .jewelry-app {
         color: #2a2520 !important;
     }
 }
+
+/* Urdu locale — clear Nastaliq, keep LTR layout for AdminLTE */
+body.locale-urdu,
+body.locale-urdu .jewelry-app,
+body.locale-urdu .login-page {
+    font-family: "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.7;
+}
+
+body.locale-urdu .brand-text,
+body.locale-urdu .brand-name,
+body.locale-urdu .login-title,
+body.locale-urdu .nav-section__toggle,
+body.locale-urdu .nav-sidebar .nav-link p,
+body.locale-urdu .jewelry-theme-btn__label,
+body.locale-urdu .jewelry-lang-select,
+body.locale-urdu .main-footer,
+body.locale-urdu .card-title,
+body.locale-urdu label,
+body.locale-urdu .btn,
+body.locale-urdu th,
+body.locale-urdu td,
+body.locale-urdu .stat-label,
+body.locale-urdu .form-control,
+body.locale-urdu .swal2-title,
+body.locale-urdu .swal2-html-container,
+body.locale-urdu #toast-container > div {
+    font-family: "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif;
+    letter-spacing: 0;
+}
+
+body.locale-urdu .nav-sidebar .nav-link p,
+body.locale-urdu .card-title,
+body.locale-urdu label {
+    line-height: 1.85;
+}

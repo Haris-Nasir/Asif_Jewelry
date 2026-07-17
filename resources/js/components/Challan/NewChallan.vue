@@ -18,7 +18,7 @@ NOTES
                             <div class="card card-primary">
                                 <!-- card Header of  New Challan -->
                                 <div class="card-header">
-                                    <h3 class="card-title">New Sales Bill</h3>
+                                    <h3 class="card-title">{{ $t('challan.newTitle') }}</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
                                                 class="fas fa-minus"></i></button>
@@ -29,7 +29,7 @@ NOTES
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="challanDate" class="text-md col-form-label">Date &amp; Time <span
+                                            <label for="challanDate" class="text-md col-form-label">{{ $t('common.dateTime') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
 
@@ -41,7 +41,7 @@ NOTES
 
                                         <!-- next sales bill number is assigned automatically per financial year -->
                                         <div class="col-md-2 ml-auto">
-                                            <label for="challanNo" class="text-md col-form-label">Sales Bill No</label>
+                                            <label for="challanNo" class="text-md col-form-label">{{ $t('challan.no') }}</label>
                                         </div>
 
                                         <div class="col-md-3 mr-5">
@@ -51,24 +51,24 @@ NOTES
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="companyName" class="text-md col-form-label">Customer <span
+                                            <label for="companyName" class="text-md col-form-label">{{ $t('common.customer') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
 
                                         <!-- here I have called an getFromSelectedCompany function which will be called when i move outside from the company Name field -->
                                         <div class="col-md-3">
                                             <model-select :options="companyNames" v-model="selectedCompanyName"
-                                                @blur="getFromSelectedCompany" placeholder="Select Customer">
+                                                @blur="getFromSelectedCompany" :placeholder="$t('common.selectCustomer')">
                                             </model-select>
                                         </div>
 
                                         <div class="col-md-2 ml-auto">
-                                            <label for="brokerName" class="text-md col-form-label">Broker Name <span
+                                            <label for="brokerName" class="text-md col-form-label">{{ $t('broker.name') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3 mr-5">
                                             <model-select :options="brokerNames" v-model="selectedBrokerName"
-                                                placeholder="Select a Broker Name">
+                                                :placeholder="$t('common.selectBrokerName')">
                                             </model-select>
                                         </div>
                                     </div>
@@ -76,8 +76,8 @@ NOTES
                                     <!-- Here contact number and gst number will be populated autommatically when wes select a company -->
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="companyContactNo" class="text-md col-form-label">Company Contact
-                                                No. <span class="required-mark" style="color: red;">*</span></label>
+                                            <label for="companyContactNo" class="text-md col-form-label">{{ $t('common.companyContact') }}
+                                                <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
                                             <input type="text" class="text-md form-control" v-model="companyContactNo"
@@ -85,7 +85,7 @@ NOTES
                                         </div>
 
                                         <div class="col-md-2 ml-auto">
-                                            <label for="companyGSTNo" class="text-md col-form-label">Company GST No.
+                                            <label for="companyGSTNo" class="text-md col-form-label">{{ $t('common.companyGst') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3 mr-5">
@@ -96,7 +96,7 @@ NOTES
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="productCategory" class="text-md col-form-label">Product Category
+                                            <label for="productCategory" class="text-md col-form-label">{{ $t('common.productCategory') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
 
@@ -104,24 +104,24 @@ NOTES
                                         <div class="col-md-3">
                                             <model-select :options="productCategories" v-model="selectedProductCategory"
                                                 @blur="loadFromSelectedCategory"
-                                                placeholder="Select a Product Category">
+                                                :placeholder="$t('common.selectProductCategory')">
                                             </model-select>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="productQuality" class="text-md col-form-label">Product Quality
+                                            <label for="productQuality" class="text-md col-form-label">{{ $t('common.productQuality') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="productQualities" v-model="selectedProductQuality"
-                                                placeholder="Select a Product Quality">
+                                                :placeholder="$t('common.selectProductQuality')">
                                             </model-select>
                                         </div>
 
                                         <div class="col-md-2 ml-auto">
-                                            <label for="Unit" class="text-md col-form-label">Unit
+                                            <label for="Unit" class="text-md col-form-label">{{ $t('common.unit') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3 mr-5">
@@ -133,8 +133,8 @@ NOTES
                                         <div class="col-md-6 table-responsive">
                                             <table class="table table-bordered">
                                                 <thead class="table-secondary text-md text-dark">
-                                                    <th>Sr. No.</th>
-                                                    <th>Quantity</th>
+                                                    <th>{{ $t('common.srNo') }}</th>
+                                                    <th>{{ $t('common.quantity') }}</th>
                                                     <th></th>
                                                 </thead>
                                                 <tbody>
@@ -162,8 +162,8 @@ NOTES
                                         <div class="col-md-6 table-responsive">
                                             <table class="table table-bordered">
                                                 <thead class="table-secondary text-md text-dark">
-                                                    <th>Sr. No.</th>
-                                                    <th>Quantity</th>
+                                                    <th>{{ $t('common.srNo') }}</th>
+                                                    <th>{{ $t('common.quantity') }}</th>
                                                     <th></th>
                                                 </thead>
                                                 <tbody>
@@ -190,19 +190,19 @@ NOTES
                                     </div>
 
                                     <!-- when we click on add product button add row function will be called -->
-                                    <button class="btn btn-primary text-md mt-2" @click="addRow">Add Product</button>
+                                    <button class="btn btn-primary text-md mt-2" @click="addRow">{{ $t('common.addProduct') }}</button>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="weightGrams" class="text-md col-form-label mt-3">Total Weight (g)
+                                            <label for="weightGrams" class="text-md col-form-label mt-3">{{ $t('common.totalWeightG') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
                                             <input type="number" step="0.001" class="text-md form-control mt-3 text-right"
-                                                v-model="weightGrams" placeholder="Weight in grams">
+                                                v-model="weightGrams" :placeholder="$t('challan.phWeight')">
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="totalQty" class="text-md col-form-label mt-3">Total Pieces
+                                            <label for="totalQty" class="text-md col-form-label mt-3">{{ $t('common.totalPieces') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -211,10 +211,10 @@ NOTES
                                         </div>
                                         <div class="col-md-12" v-if="qualityStock">
                                             <p class="text-muted small mt-2 mb-0">
-                                                In stock for <strong>{{ qualityStock.quality_name }}</strong>:
+                                                {{ $t('challan.inStockFor') }} <strong>{{ qualityStock.quality_name }}</strong>:
                                                 {{ qualityStock.weight_grams }}g, {{ qualityStock.pieces }} pcs
                                                 <span v-if="qualityStock.available_piece_weights_label">
-                                                    (pieces in stock:
+                                                    ({{ $t('common.inStockPieces') }}:
                                                     {{ qualityStock.available_piece_weights_label }})
                                                 </span>
                                             </p>
@@ -224,9 +224,9 @@ NOTES
 
                                 <div class="card-footer">
                                     <button type="submit" @click="addChallan"
-                                        class="btn btn-primary text-md">Add</button>
+                                        class="btn btn-primary text-md">{{ $t('common.add') }}</button>
                                     <button type="reset" @click="resetFields"
-                                        class="btn btn-primary ml-3 text-md">Reset</button>
+                                        class="btn btn-primary ml-3 text-md">{{ $t('common.reset') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -328,7 +328,7 @@ NOTES
                     })
 
                 } else {
-                    toastr["warning"]("Limit Exceeded! You can only add 48 entries in One Challan.");
+                    toastr["warning"](this.$t('challan.limit48'));
                 }
             },
 
@@ -366,7 +366,7 @@ NOTES
                     });
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -383,7 +383,7 @@ NOTES
                     })
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -400,7 +400,7 @@ NOTES
                     });
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong");
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -421,7 +421,7 @@ NOTES
                     this.companyGSTNo = response.data.customer_gst_no;
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -448,7 +448,7 @@ NOTES
                     this.unit = "pcs";
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -488,7 +488,7 @@ NOTES
                     this.challanNo = response.data.nextChallanNo;
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Unable to load next sales bill number.");
+                    toastr["error"](this.$t('challan.loadNextNoFail'));
                 });
             },
             
@@ -499,7 +499,7 @@ NOTES
                     this.verifyChallanNo(response.data.fromDate, response.data.toDate);
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -515,7 +515,7 @@ NOTES
                     }
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
 
             },
@@ -542,11 +542,12 @@ NOTES
                 ).length;
 
                 if (matchingCount < pieces) {
-                    toastr.error(
-                        'Cannot sell ' + pieces + ' pc at ' + weightPerPiece.toFixed(3) +
-                        'g each for "' + this.qualityStock.quality_name + '". Available piece weights: ' +
-                        this.qualityStock.available_piece_weights_label + '.'
-                    );
+                    toastr.error(this.$t('challan.cannotSell', {
+                        n: pieces,
+                        weight: weightPerPiece.toFixed(3),
+                        quality: this.qualityStock.quality_name,
+                        list: this.qualityStock.available_piece_weights_label,
+                    }));
                     return false;
                 }
 
@@ -576,13 +577,13 @@ NOTES
                     addData["toDate"] = response.data.toDate;
                     //here it will check if any of the field is empty or not
                     if (this.challanDate == '' || this.selectedCompanyName == '' || this.selectedProductQuality == '' || this.unit == '' || this.totalQty === '' || this.weightGrams === '' || parseFloat(this.weightGrams) <= 0 || this.selectedBrokerName == '') {
-                        toastr["error"]('All Fields are Required (including weight in grams)');
+                        toastr["error"](this.$t('challan.allFieldsRequired'));
                     } else if (this.allData.length == 0) {//here it will check whether we have entered 1 product or not
-                        toastr["error"]("Insert Product.");
+                        toastr["error"](this.$t('challan.insertProduct'));
                     } else {
                         for (let i = 0; i < this.allData.length; i++) {
                             if (this.allData[i].qty === '' || parseFloat(this.allData[i].qty) <= 0) {
-                                toastr["error"]("Row " + (i + 1) + " quantity is empty or invalid.");
+                                toastr["error"](this.$t('challan.rowQtyInvalid', { n: i + 1 }));
                                 return;
                             }
                         }
@@ -646,8 +647,8 @@ NOTES
                                     toastr["warning"](res.data.message);
                                 } else if (res.data.status == 1) {
                                     swal.fire({
-                                        title: 'Success',
-                                        html: "<h5 style='color:#9C9794'>Challan Created Successfully!</h5>",
+                                        title: this.$t('common.success'),
+                                        html: "<h5 style='color:#9C9794'>" + this.$t('challan.created') + "</h5>",
                                         icon: 'success'
                                     }).then((result) => {
                                         this.resetFields();
@@ -655,13 +656,13 @@ NOTES
                                 }
                             }).catch((err) => {
                                 console.log(err);
-                                toastr["error"]("Something went Wrong!");
+                                toastr["error"](this.$t('common.somethingWrong'));
                             })
                     }
 
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 });
 
 

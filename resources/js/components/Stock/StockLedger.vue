@@ -5,28 +5,28 @@
                         <div class="col-md-12 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Stock Ledger</h3>
+                                    <h3 class="card-title">{{ $t('stock.title') }}</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="row mb-3">
                                         <div class="col-md-2">
-                                            <label class="text-md">Metal</label>
+                                            <label class="text-md">{{ $t('stock.metalFilter') }}</label>
                                             <select v-model="filters.metal_type" class="form-control" @change="loadLedger">
-                                                <option value="">All</option>
-                                                <option value="gold">Gold</option>
-                                                <option value="silver">Silver</option>
+                                                <option value="">{{ $t('common.all') }}</option>
+                                                <option value="gold">{{ $t('common.gold') }}</option>
+                                                <option value="silver">{{ $t('common.silver') }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="text-md">Transaction</label>
+                                            <label class="text-md">{{ $t('stock.txnFilter') }}</label>
                                             <select v-model="filters.transaction_type" class="form-control" @change="loadLedger">
-                                                <option value="">All</option>
-                                                <option value="purchase">Purchase</option>
-                                                <option value="sale">Sale</option>
+                                                <option value="">{{ $t('common.all') }}</option>
+                                                <option value="purchase">{{ $t('stock.purchase') }}</option>
+                                                <option value="sale">{{ $t('stock.sale') }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md">Per Page</label>
+                                            <label class="text-md">{{ $t('common.perPage') }}</label>
                                             <select v-model="filters.paginate" class="form-control" @change="loadLedger">
                                                 <option value="10">10</option>
                                                 <option value="20">20</option>
@@ -40,7 +40,7 @@
                                             <div class="small-box bg-warning">
                                                 <div class="inner">
                                                     <h3>{{ balances.gold }}<sup style="font-size:14px">g</sup></h3>
-                                                    <p>Gold in stock</p>
+                                                    <p>{{ $t('stock.goldInStock') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -48,21 +48,21 @@
                                             <div class="small-box bg-secondary">
                                                 <div class="inner">
                                                     <h3>{{ balances.silver }}<sup style="font-size:14px">g</sup></h3>
-                                                    <p>Silver in stock</p>
+                                                    <p>{{ $t('stock.silverInStock') }}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <h5 class="mt-2">Stock by Item Type</h5>
+                                    <h5 class="mt-2">{{ $t('stock.byItemType') }}</h5>
                                     <div class="table-responsive mb-3">
                                     <table class="table table-bordered table-sm mb-0">
                                         <thead>
                                             <tr>
-                                                <th>Item Type</th>
-                                                <th>Metal</th>
-                                                <th class="text-right">Weight (g)</th>
-                                                <th class="text-right">Pieces</th>
+                                                <th>{{ $t('common.itemType') }}</th>
+                                                <th>{{ $t('common.metal') }}</th>
+                                                <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                <th class="text-right">{{ $t('common.pieces') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -73,7 +73,7 @@
                                                 <td class="text-right">{{ row.pieces }}</td>
                                             </tr>
                                             <tr v-if="!byQuality.length">
-                                                <td colspan="4" class="text-center text-muted">No item stock yet.</td>
+                                                <td colspan="4" class="text-center text-muted">{{ $t('stock.noItemStock') }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -83,15 +83,15 @@
                                     <table class="table table-bordered table-striped table-sm">
                                         <thead class="text-md">
                                             <tr>
-                                                <th>Date</th>
-                                                <th>Metal</th>
-                                                <th>Item</th>
-                                                <th>Type</th>
-                                                <th class="text-right">Weight (g)</th>
-                                                <th class="text-right">Pieces</th>
-                                                <th class="text-right">Rate/g</th>
-                                                <th class="text-right">Amount</th>
-                                                <th class="text-right">Balance After</th>
+                                                <th>{{ $t('common.date') }}</th>
+                                                <th>{{ $t('common.metal') }}</th>
+                                                <th>{{ $t('stock.item') }}</th>
+                                                <th>{{ $t('common.type') }}</th>
+                                                <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                <th class="text-right">{{ $t('common.pieces') }}</th>
+                                                <th class="text-right">{{ $t('common.rateG') }}</th>
+                                                <th class="text-right">{{ $t('common.amount') }}</th>
+                                                <th class="text-right">{{ $t('stock.balanceAfter') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody class="text-md">
@@ -107,7 +107,7 @@
                                                 <td class="text-right">{{ row.balance_weight_after }}</td>
                                             </tr>
                                             <tr v-if="!ledger.data || ledger.data.length === 0">
-                                                <td colspan="9" class="text-center text-muted">No stock movements yet.</td>
+                                                <td colspan="9" class="text-center text-muted">{{ $t('stock.noMovements') }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -164,7 +164,7 @@ export default {
             axios.get('/api/stock/ledger?' + params.toString()).then((res) => {
                 this.ledger = res.data;
             }).catch(() => {
-                toastr.error('Unable to load stock ledger.');
+                toastr.error(this.$t('stock.loadFail'));
             });
         },
         formatDate(value) {

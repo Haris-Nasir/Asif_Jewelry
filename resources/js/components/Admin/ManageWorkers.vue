@@ -5,24 +5,24 @@
                         <div class="col-md-5 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Add Worker</h3>
+                                    <h3 class="card-title">{{ $t('admin.addWorker') }}</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label>Name *</label>
+                                        <label>{{ $t('common.name') }} *</label>
                                         <input type="text" class="form-control" v-model="newWorker.name">
                                     </div>
                                     <div class="form-group">
-                                        <label>Email *</label>
+                                        <label>{{ $t('common.email') }} *</label>
                                         <input type="email" class="form-control" v-model="newWorker.email">
                                     </div>
                                     <div class="form-group">
-                                        <label>Password</label>
-                                        <input type="password" class="form-control" v-model="newWorker.password" placeholder="Default: password">
+                                        <label>{{ $t('common.password') }}</label>
+                                        <input type="password" class="form-control" v-model="newWorker.password" :placeholder="$t('common.defaultPassword')">
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <button class="btn btn-primary" @click="createWorker">Add Worker</button>
+                                    <button class="btn btn-primary" @click="createWorker">{{ $t('admin.addWorker') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -30,7 +30,7 @@
                         <div class="col-md-7 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Worker Permissions</h3>
+                                    <h3 class="card-title">{{ $t('admin.workerPerms') }}</h3>
                                 </div>
                                 <div class="card-body" v-if="selectedWorker">
                                     <p><strong>{{ selectedWorker.name }}</strong> ({{ selectedWorker.email }})</p>
@@ -38,16 +38,16 @@
                                         <div class="col-md-6" v-for="(label, key) in permissionLabels" :key="key">
                                             <div class="form-check mb-2">
                                                 <input class="form-check-input" type="checkbox" :id="'perm-' + key" :value="key" v-model="selectedPermissions">
-                                                <label class="form-check-label" :for="'perm-' + key">{{ label }}</label>
+                                                <label class="form-check-label" :for="'perm-' + key">{{ permLabel(key, label) }}</label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="card-body text-muted" v-else>
-                                    Select a worker below to edit permissions.
+                                    {{ $t('admin.selectWorker') }}
                                 </div>
                                 <div class="card-footer" v-if="selectedWorker">
-                                    <button class="btn btn-primary" @click="savePermissions">Save Permissions</button>
+                                    <button class="btn btn-primary" @click="savePermissions">{{ $t('admin.savePerms') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -57,17 +57,17 @@
                         <div class="col-12 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Workers</h3>
+                                    <h3 class="card-title">{{ $t('admin.workers') }}</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                     <table class="table table-bordered table-sm">
                                         <thead>
                                             <tr>
-                                                <th>Name</th>
-                                                <th>Email</th>
-                                                <th>Permissions</th>
-                                                <th class="text-center">Action</th>
+                                                <th>{{ $t('common.name') }}</th>
+                                                <th>{{ $t('common.email') }}</th>
+                                                <th>{{ $t('admin.permissions') }}</th>
+                                                <th class="text-center">{{ $t('common.action') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -75,19 +75,19 @@
                                                 <td>{{ worker.name }}</td>
                                                 <td>{{ worker.email }}</td>
                                                 <td>
-                                                    <span class="worker-perm-list">{{ (worker.permissions || defaultPermissions).join(', ') }}</span>
+                                                    <span class="worker-perm-list">{{ formatWorkerPerms(worker) }}</span>
                                                 </td>
                                                 <td class="text-center">
                                                     <div class="table-actions">
                                                         <button
                                                             type="button"
                                                             class="btn btn-primary btn-sm table-actions__label"
-                                                            title="Edit Permissions"
+                                                            :title="$t('admin.editPerms')"
                                                             @click="selectWorker(worker)"
                                                         >
                                                             <i class="fas fa-user-edit"></i>
-                                                            <span class="d-none d-md-inline ml-1">Edit Permissions</span>
-                                                            <span class="d-inline d-md-none ml-1">Edit</span>
+                                                            <span class="d-none d-md-inline ml-1">{{ $t('admin.editPerms') }}</span>
+                                                            <span class="d-inline d-md-none ml-1">{{ $t('common.edit') }}</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -123,13 +123,21 @@ export default {
         this.loadWorkers();
     },
     methods: {
+        permLabel(key, fallback) {
+            const translated = this.$t('perm.' + key);
+            return translated === 'perm.' + key ? (fallback || key) : translated;
+        },
+        formatWorkerPerms(worker) {
+            const keys = worker.permissions || this.defaultPermissions || [];
+            return keys.map((k) => this.permLabel(k, k)).join(', ');
+        },
         loadWorkers() {
             axios.get('/api/users/workers')
                 .then((res) => {
                     this.workers = res.data.data || [];
                     this.permissionLabels = res.data.permission_labels || {};
                 })
-                .catch(() => toastr['error']('Unable to load workers.'));
+                .catch(() => toastr['error'](this.$t('admin.loadWorkersFail')));
         },
         selectWorker(worker) {
             this.selectedWorker = worker;
@@ -147,26 +155,26 @@ export default {
             })
                 .then((res) => {
                     if (res.data.status === 1) {
-                        swal.fire({ title: 'Success', html: "<h5 style='color:#9C9794'>Permissions Updated!</h5>", icon: 'success' });
+                        swal.fire({ title: this.$t('common.success'), html: "<h5 style='color:#9C9794'>" + this.$t('admin.permsUpdated') + "</h5>", icon: 'success' });
                         this.loadWorkers();
                     }
                 })
-                .catch(() => toastr['error']('Failed to update permissions.'));
+                .catch(() => toastr['error'](this.$t('admin.permsFail')));
         },
         createWorker() {
             if (!this.newWorker.name || !this.newWorker.email) {
-                toastr['error']('Name and email are required.');
+                toastr['error'](this.$t('admin.nameEmailRequired'));
                 return;
             }
             axios.post('/api/users/workers', this.newWorker)
                 .then((res) => {
                     if (res.data.status === 1) {
-                        swal.fire({ title: 'Success', html: "<h5 style='color:#9C9794'>Worker Created!</h5>", icon: 'success' });
+                        swal.fire({ title: this.$t('common.success'), html: "<h5 style='color:#9C9794'>" + this.$t('admin.workerCreated') + "</h5>", icon: 'success' });
                         this.newWorker = { name: '', email: '', password: '' };
                         this.loadWorkers();
                     }
                 })
-                .catch((err) => toastr['error'](err.response?.data?.message || 'Failed to create worker.'));
+                .catch((err) => toastr['error'](err.response?.data?.message || this.$t('common.somethingWrong')));
         },
     },
 };

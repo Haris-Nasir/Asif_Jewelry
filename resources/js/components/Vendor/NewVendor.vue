@@ -4,7 +4,7 @@
       <div class="col-md-12">
         <div class="card card-primary mt-3">
           <div class="card-header">
-            <h3 class="card-title">New Vendor</h3>
+            <h3 class="card-title">{{ $t('vendor.newTitle') }}</h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
@@ -21,23 +21,23 @@
                 justify-content: center;
               "
             >
-              <label for="companyName" class="text-md col-md-2">Supplier <span class="required-mark" style="color: red;">*</span></label>
+              <label for="companyName" class="text-md col-md-2">{{ $t('vendor.name') }} <span class="required-mark" style="color: red;">*</span></label>
               <input
                 type="text"
                 class="form-control col-md-5"
                 v-model="companyName"
-                placeholder="Enter Supplier Name..."
+                :placeholder="$t('vendor.phName')"
               />
               <div class="col-md-1"></div>
               <label for="companyContact" class="text-md col-md-2"
-                >Contact Number</label
+                >{{ $t('common.contactNo') }}</label
               >
               <input
                 type="tel"
                 class="form-control col-md-2"
                 v-model="companyContact"
                 maxlength="11"
-                placeholder="Enter Contact Number..."
+                :placeholder="$t('customer.phContact')"
               />
             </div>
             <div
@@ -50,12 +50,12 @@
               "
             >
               <label for="companyAddress" class="text-md col-md-2"
-                >Company Address</label
+                >{{ $t('common.companyAddress') }}</label
               >
               <textarea
                 class="form-control col-md-10"
                 v-model="companyAddress"
-                placeholder="Enter Company Address..."
+                :placeholder="$t('customer.phAddress')"
               ></textarea>
             </div>
             <div
@@ -67,41 +67,41 @@
                 justify-content: center;
               "
             >
-              <label for="emailAddress" class="text-md col-md-2">Email Address</label>
+              <label for="emailAddress" class="text-md col-md-2">{{ $t('common.emailAddress') }}</label>
               <input
                 type="email"
                 class="form-control col-md-2"
                 v-model="emailAddress"
-                placeholder="Enter Email Address..."
+                :placeholder="$t('customer.phEmail')"
               />
               <div class="col-md-1"></div>
-              <label for="gstNumber" class="text-md col-md-1">GST No.</label>
+              <label for="gstNumber" class="text-md col-md-1">{{ $t('common.gstNo') }}</label>
               <input
                 type="text"
                 class="form-control col-md-2"
                 v-model="gstNumber"
-                placeholder="Enter GST Number..."
+                :placeholder="$t('customer.phGst')"
               />
               <div class="col-md-1"></div>
-              <label for="gstCode" class="text-md col-md-1">GST Code</label>
+              <label for="gstCode" class="text-md col-md-1">{{ $t('common.gstCode') }}</label>
               <input
                 type="text"
                 class="form-control col-md-2"
                 v-model="gstCode"
-                placeholder="Enter GST Code..."
+                :placeholder="$t('customer.phGstCode')"
               />
             </div>
           </div>
           <div class="card-footer">
             <button type="submit" class="btn btn-primary" @click="addVendor">
-              Add
+              {{ $t('common.add') }}
             </button>
             <button
               type="reset"
               class="btn btn-primary"
               @click="resetNewVendor"
             >
-              Reset
+              {{ $t('common.reset') }}
             </button>
           </div>
         </div>
@@ -137,10 +137,10 @@ export default {
   methods: {
     validateCompanyName: function () {
       if (this.companyName == "") {
-        toastr.info("Please enter supplier name!");
+        toastr.info(this.$t('vendor.nameRequired'));
         return false;
       } else if (this.companyName.length > 50) {
-        toastr.warning("Supplier name must be less than 50 characters!");
+        toastr.warning(this.$t('vendor.nameMax'));
         return false;
       } else {
         return true;
@@ -151,7 +151,7 @@ export default {
       if (this.companyContact === "") {
         return true;
       } else if (this.companyContact.length < 10 || this.companyContact.length > 11) {
-        toastr.warning("Contact Number must be 10 or 11 digits!");
+        toastr.warning(this.$t('customer.contactDigits'));
         return false;
       } else {
         return true;
@@ -162,7 +162,7 @@ export default {
       if (this.companyAddress === "") {
         return true;
       } else if (this.companyAddress.length > 255) {
-        toastr.warning("Company Address must be less than 255 characters!");
+        toastr.warning(this.$t('customer.addressMax'));
         return false;
       } else {
         return true;
@@ -171,14 +171,14 @@ export default {
 
     validateEmailAddress: function () {
       if (this.emailAddress.length > 255) {
-        toastr.warning("Email Address must be less than 255 characters!");
+        toastr.warning(this.$t('customer.emailMax'));
         return false;
       } 
       
       if (this.emailAddress != "") {
         if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.emailAddress))) 
         {
-          toastr.warning("Please enter a valid email address!");
+          toastr.warning(this.$t('customer.emailInvalid'));
           return false;
         }
       }
@@ -190,7 +190,7 @@ export default {
         return true;
       }
       if (this.gstNumber.length != 15) {
-        toastr.warning("GST Number must be equal to 15 characters!");
+        toastr.warning(this.$t('customer.gstLen'));
         return false;
       }
       return true;
@@ -201,13 +201,11 @@ export default {
         return true;
       }
       if (this.gstCode.length != 2) {
-        toastr.warning("GST Code must be equal to 2 characters!");
+        toastr.warning(this.$t('customer.gstCodeLen'));
         return false;
       }
       if (this.gstNumber !== "" && this.gstCode !== this.gstNumber.substring(0, 2)) {
-        toastr.warning(
-          "GST Code must be equal to first 2 characters of GST Number!"
-        );
+        toastr.warning(this.$t('customer.gstCodeMatch'));
         return false;
       }
       return true;
@@ -236,8 +234,8 @@ export default {
             if (res.data.status == 1) {
               swal
                 .fire({
-                  title: "Success",
-                  html: "<h5 style='color:#9C9794'>Vendor Added Successfully</h5>",
+                  title: this.$t('common.success'),
+                  html: "<h5 style='color:#9C9794'>" + this.$t('vendor.added') + "</h5>",
                   icon: "success",
                 })
                 .then(() => {

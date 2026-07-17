@@ -6,7 +6,7 @@
             @click="toggleOpen"
         >
             <div class="investor-multi-select__value">
-                <span v-if="!selectedInvestors.length" class="text-muted">{{ placeholder }}</span>
+                <span v-if="!selectedInvestors.length" class="text-muted">{{ placeholder || $t('lab.phInvestors') }}</span>
                 <template v-else>
                     <span
                         v-for="inv in selectedInvestors"
@@ -36,10 +36,10 @@
                 >
                 <span>
                     {{ inv.investor_name }}
-                    <small class="text-muted d-block">Balance Rs. {{ formatBalance(inv.total_invested) }} · Profit share {{ inv.profit_share_percentage }}%</small>
+                    <small class="text-muted d-block">{{ $t('investor.balanceRs') }} {{ formatBalance(inv.total_invested) }} · {{ $t('investor.profitShareLabel') }} {{ inv.profit_share_percentage }}%</small>
                 </span>
             </div>
-            <p v-if="!investors.length" class="text-muted small mb-0 px-2 py-1">No investors available.</p>
+            <p v-if="!investors.length" class="text-muted small mb-0 px-2 py-1">{{ $t('lab.noInvestors') }}</p>
         </div>
     </div>
 </template>
@@ -60,7 +60,7 @@ export default {
         },
         placeholder: {
             type: String,
-            default: 'Select investors...',
+            default: '',
         },
     },
     data() {

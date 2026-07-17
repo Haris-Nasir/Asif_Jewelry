@@ -2,7 +2,7 @@
   <div>
     <div class="card card-success mt-3">
       <div class="card-header">
-        <h3 class="card-title">Outward — Issue Metal to Karigar (g)</h3>
+        <h3 class="card-title">{{ $t('karigar.outwardTitle') }}</h3>
         <div class="card-tools">
           <button type="button" class="btn btn-tool" data-card-widget="collapse">
             <i class="fas fa-minus"></i>
@@ -11,35 +11,35 @@
       </div>
       <div class="card-body">
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Karigar <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('nav.karigar') }} <span style="color:red">*</span></label>
           <div class="col-md-4">
-            <model-select :options="karigarOptions" v-model="form.karigarId" placeholder="Select karigar"></model-select>
+            <model-select :options="karigarOptions" v-model="form.karigarId" :placeholder="$t('karigar.selectKarigar')"></model-select>
           </div>
-          <label class="col-md-2 col-form-label">Date &amp; Time <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('common.dateTime') }} <span style="color:red">*</span></label>
           <div class="col-md-4">
             <input type="datetime-local" class="form-control" v-model="form.jobDate">
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Item Type <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('common.itemType') }} <span style="color:red">*</span></label>
           <div class="col-md-4">
-            <model-select :options="qualityOptions" v-model="form.sellQualityId" placeholder="Select item type in stock"></model-select>
+            <model-select :options="qualityOptions" v-model="form.sellQualityId" :placeholder="$t('karigar.phItemStock')"></model-select>
           </div>
-          <label class="col-md-2 col-form-label">Metal</label>
+          <label class="col-md-2 col-form-label">{{ $t('common.metal') }}</label>
           <div class="col-md-4">
             <input type="text" class="form-control" :value="metalLabel" disabled>
           </div>
         </div>
         <div class="col-md-12" v-if="qualityStock">
           <p class="text-muted small mb-2">
-            In stock for <strong>{{ qualityStock.quality_name }}</strong>:
-            {{ qualityStock.weight_grams }}g, {{ qualityStock.pieces }} pcs
+            {{ $t('challan.inStockFor') }} <strong>{{ qualityStock.quality_name }}</strong>:
+            {{ qualityStock.weight_grams }}g, {{ qualityStock.pieces }} {{ $t('common.pcs') }}
             <span v-if="qualityStock.available_piece_weights_label">
               ({{ qualityStock.available_piece_weights_label }})
             </span>
           </p>
           <div class="mb-3" v-if="availableWeightOptions.length">
-            <span class="small text-muted mr-2">Pick from available weights:</span>
+            <span class="small text-muted mr-2">{{ $t('karigar.pickWeights') }}</span>
             <button
               v-for="opt in availableWeightOptions"
               :key="opt.weight"
@@ -49,16 +49,16 @@
               @click="selectAvailableWeight(opt)"
             >
               {{ opt.weight }}g
-              <span v-if="opt.count > 1" class="badge badge-light ml-1">{{ opt.count }} pcs</span>
+              <span v-if="opt.count > 1" class="badge badge-light ml-1">{{ opt.count }} {{ $t('common.pcs') }}</span>
             </button>
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Weight / pc (g) <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.weightPc') }} <span style="color:red">*</span></label>
           <div class="col-md-2">
             <input type="number" step="0.001" min="0.001" class="form-control text-right" v-model="form.weightPerPiece">
           </div>
-          <label class="col-md-2 col-form-label">Pieces <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('common.pieces') }} <span style="color:red">*</span></label>
           <div class="col-md-2">
             <input
               type="number"
@@ -68,27 +68,27 @@
               v-model.number="form.issuedPieces"
             >
           </div>
-          <label class="col-md-2 col-form-label">Total (g)</label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.totalG') }}</label>
           <div class="col-md-2">
             <input type="text" class="form-control text-right" :value="totalWeightLabel" disabled>
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Item to make</label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.itemToMake') }}</label>
           <div class="col-md-10">
-            <input type="text" class="form-control" v-model="form.itemDescription" placeholder="Ready product name, e.g. Angothi (matches Item Type on inward)">
+            <input type="text" class="form-control" v-model="form.itemDescription" :placeholder="$t('karigar.phItemMake')">
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Notes</label>
+          <label class="col-md-2 col-form-label">{{ $t('common.notes') }}</label>
           <div class="col-md-10">
             <textarea class="form-control" v-model="form.notes" rows="2"></textarea>
           </div>
         </div>
       </div>
       <div class="card-footer">
-        <button class="btn btn-success" @click="issueMetal" :disabled="!canSubmit">Record Outward</button>
-        <button class="btn btn-secondary ml-2" @click="resetForm">Reset</button>
+        <button class="btn btn-success" @click="issueMetal" :disabled="!canSubmit">{{ $t('karigar.recordOutward') }}</button>
+        <button class="btn btn-secondary ml-2" @click="resetForm">{{ $t('common.reset') }}</button>
       </div>
     </div>
   </div>
@@ -135,12 +135,12 @@ export default {
           const stock = this.stockByQualityId[q.sell_quality_id];
           return {
             value: q.sell_quality_id,
-            text: q.quality_name + ' — ' + stock.pieces + ' pc (' + stock.weight_grams + 'g)',
+            text: q.quality_name + ' — ' + stock.pieces + ' ' + this.$t('common.pc') + ' (' + stock.weight_grams + 'g)',
           };
         });
     },
     metalLabel() {
-      return this.form.metalType === 'silver' ? 'Silver' : 'Gold';
+      return this.form.metalType === 'silver' ? this.$t('common.silver') : this.$t('common.gold');
     },
     availableWeightOptions() {
       if (!this.qualityStock || !this.qualityStock.available_piece_weights) {
@@ -259,7 +259,7 @@ export default {
         !this.qualityStock.available_piece_weights ||
         !this.qualityStock.available_piece_weights.length
       ) {
-        toastr.error('No stock for this item type. Purchase it first.');
+        toastr.error(this.$t('karigar.noStockPurchase'));
         return false;
       }
 
@@ -267,7 +267,7 @@ export default {
       const pieces = parseInt(this.form.issuedPieces || 0, 10);
 
       if (perPiece <= 0 || pieces <= 0) {
-        toastr.info('Select an available weight and number of pieces.');
+        toastr.info(this.$t('karigar.selectWeightPieces'));
         return false;
       }
 
@@ -277,9 +277,12 @@ export default {
 
       if (matchingCount < pieces) {
         toastr.error(
-          'Only ' + matchingCount + ' pc at ' + perPiece.toFixed(3) +
-          'g available for "' + this.qualityStock.quality_name + '". ' +
-          'Available: ' + this.qualityStock.available_piece_weights_label + '.'
+          this.$t('karigar.onlyAvailableFor', {
+            n: matchingCount,
+            weight: perPiece.toFixed(3),
+            quality: this.qualityStock.quality_name,
+            list: this.qualityStock.available_piece_weights_label,
+          })
         );
         return false;
       }
@@ -288,7 +291,7 @@ export default {
     },
     issueMetal() {
       if (!this.form.karigarId || !this.form.jobDate || !this.form.sellQualityId) {
-        toastr.info('Karigar, date, and item type are required.');
+        toastr.info(this.$t('karigar.karigarDateItemRequired'));
         return;
       }
       if (!this.validateIssueWeight()) {
@@ -309,7 +312,7 @@ export default {
         notes: this.form.notes,
       }).then(res => {
         if (res.data.status === 1) {
-          swal.fire('Success', res.data.message, 'success');
+          swal.fire(this.$t('common.success'), res.data.message, 'success');
           this.resetForm();
           this.loadStockBalances();
           this.$emit('job-changed');
@@ -320,7 +323,7 @@ export default {
         const data = err.response?.data;
         const msg = data?.message
           || (data?.errors && Object.values(data.errors).flat()[0])
-          || 'Issue failed.';
+          || this.$t('karigar.issueFail');
         toastr.error(msg);
       });
     },

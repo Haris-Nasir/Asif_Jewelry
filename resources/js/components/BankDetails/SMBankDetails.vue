@@ -4,7 +4,7 @@
             <div class="col-md-12 mt-3">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Bank Details</h3>
+                        <h3 class="card-title">{{ $t('bank.manageTitle') }}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -17,7 +17,7 @@
                                 <div>
                                     <div class="d-flex align-items-center ml-4">
                                         <label for="paginate" class="text-nowrap mr-2 mb-0">
-                                            Per Page
+                                            {{ $t('common.perPage') }}
                                         </label>
                                         <select v-model="paginate" class="form-control form-control-sm">
                                             <option value="10">10</option>
@@ -28,7 +28,7 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <input v-model="search" type="search" class="form-control" placeholder="Search By..." />
+                                <input v-model="search" type="search" class="form-control" :placeholder="$t('common.searchBy')" />
                             </div>
                         </div>
 
@@ -37,30 +37,29 @@
                                 <thead class="text-md">
                                     <tr>
                                         <th width="10%">
-                                            <a href="#" @click.prevent="updateSorting('bank_details_id')">Sr. No.</a>
+                                            <a href="#" @click.prevent="updateSorting('bank_details_id')">{{ $t('common.srNo') }}</a>
                                             <span v-if="sort_field == 'bank_details_id' ? 1 : 0">
                                                 <span v-if="sort_direction == 'asc' ? 1 : 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc' ? 1 : 0">&darr;</span>
                                             </span>
                                         </th>
                                         <th>
-                                            <a href="#" @click.prevent="updateSorting('bank_name')">Bank Name</a>
+                                            <a href="#" @click.prevent="updateSorting('bank_name')">{{ $t('bank.bankName') }}</a>
                                             <span v-if="sort_field == 'bank_name' ? 1 : 0">
                                                 <span v-if="sort_direction == 'asc' ? 1 : 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc' ? 1 : 0">&darr;</span>
                                             </span>
                                         </th>
                                         <th>
-                                            <a href="#" @click.prevent="updateSorting('branch_name')">Branch
-                                                Name</a>
+                                            <a href="#" @click.prevent="updateSorting('branch_name')">{{ $t('bank.branchName') }}</a>
                                             <span v-if="sort_field == 'branch_name' ? 1 : 0">
                                                 <span v-if="sort_direction == 'asc' ? 1 : 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc' ? 1 : 0">&darr;</span>
                                             </span>
                                         </th>
-                                        <th width="20%">IFSC Code</th>
-                                        <th width="20%">Account No.</th>
-                                        <th width="110" class="text-center">Action</th>
+                                        <th width="20%">{{ $t('bank.ifsc') }}</th>
+                                        <th width="20%">{{ $t('bank.accountNo') }}</th>
+                                        <th width="110" class="text-center">{{ $t('common.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -114,7 +113,7 @@
 
                 <div v-if="bankDetailId == -1 ? 0 : 1" class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Update Bank Details</h3>
+                        <h3 class="card-title">{{ $t('bank.updateTitle') }}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -126,34 +125,34 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group" style="display: flex; flex-direction: row">
-                            <label for="bankName" class="col-md-2 text-md">Bank Name <span class="required-mark"
+                            <label for="bankName" class="col-md-2 text-md">{{ $t('bank.bankName') }} <span class="required-mark"
                                     style="color: red;">*</span></label>
                             <input type="text" class="form-control col-md-3" v-model="bankName"
-                                placeholder="Enter Bank Name..." />
+                                :placeholder="$t('bank.phBank')" />
                             <div class="col-md-1"></div>
-                            <label for="branchName" class="col-md-2 text-md">Branch Name <span class="required-mark"
+                            <label for="branchName" class="col-md-2 text-md">{{ $t('bank.branchName') }} <span class="required-mark"
                                     style="color: red;">*</span></label>
                             <input type="text" class="form-control col-md-3" v-model="branchName"
-                                placeholder="Enter Branch Name..." />
+                                :placeholder="$t('bank.phBranch')" />
                         </div>
                         <div class="form-group" style="display: flex; flex-direction: row">
-                            <label for="ifscCode" class="col-md-2 text-md">IFSC Code <span class="required-mark"
+                            <label for="ifscCode" class="col-md-2 text-md">{{ $t('bank.ifsc') }} <span class="required-mark"
                                     style="color: red;">*</span></label>
                             <input type="text" class="form-control col-md-3" maxlength="11" v-model="ifscCode"
-                                placeholder="Enter IFSC Code..." />
+                                :placeholder="$t('bank.phIfsc')" />
                             <div class="col-md-1"></div>
-                            <label for="accNo" class="col-md-2 text-md">Account No. <span class="required-mark"
+                            <label for="accNo" class="col-md-2 text-md">{{ $t('bank.accountNo') }} <span class="required-mark"
                                     style="color: red;">*</span></label>
                             <input type="text" class="form-control col-md-3" v-model="accNo"
-                                placeholder="Enter Account No..." />
+                                :placeholder="$t('bank.phAccount')" />
                         </div>
                     </div>
                     <div class="card-footer">
                         <button class="btn btn-primary" @click="updateBankDetailsSaveUpdate">
-                            Update
+                            {{ $t('common.update') }}
                         </button>
                         <button class="btn btn-primary" @click="resetUpdateBankDetail">
-                            Reset
+                            {{ $t('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -228,7 +227,7 @@
             },
 
             updateBankDetailBtn: function (bank_details_id, bank_name, branch_name, ifsc_code, account_no) {
-                toastr.info("Please scroll down the page!");
+                toastr.info(this.$t('common.scrollDown'));
                 this.bankDetailId = bank_details_id;
                 this.bankName = bank_name;
                 this.branchName = branch_name;
@@ -238,7 +237,7 @@
 
             updateBankDetailsSaveUpdate: function () {
                 if (this.bankName == "" || this.branchName == "" || this.ifscCode == "" || this.accNo == "") {
-                    toastr["error"]("All Fields are Required");
+                    toastr["error"](this.$t('common.allFieldsRequired'));
                 } else {
                     axios
                         .put("/api/bankdetail/update/" + this.bankDetailId, {
@@ -251,8 +250,8 @@
                             if (res.data.status == 1) {
                                 swal
                                     .fire({
-                                        title: "Success",
-                                        html: "<h5 style='color:#9C9794'>Bank Details Updated Successfully</h5>",
+                                        title: this.$t('common.success'),
+                                        html: "<h5 style='color:#9C9794'>" + this.$t('bank.updated') + "</h5>",
                                         icon: "success",
                                     })
                                     .then((result) => {
@@ -270,7 +269,7 @@
                             }
                         })
                         .catch((err) => {
-                            toastr.error("Something Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                         });
                 }
             },
@@ -299,8 +298,8 @@
                     .then((res) => {
                         swal
                             .fire({
-                                title: "Success",
-                                html: "<h5 style='color:#9C9794'>Bank Details Deleted Successfully</h5>",
+                                title: this.$t('common.success'),
+                                html: "<h5 style='color:#9C9794'>" + this.$t('bank.deleted') + "</h5>",
                                 icon: "success",
                             })
                             .then((result) => {

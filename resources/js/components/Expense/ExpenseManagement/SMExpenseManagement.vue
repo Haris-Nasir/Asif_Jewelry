@@ -8,7 +8,7 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            Search and Manage Expense
+                            {{ $t('expense.manageTitle') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -21,29 +21,29 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-1">
-                                <label for="from-date" class="text-md">From Date</label>
+                                <label for="from-date" class="text-md">{{ $t('common.fromDate') }}</label>
                             </div>
                             <div class="col-md-3">
                                 <input type="date" class="form-control" id="from-date" v-model="fromDate" />
                             </div>
                             <div class="col-md-1">
-                                <label for="to-date" class="text-md">To Date</label>
+                                <label for="to-date" class="text-md">{{ $t('common.toDate') }}</label>
                             </div>
                             <div class="col-md-3">
                                 <input type="date" class="form-control" id="to-date" v-model="toDate" />
                             </div>
                             <div class="col-md-1">
-                                <label for="expense-category" class="text-md">Expense Category</label>
+                                <label for="expense-category" class="text-md">{{ $t('expCat.category') }}</label>
                             </div>
                             <div class="col-md-3">
                                 <model-select :options="categoriesForFilter" v-model="selectedExpenseCategoryForFilter"
-                                    placeholder="Select Category">
+                                    :placeholder="$t('expense.selectCategory')">
                                 </model-select>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-md-1">
-                                <label for="" class="text-md">Per Page</label>
+                                <label for="" class="text-md">{{ $t('common.perPage') }}</label>
                             </div>
                             <div class="col-md-3">
                                 <select v-model="paginate" class="form-control">
@@ -55,7 +55,7 @@
                             <div class="col-md-5"></div>
                             <div class="col-md-3 form-group">
                                 <input v-model="search" type="search" class="form-control "
-                                    placeholder="Search By ..." />
+                                    :placeholder="$t('common.searchBy')" />
                             </div>
                         </div>
 
@@ -64,22 +64,22 @@
                                 <thead class="text-md">
                                     <tr>
                                         <th width="12%">
-                                            <a href="#" @click.prevent="updateSorting('expense_date')                                               ">Date</a>
+                                            <a href="#" @click.prevent="updateSorting('expense_date')                                               ">{{ $t('common.date') }}</a>
                                             <span v-if="sort_field == 'expense_date'? 1: 0">
                                                 <span v-if="sort_direction == 'asc'? 1: 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                                             </span>
                                         </th>
                                         <th>
-                                            <a href="#" @click.prevent="updateSorting('expense_description')">Expense Description</a>
+                                            <a href="#" @click.prevent="updateSorting('expense_description')">{{ $t('common.description') }}</a>
                                             <span v-if="sort_field =='expense_description'? 1: 0">
                                                 <span v-if="sort_direction == 'asc'? 1: 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                                             </span>
                                         </th>
-                                        <th width="25%">Expense Category</th>
-                                        <th>Amount</th>
-                                        <th width="110" class="text-center">Action</th>
+                                        <th width="25%">{{ $t('expCat.category') }}</th>
+                                        <th>{{ $t('common.amount') }}</th>
+                                        <th width="110" class="text-center">{{ $t('common.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -107,7 +107,7 @@
                             <!-- <div class="col-md-5"></div> -->
                             <div class="col-md-9 text-right">
                                 <label for="" class="mt-2 text-md">
-                                    Total Amount of this page :
+                                    {{ $t('common.totalPageAmount') }}
                                 </label>
                             </div>
                             <div class="col-md-3">
@@ -118,7 +118,7 @@
                             <!-- <div class="col-md-2"></div> -->
                             <div class="col-md-9 text-right">
                                 <label for="" class="mt-2 text-md">
-                                    Total Amount From <span class="text-success"> {{ printDate(fromDate) }} </span> to <span class="text-success"> {{ printDate(toDate) }} </span> of <span class="text-danger"> {{selectedExpenseCategoryForFilter.text}} </span> Category and Search Term = <span class="text-danger">"{{search}}"</span> :
+                                    {{ $t('expense.totalRangeFrom') }} <span class="text-success"> {{ printDate(fromDate) }} </span> {{ $t('common.to') }} <span class="text-success"> {{ printDate(toDate) }} </span> {{ $t('expense.totalRangeOf') }} <span class="text-danger"> {{selectedExpenseCategoryForFilter.text}} </span> {{ $t('expense.totalRangeCategorySearch') }} <span class="text-danger">"{{search}}"</span> :
                                 </label>
                             </div>
                             <div class="col-md-3">
@@ -131,7 +131,7 @@
                 <div v-if="expenseId == -1 ? 0:1" class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            Update Expense
+                            {{ $t('expense.updateTitle') }}
                         </h3>
                         <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
@@ -147,7 +147,7 @@
                                 <label
                                     for="expense-date"
                                     class="text-md col-form-label"
-                                    >Date</label
+                                    >{{ $t('common.date') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -164,13 +164,13 @@
                                 <label
                                     for="expense-category"
                                     class="text-md col-form-label"
-                                    >Expense Category</label
+                                    >{{ $t('expCat.category') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
                             <div class="col-md-3">
                                 <model-select :options="categoriesForEdit" v-model="expenseCategory"
-                                    placeholder="Select Category">
+                                    :placeholder="$t('expense.selectCategory')">
                                 </model-select>
                             </div>
                         </div>
@@ -180,7 +180,7 @@
                                 <label
                                     for="expense-description"
                                     class="text-md col-form-label"
-                                    >Expense Description</label
+                                    >{{ $t('common.description') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -191,7 +191,7 @@
                                     class="form-control text-md"
                                     rows="5"
                                     v-model="expenseDescription"
-                                    placeholder="Enter Description Of Expense..."
+                                    :placeholder="$t('expense.phDesc')"
                                 />
                             </div>
                         </div>
@@ -201,7 +201,7 @@
                                 <label
                                     for="expense-amount"
                                     class="text-md col-form-label"
-                                    >Amount</label
+                                    >{{ $t('common.amount') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -227,14 +227,14 @@
                             class="btn btn-primary text-md"
                             @click="updateExpense"
                         >
-                            Update
+                            {{ $t('common.update') }}
                         </button>
                         <button
                             type="reset"
                             class="btn btn-primary ml-3 text-md"
                             @click="resetUpdateExpenseForm"
                         >
-                            Reset
+                            {{ $t('common.reset') }}
                         </button>
 
                         
@@ -265,7 +265,7 @@
                 categoriesForFilter: [],
                 selectedExpenseCategoryForFilter: {
                     value: "",
-                    text: "All"
+                    text: this.$t('common.all')
                 },
                 paginate: "10",
                 search: "",
@@ -341,7 +341,7 @@
                     )
                     .then((response, err) => {
                         if (err) {
-                            toastr.error("Something Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                         } else {
                             this.expenses = response.data;
                             let totalAmountOfPage = 0;
@@ -360,7 +360,7 @@
                     .then(res => {
                         if (res.data.status == 1) {
 
-                            let allEntry = [{value: "", text: "All"}];
+                            let allEntry = [{value: "", text: this.$t('common.all')}];
                             let individualEntry = res.data.data.map(category => {
                                 return {
                                     value: category.expense_category_id,
@@ -372,9 +372,7 @@
                         }
                     })
                     .catch(() => {
-                        toastr.error(
-                            "Some thing Went Wrong, Please Refreash The Page"
-                        );
+                        toastr.error(this.$t('common.somethingWrongRefresh'));
                     });
             },
 
@@ -384,7 +382,7 @@
                 })
                 .catch((err) => {
                     console.log(`Exception In ${this}`);
-                    toastr.error("Something Went Wrong");
+                    toastr.error(this.$t('common.somethingWrong'));
                 })
             },
 
@@ -403,9 +401,7 @@
                         }
                     })
                     .catch(() => {
-                        toastr.error(
-                            "Some thing Went Wrong, Please Refreash The Page"
-                        );
+                        toastr.error(this.$t('common.somethingWrongRefresh'));
                     });
             },
 
@@ -439,7 +435,7 @@
                 this.expenseAmount = expense_amount;
                 this.expenseCategory = expense_category_id;
                 this.expenseDate = this.getStdDate(expense_date);
-                toastr.info("Please Scroll Down");
+                toastr.info(this.$t('common.scrollDown'));
             },
 
             roundFigureAmount: function(){
@@ -462,8 +458,8 @@
                         .then(res => {
                             if(res.data.status == 1){
                                 swal.fire({
-                                    title: "Success",
-                                    html:"<h5 style='color:#9C9794'>Expense Updated Successfully</h5>",
+                                    title: this.$t('common.success'),
+                                    html:"<h5 style='color:#9C9794'>" + this.$t('expense.updated') + "</h5>",
                                     icon: "success"
                                 })
                                 .then(result => {
@@ -493,14 +489,14 @@
                         })
                         .catch((err)=>{
                             console.log("Exception In Update Expense");
-                            toastr.error("Something Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                         });
                     }
             },
 
             validateExpenseCategory: function(){
                 if(this.expensesCategory == ""){
-                    toastr.info("Please Select Expense Category");
+                    toastr.info(this.$t('expense.selectCategoryPlease'));
                     return false;
                 }
 
@@ -509,7 +505,7 @@
 
             validateExpenseDescription: function(){
                 if(this.expenseDescription == ""){
-                    toastr.info("Expense Description Is Required");
+                    toastr.info(this.$t('expense.descRequired'));
                     return false;
                 }
 
@@ -519,12 +515,12 @@
             validateExpenseAmount: function(){
 
                 if(this.expenseAmount == "" || isNaN(this.expenseAmount)){
-                    toastr.info("Expense Amount Is Required");
+                    toastr.info(this.$t('expense.amountRequired'));
                     return false;
                 }
 
                 if(this.expenseAmount < 0){
-                    toastr.info("Expense Amount Can Not Be Negative");
+                    toastr.info(this.$t('expense.amountNegative'));
                     return false;
                 }
 
@@ -533,7 +529,7 @@
 
             validateExpenseDate: function(){
                 if(this.expenseDate == ""){
-                    toastr.info("Expense Date Is Required");
+                    toastr.info(this.$t('expense.dateRequired'));
                     return false;
                 }
                 return true;
@@ -552,9 +548,9 @@
                     .then(res => {
                         if (res.data.status == 1) {
                             swal.fire({
-                                title: "Success",
+                                title: this.$t('common.success'),
                                 html:
-                                    "<h5 style='color:#9C9794'>Expense Deleted Successfully</h5>",
+                                    "<h5 style='color:#9C9794'>" + this.$t('expense.deleted') + "</h5>",
                                 icon: "success"
                             }).then(() => {
                                 this.getAllExpenses(this.expenses.current_page);
@@ -563,13 +559,13 @@
                         } else if (res.data.status == -1) {
                             toastr.error(res.data.message);
                         } else {
-                            toastr.error("Something Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                             console.log("Error In Delete Expense API");
                         }
                     })
                     .catch(err => {
                         console.log("Exception in Delete Expense API");
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                     });
             },
 

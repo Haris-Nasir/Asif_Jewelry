@@ -4,7 +4,7 @@
             <div class="col-md-12 mt-3">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">New Broker</h3>
+                        <h3 class="card-title">{{ $t('broker.newTitle') }}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -15,30 +15,30 @@
                     <div class="card-body">
                         <div class="form-group row">
                             <div class="col-md-2">
-                                <label for="brokerName" class="text-md col-form-label">Broker Name <span
+                                <label for="brokerName" class="text-md col-form-label">{{ $t('broker.name') }} <span
                                         class="required-mark" style="color: red;">*</span></label>
                             </div>
 
                             <div class="col-md-3">
                                 <input type="text" class="form-control" v-model="brokerName" maxlength="70"
-                                    placeholder="Enter Broker Name...">
+                                    :placeholder="$t('broker.phName')">
                             </div>
 
                             <div class="col-md-2 ml-auto">
-                                <label for="contactNo" class="text-md col-form-label">Contact Number</label>
+                                <label for="contactNo" class="text-md col-form-label">{{ $t('common.contactNo') }}</label>
                             </div>
 
                             <div class="col-md-3 mr-5">
                                 <input type="text" class="form-control" v-model="contactNo" maxlength="11"
-                                    placeholder="Enter Broker Contact No...">
+                                    :placeholder="$t('broker.phContact')">
                             </div>
                         </div>
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" v-on:click="addBroker" class="btn btn-primary text-md">Add</button>
+                        <button type="submit" v-on:click="addBroker" class="btn btn-primary text-md">{{ $t('common.add') }}</button>
                         <button type="reset" v-on:click="resetFields"
-                            class="btn btn-primary ml-3 text-md">Reset</button>
+                            class="btn btn-primary ml-3 text-md">{{ $t('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -72,7 +72,7 @@
         methods: {
             addBroker() {
                 if (this.brokerName == '') {
-                    toastr["error"]('Broker Name is Required');
+                    toastr["error"](this.$t('broker.nameRequired'));
                 } else {
                     let payload = {
                         brokerName: this.brokerName,
@@ -97,8 +97,8 @@
                                 toastr["warning"](response.data.message);
                             } else if (response.data.status == 1) {
                                 swal.fire({
-                                    title: 'Success',
-                                    html: "<h5 style='color:#9C9794'>Broker Details Added Successfully!</h5>",
+                                    title: this.$t('common.success'),
+                                    html: "<h5 style='color:#9C9794'>" + this.$t('broker.added') + "</h5>",
                                     icon: 'success'
                                 }).then((result) => {
                                     this.$emit("refreshBrokersTable");
@@ -108,7 +108,7 @@
                         })
                         .catch(err => {
                             console.log(err.response.data.message);
-                            toastr["error"]("Something went Wrong.");
+                            toastr["error"](this.$t('common.somethingWrong'));
                         })
                 }
 

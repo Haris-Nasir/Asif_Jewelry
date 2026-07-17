@@ -4,31 +4,31 @@
                     <div class="col-md-12 mt-3">
                         <div class="card card-primary">
                             <div class="card-header">
-                                <h3 class="card-title">Audit Logs</h3>
+                                <h3 class="card-title">{{ $t('admin.auditTitle') }}</h3>
                             </div>
                             <div class="card-body">
                                 <div class="form-row mb-3">
                                     <div class="col-md-2">
-                                        <label>From</label>
+                                        <label>{{ $t('common.from') }}</label>
                                         <input type="date" class="form-control" v-model="filters.from_date" @change="loadLogs">
                                     </div>
                                     <div class="col-md-2">
-                                        <label>To</label>
+                                        <label>{{ $t('common.to') }}</label>
                                         <input type="date" class="form-control" v-model="filters.to_date" @change="loadLogs">
                                     </div>
                                     <div class="col-md-2">
-                                        <label>Module</label>
-                                        <input type="text" class="form-control" v-model="filters.module" placeholder="e.g. purchase" @change="loadLogs">
+                                        <label>{{ $t('admin.module') }}</label>
+                                        <input type="text" class="form-control" v-model="filters.module" :placeholder="$t('admin.phModule')" @change="loadLogs">
                                     </div>
                                     <div class="col-md-2">
-                                        <label>Action</label>
+                                        <label>{{ $t('admin.action') }}</label>
                                         <select class="form-control" v-model="filters.action" @change="loadLogs">
-                                            <option value="">All</option>
-                                            <option value="create">Create</option>
-                                            <option value="update">Update</option>
-                                            <option value="delete">Delete</option>
-                                            <option value="login">Login</option>
-                                            <option value="logout">Logout</option>
+                                            <option value="">{{ $t('common.all') }}</option>
+                                            <option value="create">{{ $t('admin.actionCreate') }}</option>
+                                            <option value="update">{{ $t('admin.actionUpdate') }}</option>
+                                            <option value="delete">{{ $t('admin.actionDelete') }}</option>
+                                            <option value="login">{{ $t('admin.actionLogin') }}</option>
+                                            <option value="logout">{{ $t('admin.actionLogout') }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -37,13 +37,13 @@
                                     <table class="table table-bordered table-sm">
                                         <thead>
                                             <tr>
-                                                <th>When</th>
-                                                <th>User</th>
-                                                <th>Action</th>
-                                                <th>Module</th>
-                                                <th>Record</th>
-                                                <th>Description</th>
-                                                <th>IP</th>
+                                                <th>{{ $t('admin.when') }}</th>
+                                                <th>{{ $t('admin.user') }}</th>
+                                                <th>{{ $t('admin.action') }}</th>
+                                                <th>{{ $t('admin.module') }}</th>
+                                                <th>{{ $t('admin.record') }}</th>
+                                                <th>{{ $t('common.description') }}</th>
+                                                <th>{{ $t('admin.ip') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -57,7 +57,7 @@
                                                 <td>{{ log.ip_address || '-' }}</td>
                                             </tr>
                                             <tr v-if="!logs.data || !logs.data.length">
-                                                <td colspan="7" class="text-center text-muted">No audit logs found.</td>
+                                                <td colspan="7" class="text-center text-muted">{{ $t('admin.noLogs') }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -110,7 +110,7 @@ export default {
                 .then((res) => {
                     this.logs = res.data;
                 })
-                .catch(() => toastr.error('Unable to load audit logs.'));
+                .catch(() => toastr.error(this.$t('admin.loadLogsFail')));
         },
         formatDate(value) {
             if (!value) return '-';

@@ -9,7 +9,7 @@
         <!-- New Sell Quality Form Elements -->
         <div class="card card-primary">
           <div class="card-header">
-            <h3 class="card-title">New Sell Quality</h3>
+            <h3 class="card-title">{{ $t('sellQuality.newTitle') }}</h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
@@ -21,31 +21,31 @@
           <div class="card-body">
             <div class="form-group row">
               <div class="col-md-2">
-                <label for="qualitycategory" class="text-md col-form-label">Quality Category <span class="required-mark"
+                <label for="qualitycategory" class="text-md col-form-label">{{ $t('common.category') }} <span class="required-mark"
                     style="color: red;">*</span></label>
               </div>
               <div class="col-md-4">
-                <model-select :options="qualityCategories" v-model="selectedQualityCategory" placeholder="Select Quality Category">
+                <model-select :options="qualityCategories" v-model="selectedQualityCategory" :placeholder="$t('quality.selectCategory')">
                 </model-select>
               </div>
             </div>
 
             <div class="form-group row">
               <div class="col-md-2">
-                <label for="qualityname" class="text-md col-form-label">Quality Name <span class="required-mark"
+                <label for="qualityname" class="text-md col-form-label">{{ $t('quality.qualityName') }} <span class="required-mark"
                     style="color: red;">*</span></label>
               </div>
               <div class="col-md-4">
                 <input type="text" class="form-control" v-model="qualityName" maxlength="50"
-                  placeholder="Enter Quality Name...">
+                  :placeholder="$t('quality.phName')">
               </div>
             </div>
           </div>
           <!-- /.card-body -->
 
           <div class="card-footer">
-            <button type="submit" v-on:click="addSellQuality" class="btn btn-primary text-md">Add</button>
-            <button type="reset" v-on:click="resetFields" class="btn btn-primary ml-3 text-md">Reset</button>
+            <button type="submit" v-on:click="addSellQuality" class="btn btn-primary text-md">{{ $t('common.add') }}</button>
+            <button type="reset" v-on:click="resetFields" class="btn btn-primary ml-3 text-md">{{ $t('common.reset') }}</button>
           </div>
         </div>
         <!-- /.card -->
@@ -106,7 +106,7 @@
           });
         }).catch(err => {
           console.log(err);
-          toastr["error"]("Something went Wrong");
+          toastr["error"](this.$t('common.somethingWrong'));
         })
       },
 
@@ -116,7 +116,7 @@
         addData["qualityCategoryId"] = this.selectedQualityCategory.value;
 
         if ((this.selectedQualityCategory == '') || (this.qualityName == '')) {
-          toastr["error"]('All Fields are Required');
+          toastr["error"](this.$t('common.allFieldsRequired'));
         } else {
           axios
             .post("../api/sellquality/insert", addData)
@@ -139,8 +139,8 @@
                 toastr["warning"](res.data.message);
               } else if (res.data.status == 1) {
                 swal.fire({
-                  title: 'Success',
-                  html: "<h5 style='color:#9C9794'>Sell Quality Data Added Successfully!</h5>",
+                  title: this.$t('common.success'),
+                  html: "<h5 style='color:#9C9794'>" + this.$t('sellQuality.added') + "</h5>",
                   icon: 'success'
                 }).then((result) => {
                   this.resetFields();
@@ -149,7 +149,7 @@
               }
             }).catch((err) => {
               console.log(err.response.data.message);
-              toastr["error"]("Something went Wrong.");
+              toastr["error"](this.$t('common.somethingWrong'));
             });
         }
       },

@@ -6,7 +6,7 @@
                             <div class="card card-primary">
                                 <div class="card-header">
                                     <h3 class="card-title">
-                                        Manage Challan Invoice
+                                        {{ $t('invoice.manageChallan') }}
                                     </h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"></button>
@@ -16,61 +16,61 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-1">
-                                            <label for="from-date" class="text-md">From Date</label>
+                                            <label for="from-date" class="text-md">{{ $t('common.fromDate') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <input type="date" class="form-control" id="from-date"
                                                 v-model="filters.fromDate" />
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="to-date" class="text-md">To Date</label>
+                                            <label for="to-date" class="text-md">{{ $t('common.toDate') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <input type="date" class="form-control" id="to-date"
                                                 v-model="filters.toDate" />
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="company-name" class="text-md">Customer</label>
+                                            <label for="company-name" class="text-md">{{ $t('common.customer') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.customers"
-                                                v-model="filters.customer" placeholder="Select Company">
+                                                v-model="filters.customer" :placeholder="$t('common.selectCompany')">
                                             </model-select>
                                         </div>
                                     </div>
 
                                     <div class="row mt-2">
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Category</label>
+                                            <label for="" class="text-md">{{ $t('common.category') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.categories"
-                                                v-model="filters.category" placeholder="Select Category">
+                                                v-model="filters.category" :placeholder="$t('common.selectCategory')">
                                             </model-select>
                                         </div>
 
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Quality</label>
+                                            <label for="" class="text-md">{{ $t('common.quality') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.qualities" v-model="filters.quality"
-                                                placeholder="Select Quality">
+                                                :placeholder="$t('common.selectQuality')">
                                             </model-select>
                                         </div>
 
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Broker</label>
+                                            <label for="" class="text-md">{{ $t('common.broker') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.brokers" v-model="filters.broker"
-                                                placeholder="Select Broker">
+                                                :placeholder="$t('common.selectBroker')">
                                             </model-select>
                                         </div>
                                     </div>
 
                                     <div class="row mt-4">
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Per Page</label>
+                                            <label for="" class="text-md">{{ $t('common.perPage') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <select v-model="filters.paginate" class="form-control">
@@ -82,7 +82,7 @@
                                         <!-- <div class="col-md-5"></div>
                                         <div class="col-md-3 form-group">
                                             <input v-model="search" type="search" class="form-control "
-                                                placeholder="Search By ..." />
+                                                :placeholder="$t('common.searchBy')" />
                                         </div> -->
                                     </div>
 
@@ -92,7 +92,7 @@
                                                 <tr>
                                                     <th width="12%">
                                                         <a href="#"
-                                                            @click.prevent="updateSorting('invoice_date')">Date</a>
+                                                            @click.prevent="updateSorting('invoice_date')">{{ $t('common.date') }}</a>
                                                         <span v-if="filters.sort_field == 'invoice_date'?1:0">
                                                             <span
                                                                 v-if=" filters.sort_direction == 'asc' ? 1 : 0 ">&uarr;</span>
@@ -101,8 +101,7 @@
                                                         </span>
                                                     </th>
                                                     <th width="12%">
-                                                        <a href="#" @click.prevent="updateSorting('due_date')">Due
-                                                            Date</a>
+                                                        <a href="#" @click.prevent="updateSorting('due_date')">{{ $t('common.dueDate') }}</a>
                                                         <span v-if="filters.sort_field == 'due_date'?1:0">
                                                             <span
                                                                 v-if=" filters.sort_direction == 'asc' ? 1 : 0 ">&uarr;</span>
@@ -111,8 +110,7 @@
                                                         </span>
                                                     </th>
                                                     <th>
-                                                        <a href="#" @click.prevent="updateSorting('challan_no')">Invoice
-                                                            No</a>
+                                                        <a href="#" @click.prevent="updateSorting('challan_no')">{{ $t('common.invoiceNo') }}</a>
                                                         <span v-if=" filters.sort_field == 'challan_no'?1:0">
                                                             <span
                                                                 v-if=" filters.sort_direction == 'asc'? 1: 0">&uarr;</span>
@@ -120,15 +118,15 @@
                                                                 v-if="filters.sort_direction =='desc'? 1: 0">&darr;</span>
                                                         </span>
                                                     </th>
-                                                    <th>Company</th>
-                                                    <th>Broker</th>
-                                                    <th>Item Type</th>
-                                                    <th>Category</th>
-                                                    <th class="text-right">Weight (g)</th>
-                                                    <th class="text-right">Sold Amount</th>
-                                                    <th class="text-right">Profit</th>
-                                                    <th class="text-right">Net Amount</th>
-                                                    <th width="120" class="text-center">Action</th>
+                                                    <th>{{ $t('common.company') }}</th>
+                                                    <th>{{ $t('common.broker') }}</th>
+                                                    <th>{{ $t('common.itemType') }}</th>
+                                                    <th>{{ $t('common.category') }}</th>
+                                                    <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                    <th class="text-right">{{ $t('common.soldAmount') }}</th>
+                                                    <th class="text-right">{{ $t('common.profit') }}</th>
+                                                    <th class="text-right">{{ $t('common.netAmount') }}</th>
+                                                    <th width="120" class="text-center">{{ $t('common.action') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="text-md">
@@ -149,12 +147,12 @@
                                                     <td class="text-center">
                                                         <div class="table-actions">
                                                             <a :href="pdfLink('/invoice/pdf/' + invoice.invoice_mst_id)"
-                                                                target="_blank" class="btn btn-danger btn-sm" title="PDF"><i
+                                                                target="_blank" class="btn btn-danger btn-sm" :title="$t('common.pdf')"><i
                                                                     class="fas fa-file-pdf"></i></a>
-                                                            <button type="button" class="btn btn-info btn-sm" title="View"
+                                                            <button type="button" class="btn btn-info btn-sm" :title="$t('common.view')"
                                                                 @click="viewInvoice(invoice.invoice_mst_id    , invoice.challan_no)"><i
                                                                     class="fas fa-eye"></i></button>
-                                                            <button type="button" class="btn btn-primary btn-sm" title="Edit"
+                                                            <button type="button" class="btn btn-primary btn-sm" :title="$t('common.edit')"
                                                                 @click="editInvoice(invoice.invoice_mst_id)"><i
                                                                     class="fas fa-pen"></i></button>
                                                         </div>
@@ -175,7 +173,7 @@
                                         <!-- <div class="col-md-5"></div> -->
                                         <div class="col-md-9 text-right">
                                             <label for="" class="mt-2 text-md">
-                                                Total Amount of this page :
+                                                {{ $t('common.totalPageAmount') }}
                                             </label>
                                         </div>
                                         <div class="col-md-3">
@@ -190,7 +188,7 @@
 
                                 <div class="card-header card-title d-flex">
                                     <span class="flex-grow-1 bd-highlight">
-                                        View Invoice
+                                        {{ $t('invoice.viewTitle') }}
                                     </span>
                                     <span class="p-2 bd-highlight">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -205,21 +203,21 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Invoice Date</label>
+                                            <label class="text-md mt-1">{{ $t('common.invoiceDate') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceDate"
                                                 disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Challan Date</label>
+                                            <label class="text-md mt-1">{{ $t('challan.challanDate') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceDate"
                                                 disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Challan No / Invoice No</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.challanInvoiceNo') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceNo"
@@ -228,14 +226,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Customer</label>
+                                            <label class="text-md mt-1">{{ $t('common.customer') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.customer"
                                                 disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Broker</label>
+                                            <label class="text-md mt-1">{{ $t('common.broker') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.broker"
@@ -244,14 +242,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Customer Mobile</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.customerMobile') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control"
                                                 v-model="invoiceToView.customerMobileNo" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Customer GST No</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.customerGstNo') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control"
@@ -260,14 +258,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Quality</label>
+                                            <label class="text-md mt-1">{{ $t('common.quality') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.quality"
                                                 disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">No Of Units</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.noOfUnits') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.noOfUnits"
@@ -276,14 +274,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Total Quantity</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.totalQuantity') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.qty" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Unit</label>
+                                            <label class="text-md mt-1">{{ $t('common.unit') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.unit"
@@ -292,14 +290,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Rate / gram (Rs.)</label>
+                                            <label class="text-md mt-1">{{ $t('common.ratePerG') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.rate" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">GST</label>
+                                            <label class="text-md mt-1">{{ $t('common.gst') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
@@ -308,14 +306,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Total Amount</label>
+                                            <label class="text-md mt-1">{{ $t('common.totalAmount') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
                                                 v-model="invoiceToView.totalAmount" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">GST Amount</label>
+                                            <label class="text-md mt-1">{{ $t('common.gstAmount') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
@@ -324,14 +322,14 @@
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Bank</label>
+                                            <label class="text-md mt-1">{{ $t('common.bank') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control"
                                                 v-model="invoiceToView.bankDetails" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Net Amount</label>
+                                            <label class="text-md mt-1">{{ $t('common.netAmount') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right"
@@ -343,7 +341,7 @@
 
                             <div v-if="invoiceToEdit.invoiceId == -1 ? 0 :1" class="card card-primary mt-3">
                                 <div class="card-header">
-                                    <h3 class="card-title">Edit Invoice</h3>
+                                    <h3 class="card-title">{{ $t('invoice.editTitle') }}</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
                                                 class="fas fa-minus"></i></button>
@@ -357,7 +355,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="dueDate" class="text-md col-form-label">Due Date <span
+                                            <label for="dueDate" class="text-md col-form-label">{{ $t('common.dueDate') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -368,7 +366,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="rate" class="text-md col-form-label">Rate / gram (Rs.) <span
+                                            <label for="rate" class="text-md col-form-label">{{ $t('common.ratePerG') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -377,7 +375,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="gstPercentage" class="text-md col-form-label">GST <span
+                                            <label for="gstPercentage" class="text-md col-form-label">{{ $t('common.gst') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -398,12 +396,12 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="bank" class="text-md col-form-label">Bank <span
+                                            <label for="bank" class="text-md col-form-label">{{ $t('common.bank') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="invoiceToEdit.bank"
-                                                v-model="invoiceToEdit.selectedBank" placeholder="Select a Bank"
+                                                v-model="invoiceToEdit.selectedBank" :placeholder="$t('common.selectBank')"
                                                 @blur="getBranchName">
                                             </model-select>
                                         </div>
@@ -411,7 +409,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="branch" class="text-md col-form-label">Branch <span
+                                            <label for="branch" class="text-md col-form-label">{{ $t('invoice.branch') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -423,9 +421,9 @@
 
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary text-md"
-                                        @click="updateInvoice">Update</button>
+                                        @click="updateInvoice">{{ $t('common.update') }}</button>
                                     <button type="reset" class="btn btn-primary ml-3 text-md"
-                                        @click="resetEditFields">Reset</button>
+                                        @click="resetEditFields">{{ $t('common.reset') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -504,7 +502,7 @@
                         customers: [],
                         brokers: [],
                         categories: [],
-                        qualities: [{ text: "All", value: "" }]
+                        qualities: [{ text: this.$t('common.all'), value: "" }]
                     },
 
                     invoices: {}
@@ -566,7 +564,7 @@
             loadCustomersForFilter: function () {
                 axios
                     .get('../api/customerlist').then((response) => {
-                        let allEntry = [{ text: "All", value: "" }];
+                        let allEntry = [{ text: this.$t('common.all'), value: "" }];
                         let individualEntry = response.data.map(company => {
                             return {
                                 value: company.customer_id,
@@ -577,7 +575,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        toastr["error"]("Something went Wrong.")
+                        toastr["error"](this.$t('common.somethingWrong'))
                     })
             },
 
@@ -585,7 +583,7 @@
 
                 axios
                     .get('../api/sellqualitycategories').then((response) => {
-                        let allEntry = [{ text: "All", value: "" }];
+                        let allEntry = [{ text: this.$t('common.all'), value: "" }];
                         let individualEntry = response.data.qualityCategories.map(category => {
                             return {
                                 value: category.qualityCategoryId,
@@ -597,13 +595,13 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        toastr["error"]("Something went Wrong");
+                        toastr["error"](this.$t('common.somethingWrong'));
                     })
             },
 
             loadQualitiesFromCategoryForFilter: function () {
                 if (typeof this.filters.category === 'undefined' || this.filters.category == '' || this.filters.category == null) {
-                    this.filters.options.qualities = [{ text: "All", value: "" }];
+                    this.filters.options.qualities = [{ text: this.$t('common.all'), value: "" }];
                     this.filters.quality = "";
                     return;
                 }
@@ -611,7 +609,7 @@
                 axios
                     .get('../api/sellqualityofcategory/' + this.filters.category)
                     .then(response => {
-                        let allEntry = [{ text: "All", value: "" }];
+                        let allEntry = [{ text: this.$t('common.all'), value: "" }];
                         let individualEntry = response.data.map(quality => {
                             return {
                                 value: quality.sell_quality_id,
@@ -623,13 +621,13 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        toastr["error"]("Something went Wrong.")
+                        toastr["error"](this.$t('common.somethingWrong'))
                     })
             },
 
             loadBrokersForFilter: function () {
                 axios.get('../api/brokerslist').then((response) => {
-                    let allEntry = [{ text: "All", value: "" }];
+                    let allEntry = [{ text: this.$t('common.all'), value: "" }];
                     let individualEntry = response.data.map(broker => {
                         return {
                             value: broker.broker_id,
@@ -641,7 +639,7 @@
 
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
             },
 
@@ -737,7 +735,7 @@
                     .catch(err => {
                         console.error(err)
                         console.log("Err in Fetching Challans");
-                        toastr.error("Something Went Wrong, Please Refrash");
+                        toastr.error(this.$t('common.somethingWrongRefresh'));
                     });
             },
 
@@ -777,7 +775,7 @@
                             this.invoiceToView.bankDetails = response.data.data.bank.bank_name + ' - ' + response.data.data.bank.account_no;
                         }
                         else {
-                            toastr.error("Something Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                             console.log("Other then Expected Answer Recieved In Viewing Invoice");
                         }
                     })
@@ -803,7 +801,7 @@
                     })
                     .catch(err => {
                         console.log(err);
-                        toastr["error"]('Something Went Wrong!');
+                        toastr["error"](this.$t('common.somethingWrong'));
                     })
             },
 
@@ -817,7 +815,7 @@
                     this.invoiceToEdit.branch = response.data.branch_name;
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]('Something went Wrong!');
+                    toastr["error"](this.$t('common.somethingWrong'));
                 })
             },
 
@@ -832,7 +830,7 @@
                     })
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]('Something went Wrong.');
+                    toastr["error"](this.$t('common.somethingWrong'));
                 });
             },
 
@@ -890,15 +888,15 @@
                     .then(response => {
                         if (response.data.status == 1) {
                             swal.fire({
-                                title: 'Success',
-                                html: "<h5 style='color:#9C9794'>Invoice Updated Successfully!</h5>",
+                                title: this.$t('common.success'),
+                                html: "<h5 style='color:#9C9794'>" + this.$t('invoice.updated') + "</h5>",
                                 icon: 'success'
                             }).then((result) => {
                                 this.invoiceToEdit.invoiceId = -1;
                                 this.getInvoices(this.filters.invoices.current_page);
                             });
                         } else if (response.data.status == -1) {
-                            toastr.error("Something Went Worng");
+                            toastr.error(this.$t('common.somethingWrong'));
                             console.log("Something Went Wrong in Update Invoice API Call in serve");
                         } else if (response.data.status == 0) {
                             let errorString = "";
@@ -915,7 +913,7 @@
                     })
                     .catch(err => {
                         console.log("Err In Updateing Invoice API Call");
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                     })
             }
         },

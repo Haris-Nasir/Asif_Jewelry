@@ -3,7 +3,7 @@
         <div class="col-md-12 mt-3">
             <div class="card card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">New Laboratory Job</h3>
+                    <h3 class="card-title">{{ $t('lab.newTitle') }}</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                             <i class="fas fa-minus"></i>
@@ -12,57 +12,56 @@
                 </div>
                 <div class="card-body lab-job-form">
                     <p class="text-muted small mb-3">
-                        Select investors from the dropdown. Base price is cut equally from each selected investor.
-                        Profit uses each investor's configured profit share % from Manage Investors.
+                        {{ $t('lab.helperSelectInvestors') }}
                     </p>
 
                     <div class="form-row">
                         <div class="form-group col-md-3">
-                            <label class="lab-label">Job Date &amp; Time <span class="text-danger">*</span></label>
+                            <label class="lab-label">{{ $t('lab.jobDateTime') }} <span class="text-danger">*</span></label>
                             <input type="datetime-local" class="form-control" v-model="form.job_date">
                         </div>
                         <div class="form-group col-md-3">
-                            <label class="lab-label">Investors <span class="text-danger">*</span></label>
+                            <label class="lab-label">{{ $t('lab.investors') }} <span class="text-danger">*</span></label>
                             <investor-multi-select
                                 :investors="investors"
                                 v-model="form.investor_ids"
-                                placeholder="Select investors..."
+                                :placeholder="$t('lab.phInvestors')"
                                 @change="refreshSharePreview"
                             />
                         </div>
                         <div class="form-group col-md-2">
-                            <label class="lab-label">Reference</label>
-                            <input type="text" class="form-control" v-model="form.job_reference" placeholder="Job no.">
+                            <label class="lab-label">{{ $t('common.reference') }}</label>
+                            <input type="text" class="form-control" v-model="form.job_reference" :placeholder="$t('lab.phJobNo')">
                         </div>
                         <div class="form-group col-md-2">
-                            <label class="lab-label">Metal <span class="text-danger">*</span></label>
+                            <label class="lab-label">{{ $t('common.metal') }} <span class="text-danger">*</span></label>
                             <select class="form-control" v-model="form.metal_type">
-                                <option value="gold">Gold</option>
-                                <option value="silver">Silver</option>
+                                <option value="gold">{{ $t('common.gold') }}</option>
+                                <option value="silver">{{ $t('common.silver') }}</option>
                             </select>
                         </div>
                         <div class="form-group col-md-2">
-                            <label class="lab-label">Weight (g) <span class="text-danger">*</span></label>
+                            <label class="lab-label">{{ $t('common.weightG') }} <span class="text-danger">*</span></label>
                             <input type="number" class="form-control text-right" v-model="form.weight_grams" min="0" step="0.001">
                         </div>
                     </div>
 
                     <div v-if="sharePreview.participants.length" class="alert alert-light border mb-3">
-                        <strong>Split preview</strong>
+                        <strong>{{ $t('lab.splitPreview') }}</strong>
                         <span class="text-muted small ml-2">
-                            Profit allocated: {{ sharePreview.total_profit_share_percentage }}%
+                            {{ $t('lab.profitAllocated', { pct: sharePreview.total_profit_share_percentage }) }}
                             <span v-if="sharePreview.unallocated_profit_percentage > 0">
-                                · Unallocated: {{ sharePreview.unallocated_profit_percentage }}%
+                                · {{ $t('lab.unallocated', { pct: sharePreview.unallocated_profit_percentage }) }}
                             </span>
                         </span>
                         <table class="table table-sm table-borderless mb-0 mt-2">
                             <thead>
                                 <tr>
-                                    <th>Investor</th>
-                                    <th class="text-right">Balance (Rs.)</th>
-                                    <th class="text-right">Purchase cut (Rs.)</th>
-                                    <th class="text-right">Profit share %</th>
-                                    <th class="text-right" v-if="estimatedProfit !== '-'">Est. profit (Rs.)</th>
+                                    <th>{{ $t('lab.investor') }}</th>
+                                    <th class="text-right">{{ $t('lab.balance') }}</th>
+                                    <th class="text-right">{{ $t('lab.purchaseCut') }}</th>
+                                    <th class="text-right">{{ $t('lab.profitShare') }}</th>
+                                    <th class="text-right" v-if="estimatedProfit !== '-'">{{ $t('lab.estProfit') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,30 +80,30 @@
 
                     <div class="form-row">
                         <div class="form-group col-md-3">
-                            <label class="lab-label">Base Price (Rs.) <span class="text-danger">*</span></label>
+                            <label class="lab-label">{{ $t('lab.basePrice') }} <span class="text-danger">*</span></label>
                             <input type="number" class="form-control text-right" v-model="form.base_price" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
                         <div class="form-group col-md-3">
-                            <label class="lab-label">Refinery Cost (Rs.)</label>
+                            <label class="lab-label">{{ $t('lab.refineryCost') }}</label>
                             <input type="number" class="form-control text-right" v-model="form.refinery_cost" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
                         <div class="form-group col-md-3">
-                            <label class="lab-label">Sold Amount (Rs.)</label>
+                            <label class="lab-label">{{ $t('lab.soldAmount') }}</label>
                             <input type="number" class="form-control text-right" v-model="form.sold_amount" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
                         <div class="form-group col-md-3">
-                            <label class="lab-label">Est. Profit (Rs.)</label>
+                            <label class="lab-label">{{ $t('lab.estProfit') }}</label>
                             <input type="text" class="form-control text-right" :value="estimatedProfit" disabled>
                         </div>
                     </div>
                     <div class="form-group mb-0">
-                        <label class="lab-label">Notes</label>
+                        <label class="lab-label">{{ $t('common.notes') }}</label>
                         <textarea class="form-control" v-model="form.notes" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button type="button" class="btn btn-primary" @click="saveJob">Add Job</button>
-                    <button type="reset" class="btn btn-secondary" @click="resetForm">Reset</button>
+                    <button type="button" class="btn btn-primary" @click="saveJob">{{ $t('lab.addJob') }}</button>
+                    <button type="reset" class="btn btn-secondary" @click="resetForm">{{ $t('common.reset') }}</button>
                 </div>
             </div>
         </div>
@@ -181,7 +180,7 @@ export default {
                 })
                 .catch((err) => {
                     console.log(err);
-                    toastr['error']('Unable to load investors.');
+                    toastr['error'](this.$t('lab.loadInvestorsFail'));
                 });
         },
         refreshSharePreview() {
@@ -213,7 +212,7 @@ export default {
         saveJob() {
             const investorIds = this.normalizedInvestorIds();
             if (!this.form.job_date || !investorIds.length || this.form.weight_grams === '' || this.form.base_price === '') {
-                toastr['error']('Job date, at least one investor, weight, and base price are required.');
+                toastr['error'](this.$t('lab.requiredFields'));
                 return;
             }
 
@@ -222,19 +221,19 @@ export default {
                 .then((res) => {
                     if (res.data.status === 1) {
                         swal.fire({
-                            title: 'Success',
-                            html: "<h5 style='color:#9C9794'>Laboratory Job Added Successfully!</h5>",
+                            title: this.$t('common.success'),
+                            html: "<h5 style='color:#9C9794'>" + this.$t('lab.added') + "</h5>",
                             icon: 'success',
                         }).then(() => {
                             this.resetForm();
                             this.$emit('refreshLabJobs');
                         });
                     } else {
-                        toastr['error'](res.data.message || 'Failed to add job.');
+                        toastr['error'](res.data.message || this.$t('lab.addFail'));
                     }
                 })
                 .catch((err) => {
-                    toastr['error'](err.response?.data?.message || 'Failed to add job.');
+                    toastr['error'](err.response?.data?.message || this.$t('lab.addFail'));
                 });
         },
         resetForm() {

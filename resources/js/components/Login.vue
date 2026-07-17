@@ -19,15 +19,27 @@
             </div>
 
             <div class="metal-tags" aria-hidden="true">
-                <span class="metal-tag metal-tag--gold">Gold</span>
-                <span class="metal-tag metal-tag--silver">Silver</span>
+                <span class="metal-tag metal-tag--gold">{{ $t('login.gold') }}</span>
+                <span class="metal-tag metal-tag--silver">{{ $t('login.silver') }}</span>
             </div>
 
-            <h1 class="login-title">Login</h1>
+            <div class="login-lang">
+                <select
+                    class="jewelry-lang-select"
+                    :value="locale"
+                    :title="$t('lang.label')"
+                    @change="onLocaleChange"
+                >
+                    <option value="en">{{ $t('lang.english') }}</option>
+                    <option value="ur">{{ $t('lang.urdu') }}</option>
+                </select>
+            </div>
+
+            <h1 class="login-title">{{ $t('login.title') }}</h1>
 
             <form @submit.prevent="login">
                 <div class="form-group">
-                    <label for="email">Username</label>
+                    <label for="email">{{ $t('login.username') }}</label>
                     <div class="input-wrap">
                         <span class="input-icon"
                             ><i class="fas fa-user"></i
@@ -43,7 +55,7 @@
                 </div>
 
                 <div class="form-group form-group--password">
-                    <label for="password">Password</label>
+                    <label for="password">{{ $t('login.password') }}</label>
                     <div class="input-wrap">
                         <span class="input-icon"
                             ><i class="fas fa-lock"></i
@@ -61,12 +73,12 @@
                 <p v-if="error" class="login-error">{{ error }}</p>
 
                 <button type="submit" class="login-btn" :disabled="loading">
-                    {{ loading ? "Signing in..." : "Login" }}
+                    {{ loading ? $t('login.signingIn') : $t('login.submit') }}
                 </button>
             </form>
 
             <div class="login-footer">
-                <p class="login-tagline">Gold &amp; Silver Management</p>
+                <p class="login-tagline">{{ $t('login.tagline') }}</p>
             </div>
         </div>
     </div>
@@ -74,6 +86,7 @@
 
 <script>
 import { setAuth, getHomeRoute } from "../auth";
+import { i18nState, setLocale } from "../i18n";
 
 export default {
     name: "Login",
@@ -87,7 +100,15 @@ export default {
             error: ""
         };
     },
+    computed: {
+        locale() {
+            return i18nState.locale;
+        },
+    },
     methods: {
+        onLocaleChange(event) {
+            setLocale(event.target.value);
+        },
         login() {
             this.loading = true;
             this.error = "";
@@ -253,7 +274,31 @@ export default {
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
+}
+
+.login-lang {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.login-lang .jewelry-lang-select {
+    height: 32px;
+    padding: 0 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    background: rgba(212, 175, 55, 0.12);
+    color: #f0d875;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.login-lang .jewelry-lang-select option {
+    color: #1a1a1a;
+    background: #fff;
 }
 
 .metal-tag {
