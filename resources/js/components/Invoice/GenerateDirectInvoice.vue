@@ -6,7 +6,7 @@
                             <div class="card card-primary mt-3">
                                 <div class="card-header card-title d-flex">
                                     <span class="p-2 flex-grow-1 bd-highlight">
-                                        Generate Sales Bill (Direct)
+                                        {{ $t('invoice.directTitle') }}
                                     </span>
                                     <span class="p-2 bd-highlight">
                                         <button
@@ -30,7 +30,7 @@
                                             <label
                                                 for="invoice-date"
                                                 class="text-md mt-1"
-                                                >Invoice Date</label
+                                                >{{ $t('common.invoiceDate') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -47,7 +47,7 @@
                                             <label
                                                 for="invoice-no"
                                                 class="text-md mt-1"
-                                                >Invoice No</label
+                                                >{{ $t('common.invoiceNo') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -63,27 +63,27 @@
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Customer</label
+                                                >{{ $t('common.customer') }}</label
                                             >
                                         </div>
                                         <div class="col-md-4">
                                             <model-select
                                                 :options="options.customers"
                                                 v-model="invoice.customerId"
-                                                placeholder="Select Customer"
+                                                :placeholder="$t('common.selectCustomer')"
                                             >
                                             </model-select>
                                         </div>
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Broker</label
+                                                >{{ $t('common.broker') }}</label
                                             >
                                         </div>
                                         <div class="col-md-4">
                                             <model-select
                                                 :options="options.brokers"
                                                 v-model="invoice.brokerId"
-                                                placeholder="Select Broker"
+                                                :placeholder="$t('common.selectBroker')"
                                             >
                                             </model-select>
                                         </div>
@@ -91,27 +91,27 @@
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Category</label
+                                                >{{ $t('common.category') }}</label
                                             >
                                         </div>
                                         <div class="col-md-4">
                                             <model-select
                                                 :options="options.categories"
                                                 v-model="invoice.categoryId"
-                                                placeholder="Select Category"
+                                                :placeholder="$t('common.selectCategory')"
                                             >
                                             </model-select>
                                         </div>
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Quality</label
+                                                >{{ $t('common.quality') }}</label
                                             >
                                         </div>
                                         <div class="col-md-4">
                                             <model-select
                                                 :options="options.qualities"
                                                 v-model="invoice.qualityId"
-                                                placeholder="Select Quality"
+                                                :placeholder="$t('common.selectQuality')"
                                             >
                                             </model-select>
                                         </div>
@@ -122,14 +122,14 @@
                                     >
                                         <div class="col-md-2">
                                             <label class="text-md mt-1"
-                                                >Karigar Job</label
+                                                >{{ $t('common.karigarJob') }}</label
                                             >
                                         </div>
                                         <div class="col-md-4">
                                             <model-select
                                                 :options="karigarJobOptions"
                                                 v-model="invoice.karigarJobId"
-                                                placeholder="Link returned karigar job (optional)"
+                                                :placeholder="$t('common.linkKarigarOptional')"
                                             >
                                             </model-select>
                                         </div>
@@ -137,17 +137,14 @@
                                             <p
                                                 class="text-muted small mt-2 mb-0"
                                             >
-                                                Select if this sale is from
-                                                metal returned by a karigar —
-                                                mazduri will be deducted from
-                                                profit
+                                                {{ $t('invoice.helperKarigar') }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Weight per piece (g)</label
+                                                >{{ $t('common.weightPerPiece') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -165,7 +162,7 @@
                                             <p
                                                 class="text-muted small mt-2 mb-0"
                                             >
-                                                Available for
+                                                {{ $t('common.availableFor') }}
                                                 <strong>{{
                                                     qualityStock.quality_name
                                                 }}</strong
@@ -175,7 +172,7 @@
                                                 }}g,
                                                 {{ qualityStock.pieces }} pcs
                                                 <span v-if="qualityStock.available_piece_weights_label">
-                                                    (pieces in stock:
+                                                    ({{ $t('common.inStockPieces') }}:
                                                     {{ qualityStock.available_piece_weights_label }})
                                                 </span>
                                             </p>
@@ -184,7 +181,7 @@
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Qty (pieces)</label
+                                                >{{ $t('invoice.qtyPieces') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -199,7 +196,7 @@
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Unit</label
+                                                >{{ $t('common.unit') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -213,7 +210,7 @@
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label class="text-md mt-1"
-                                                >Total Weight (g)</label
+                                                >{{ $t('common.totalWeightG') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -228,14 +225,14 @@
                                             <p
                                                 class="text-muted small mt-2 mb-0"
                                             >
-                                                = weight per piece × qty
+                                                {{ $t('invoice.helperWeightQty') }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Rate / gram (Rs.)</label
+                                                >{{ $t('common.ratePerG') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -250,14 +247,13 @@
                                             <p
                                                 class="text-muted small mt-2 mb-0"
                                             >
-                                                Amount = total weight (g) ×
-                                                rate/g
+                                                {{ $t('invoice.helperAmount') }}
                                             </p>
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >GST Percentage</label
+                                                >{{ $t('common.gstPercent') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -279,7 +275,7 @@
                                     >
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Polish / g (Rs.)</label
+                                                >{{ $t('common.polishPerG') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -295,7 +291,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <label class="text-md mt-1"
-                                                >Polish Total</label
+                                                >{{ $t('common.polishTotal') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -310,8 +306,7 @@
                                             <p
                                                 class="text-muted small mt-2 mb-0"
                                             >
-                                                = polish/g × total weight (gold
-                                                only)
+                                                {{ $t('invoice.helperPolish') }}
                                             </p>
                                         </div>
                                     </div>
@@ -321,7 +316,7 @@
                                     >
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Mazduri (Rs.)</label
+                                                >{{ $t('common.mazduri') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -347,7 +342,7 @@
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label class="text-md mt-1"
-                                                >Processing Cost</label
+                                                >{{ $t('common.processingCost') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -362,15 +357,14 @@
                                             <p
                                                 class="text-muted small mt-2 mb-0"
                                             >
-                                                Deducted from profit (polish for
-                                                gold, mazduri for silver)
+                                                {{ $t('invoice.helperProcessing') }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Total Amount</label
+                                                >{{ $t('common.totalAmount') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -383,7 +377,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >GST Amount</label
+                                                >{{ $t('common.gstAmount') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -396,7 +390,7 @@
                                         </div>
                                         <div class="col-md-2">
                                             <label for="" class="text-md mt-1"
-                                                >Net Amount</label
+                                                >{{ $t('common.netAmount') }}</label
                                             >
                                         </div>
                                         <div class="col-md-2">
@@ -414,13 +408,13 @@
                                         class="btn btn-primary"
                                         @click="generateInvoice"
                                     >
-                                        Generate Invoice
+                                        {{ $t('invoice.generate') }}
                                     </button>
                                     <button
                                         class="btn btn-primary"
                                         @click="resetInvoiceForm"
                                     >
-                                        Reset
+                                        {{ $t('common.reset') }}
                                     </button>
                                 </div>
                             </div>
@@ -525,9 +519,9 @@ export default {
         },
         mazduriHelpText() {
             if (this.invoice.karigarJobId) {
-                return "Karigar labour — deducted from profit when this item is sold";
+                return this.$t('invoice.helperMazduriKarigar');
             }
-            return "Overall labour charge for this silver sale";
+            return this.$t('invoice.helperMazduriSilver');
         },
         karigarJobOptions() {
             return this.pendingKarigarJobs.map(job => ({
@@ -602,7 +596,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.");
+                    toastr["error"](this.$t('common.somethingWrong'));
                 });
         },
 
@@ -622,7 +616,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.");
+                    toastr["error"](this.$t('common.somethingWrong'));
                 });
         },
 
@@ -642,7 +636,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong");
+                    toastr["error"](this.$t('common.somethingWrong'));
                 });
         },
 
@@ -680,7 +674,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.");
+                    toastr["error"](this.$t('common.somethingWrong'));
                 });
         },
 
@@ -727,7 +721,7 @@ export default {
                 typeof this.invoice.invoiceDate === "undefined" ||
                 this.invoice.invoiceDate == null
             ) {
-                toastr.info("Please Selecte Invoice Date");
+                toastr.info(this.$t('invoice.dateRequired'));
                 return false;
             }
             return true;
@@ -748,20 +742,20 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr.error("Unable to load next invoice number.");
+                    toastr.error(this.$t('invoice.loadNextFail'));
                 });
         },
 
         isInvoiceNoValid: function() {
             if (this.invoice.invoiceNo == "") {
                 toastr.info(
-                    "Invoice number is not ready yet. Please wait or refresh."
+                    this.$t('invoice.notReady')
                 );
                 return false;
             }
 
             if (this.invoice.invoiceNo <= 0) {
-                toastr.info("Invoice No Is In-Valid");
+                toastr.info(this.$t('invoice.noInvalid'));
                 return false;
             }
 
@@ -773,7 +767,7 @@ export default {
                 typeof this.invoice.customerId === "undefined" ||
                 this.invoice.customerId == ""
             ) {
-                toastr.info("Please Select Customer");
+                toastr.info(this.$t('invoice.customerRequired'));
                 return false;
             }
             return true;
@@ -784,7 +778,7 @@ export default {
                 typeof this.invoice.brokerId === "undefined" ||
                 this.invoice.brokerId == ""
             ) {
-                toastr.info("Please Select Broker");
+                toastr.info(this.$t('invoice.brokerRequired'));
                 return false;
             }
             return true;
@@ -795,7 +789,7 @@ export default {
                 typeof this.invoice.categoryId === "undefined" ||
                 this.invoice.categoryId == ""
             ) {
-                toastr.info("Please Select Category");
+                toastr.info(this.$t('invoice.categoryRequired'));
                 return false;
             }
             return true;
@@ -806,7 +800,7 @@ export default {
                 typeof this.invoice.qualityId === "undefined" ||
                 this.invoice.qualityId == ""
             ) {
-                toastr.info("Please Select Quality");
+                toastr.info(this.$t('invoice.qualityRequired'));
                 return false;
             }
             return true;
@@ -817,11 +811,11 @@ export default {
                 this.invoice.qty == "" ||
                 typeof this.invoice.qty === "undefined"
             ) {
-                toastr.info("Please Enter Qty (pieces)");
+                toastr.info(this.$t('invoice.qtyRequired'));
                 return false;
             }
             if (parseFloat(this.invoice.qty) <= 0) {
-                toastr.info("Qty must be at least 1 piece");
+                toastr.info(this.$t('invoice.qtyInvalid'));
                 return false;
             }
 
@@ -833,7 +827,7 @@ export default {
                 typeof this.invoice.unit === "undefined" ||
                 this.invoice.unit == ""
             ) {
-                toastr.info("Please Select Unit");
+                toastr.info(this.$t('invoice.unitRequired'));
                 return false;
             }
             return true;
@@ -844,11 +838,11 @@ export default {
                 this.invoice.rate == "" ||
                 typeof this.invoice.rate === "undefined"
             ) {
-                toastr.info("Please Enter Rate per gram");
+                toastr.info(this.$t('invoice.rateRequired'));
                 return false;
             }
             if (this.invoice.rate < 0) {
-                toastr.info("Rate Is Invalid");
+                toastr.info(this.$t('invoice.rateInvalid'));
                 return false;
             }
 
@@ -860,7 +854,7 @@ export default {
                 this.invoice.gstPercentage == "" ||
                 typeof this.invoice.gstPercentage === "undefined"
             ) {
-                toastr.info("Please Select GST Pecentage");
+                toastr.info(this.$t('invoice.gstRequired'));
                 return false;
             }
             return true;
@@ -871,7 +865,7 @@ export default {
                 this.invoice.weightGrams == "" ||
                 parseFloat(this.invoice.weightGrams) <= 0
             ) {
-                toastr.info("Please enter weight per piece in grams");
+                toastr.info(this.$t('invoice.weightRequired'));
                 return false;
             }
             return this.isSaleWeightRatioValid();
@@ -899,9 +893,12 @@ export default {
 
             if (matchingCount < qty) {
                 toastr.error(
-                    'Cannot sell ' + qty + ' pc at ' + perPiece.toFixed(3) + 'g each for "' +
-                    this.qualityStock.quality_name + '". Available piece weights: ' +
-                    this.qualityStock.available_piece_weights_label + '.'
+                    this.$t('challan.cannotSell', {
+                        n: qty,
+                        weight: perPiece.toFixed(3),
+                        quality: this.qualityStock.quality_name,
+                        list: this.qualityStock.available_piece_weights_label
+                    })
                 );
                 return false;
             }
@@ -930,10 +927,10 @@ export default {
                     .then(response => {
                         if (response.data.status == 1) {
                             swal.fire({
-                                title: "Success",
+                                title: this.$t('common.success'),
                                 html:
-                                    "<h5 style='color:#9C9794'>Sale bill created. Profit: Rs. " +
-                                    (response.data.profit || 0) +
+                                    "<h5 style='color:#9C9794'>" +
+                                    this.$t('invoice.created', { amount: response.data.profit || 0 }) +
                                     "</h5>",
                                 icon: "success",
                                 allowOutsideClick: false
@@ -961,13 +958,13 @@ export default {
                                 toastr.error(
                                     errorString,
                                     response.data.message ||
-                                        "Validation failed",
+                                        this.$t('common.validationFailed'),
                                     { timeOut: 20000, closeButton: true }
                                 );
                             } else {
                                 toastr.error(
                                     response.data.message ||
-                                        "Unable to create sale bill."
+                                        this.$t('invoice.createFail')
                                 );
                             }
                         } else if (response.data.status == 0) {
@@ -978,7 +975,7 @@ export default {
                             );
                             toastr.error(
                                 response.data.message ||
-                                    "Unable to create sale bill."
+                                    this.$t('invoice.createFail')
                             );
                         }
                     })
@@ -986,7 +983,7 @@ export default {
                         console.log("Err In Generatin Invoice", err);
                         toastr.error(
                             err.response?.data?.message ||
-                                "Unable to create sale bill. Check item type stock and weight."
+                                this.$t('invoice.createFailDetailed')
                         );
                     });
             }

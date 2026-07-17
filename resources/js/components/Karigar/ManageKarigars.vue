@@ -4,7 +4,7 @@
       <div class="col-md-12">
         <div class="card card-primary mt-3">
           <div class="card-header">
-            <h3 class="card-title">Karigar (Craftsman)</h3>
+            <h3 class="card-title">{{ $t('karigar.craftsmanTitle') }}</h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
@@ -13,31 +13,31 @@
           </div>
           <div class="card-body">
             <div class="form-group row">
-              <label class="col-md-2 col-form-label">Name <span class="required-mark" style="color:red">*</span></label>
+              <label class="col-md-2 col-form-label">{{ $t('common.name') }} <span class="required-mark" style="color:red">*</span></label>
               <div class="col-md-4">
-                <input type="text" class="form-control" v-model="form.karigarName" placeholder="Karigar name">
+                <input type="text" class="form-control" v-model="form.karigarName" :placeholder="$t('karigar.phName')">
               </div>
-              <label class="col-md-2 col-form-label">Contact</label>
+              <label class="col-md-2 col-form-label">{{ $t('common.contact') }}</label>
               <div class="col-md-4">
                 <input type="tel" class="form-control" v-model="form.contactNo" maxlength="11">
               </div>
             </div>
             <div class="form-group row">
-              <label class="col-md-2 col-form-label">Address</label>
+              <label class="col-md-2 col-form-label">{{ $t('common.address') }}</label>
               <div class="col-md-10">
                 <textarea class="form-control" v-model="form.address" rows="2"></textarea>
               </div>
             </div>
           </div>
           <div class="card-footer">
-            <button class="btn btn-primary" @click="saveKarigar">{{ editId ? 'Update' : 'Add' }}</button>
-            <button class="btn btn-secondary ml-2" @click="resetForm">Reset</button>
+            <button class="btn btn-primary" @click="saveKarigar">{{ editId ? $t('common.update') : $t('common.add') }}</button>
+            <button class="btn btn-secondary ml-2" @click="resetForm">{{ $t('common.reset') }}</button>
           </div>
         </div>
 
         <div class="card card-secondary mt-3">
           <div class="card-header">
-            <h3 class="card-title">Karigar List</h3>
+            <h3 class="card-title">{{ $t('karigar.listTitle') }}</h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
@@ -47,7 +47,7 @@
           <div class="card-body table-responsive">
             <table class="table table-bordered table-sm">
               <thead>
-                <tr><th>Name</th><th>Contact</th><th>Address</th><th width="120">Action</th></tr>
+                <tr><th>{{ $t('common.name') }}</th><th>{{ $t('common.contact') }}</th><th>{{ $t('common.address') }}</th><th width="120">{{ $t('common.action') }}</th></tr>
               </thead>
               <tbody>
                 <tr v-for="k in karigars.data" :key="k.karigar_id">
@@ -56,8 +56,8 @@
                   <td>{{ k.address || '-' }}</td>
                   <td class="text-center">
                     <div class="table-actions">
-                      <button type="button" class="btn btn-sm btn-primary" title="Edit" @click="editKarigar(k)"><i class="fas fa-pen"></i></button>
-                      <button type="button" class="btn btn-sm btn-danger" title="Delete" @click="deleteKarigar(k.karigar_id)"><i class="fas fa-trash"></i></button>
+                      <button type="button" class="btn btn-sm btn-primary" :title="$t('common.edit')" @click="editKarigar(k)"><i class="fas fa-pen"></i></button>
+                      <button type="button" class="btn btn-sm btn-danger" :title="$t('common.delete')" @click="deleteKarigar(k.karigar_id)"><i class="fas fa-trash"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -93,7 +93,7 @@ export default {
     },
     saveKarigar() {
       if (!this.form.karigarName.trim()) {
-        toastr.info('Karigar name is required.');
+        toastr.info(this.$t('karigar.nameRequired'));
         return;
       }
       const payload = { karigarName: this.form.karigarName, contactNo: this.form.contactNo, address: this.form.address };
@@ -107,9 +107,9 @@ export default {
           this.loadKarigars();
           this.$emit('karigars-changed');
         } else {
-          toastr.error(res.data.message || 'Unable to save.');
+          toastr.error(res.data.message || this.$t('karigar.saveFail'));
         }
-      }).catch(() => toastr.error('Unable to save karigar.'));
+      }).catch(() => toastr.error(this.$t('karigar.saveFail')));
     },
     editKarigar(k) {
       this.editId = k.karigar_id;
@@ -118,10 +118,10 @@ export default {
       this.form.address = k.address || '';
     },
     deleteKarigar(id) {
-      swal.fire({ title: 'Delete karigar?', icon: 'warning', showCancelButton: true }).then(r => {
+      swal.fire({ title: this.$t('karigar.deleteConfirm'), icon: 'warning', showCancelButton: true }).then(r => {
         if (r.isConfirmed) {
           axios.delete('/api/karigar/' + id).then(() => {
-            toastr.success('Karigar deleted.');
+            toastr.success(this.$t('karigar.deleted'));
             this.loadKarigars();
             this.$emit('karigars-changed');
           });

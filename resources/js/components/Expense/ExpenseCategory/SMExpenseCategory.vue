@@ -8,7 +8,7 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            Search and Manage Expense Category
+                            {{ $t('expCat.manageTitle') }}
                         </h3>
                         <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -28,7 +28,7 @@
                                             for="paginate"
                                             class="text-nowrap text-md mr-2 mb-0"
                                         >
-                                            Per Page
+                                            {{ $t('common.perPage') }}
                                         </label>
                                         <select
                                             v-model="paginate"
@@ -46,7 +46,7 @@
                                     v-model="search"
                                     type="search"
                                     class="form-control "
-                                    placeholder="Search By ..."
+                                    :placeholder="$t('common.searchBy')"
                                 />
                             </div>
                         </div>
@@ -65,7 +65,7 @@
                                                         'expense_category_id'
                                                     )
                                                 "
-                                                >Sr. No.</a
+                                                >{{ $t('common.srNo') }}</a
                                             >
                                             <span
                                                 v-if="
@@ -101,7 +101,7 @@
                                                         'expense_category'
                                                     )
                                                 "
-                                                >Category Name</a
+                                                >{{ $t('expCat.categoryName') }}</a
                                             >
                                             <span
                                                 v-if="
@@ -129,7 +129,7 @@
                                                 >
                                             </span>
                                         </th>
-                                        <th width="110" class="text-center">Action</th>
+                                        <th width="110" class="text-center">{{ $t('common.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -187,7 +187,7 @@
                     class="card card-primary" id="updating-card"
                 >
                     <div class="card-header">
-                        Update Category
+                        {{ $t('common.update') }} {{ $t('expCat.category') }}
                         <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                         <button type="button" class="btn btn-tool" @click="closeUpdateExpenseCategoryBtn" ><i class="fas fa-times"></i>
@@ -197,7 +197,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-2">
-                                <label for="" class="text-md">Category</label>
+                                <label for="" class="text-md">{{ $t('expCat.category') }}</label>
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
                             <div class="col-md-4">
@@ -215,13 +215,13 @@
                             class="btn btn-primary text-md"
                             @click="updateCategorySaveUpdate"
                         >
-                            Update
+                            {{ $t('common.update') }}
                         </button>
                         <button
                             class="btn btn-primary"
                             @click="resetUpdateCategory"
                         >
-                            Reset
+                            {{ $t('common.reset') }}
                         </button>
                     </div>
                 </div>
@@ -296,14 +296,14 @@ export default {
             this.expenseCategoryId = expense_category_id;
             this.expenseCategoryTxt = expense_category;
 
-            toastr.info("Please Scroll Down");
+            toastr.info(this.$t('common.scrollDown'));
         },
 
         updateCategorySaveUpdate: function() {
             if (this.expenseCategoryTxt == "") {
-                toastr.info("Please Enter Expense Category To Be Updated");
+                toastr.info(this.$t('expCat.updateRequired'));
             } else if (this.expenseCategoryTxt.length > 50) {
-                toastr.warning("Max Character In Expense Category is 50");
+                toastr.warning(this.$t('expCat.max'));
             } else {
                 axios
                     .put(
@@ -315,9 +315,9 @@ export default {
                     .then(res => {
                         if (res.data.status == 1) {
                             swal.fire({
-                                title: "Success",
+                                title: this.$t('common.success'),
                                 html:
-                                    "<h5 style='color:#9C9794'>Expense Category Updated Successfully</h5>",
+                                    "<h5 style='color:#9C9794'>" + this.$t('expCat.updated') + "</h5>",
                                 icon: "success"
                             }).then(result => {
                                 this.expenseCategoryId = -1;
@@ -333,7 +333,7 @@ export default {
                         }
                     })
                     .catch(err => {
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                     });
             }
         },
@@ -348,9 +348,9 @@ export default {
                 .then(res => {
                     if(res.data.status == 1){
                         swal.fire({
-                                title: "Success",
+                                title: this.$t('common.success'),
                                 html:
-                                    "<h5 style='color:#9C9794'>Expense Category Deleted Successfully</h5>",
+                                    "<h5 style='color:#9C9794'>" + this.$t('expCat.deleted') + "</h5>",
                                 icon: "success"
                             }).then(() => { 
                                 this.getAllExpenseCategories(
@@ -368,7 +368,7 @@ export default {
                 })
                 .catch((err)=>{
                     console.log(err);
-                    toastr.error("Something Went Wrong");
+                    toastr.error(this.$t('common.somethingWrong'));
                 });
         },
 

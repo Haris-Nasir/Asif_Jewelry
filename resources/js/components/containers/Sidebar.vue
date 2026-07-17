@@ -20,7 +20,7 @@
                         <li class="nav-item">
                             <router-link to="/investor" class="nav-link">
                                 <i class="nav-icon fas fa-chart-line"></i>
-                                <p class="text-md">Investor Portal</p>
+                                <p class="text-md">{{ $t('nav.investorPortal') }}</p>
                             </router-link>
                         </li>
                     </template>
@@ -33,7 +33,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('home')"
                             >
-                                <span>Home</span>
+                                <span>{{ $t('nav.home') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('home') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -43,7 +43,7 @@
                                 <li class="nav-item">
                                     <router-link to="/dashboard" class="nav-link">
                                         <i class="nav-icon fas fa-tachometer-alt"></i>
-                                        <p class="text-md">Dashboard</p>
+                                        <p class="text-md">{{ $t('nav.dashboard') }}</p>
                                     </router-link>
                                 </li>
                             </ul>
@@ -56,7 +56,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('setup')"
                             >
-                                <span>Setup</span>
+                                <span>{{ $t('nav.setup') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('setup') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -66,25 +66,25 @@
                                 <li class="nav-item">
                                     <router-link to="/sellquality" class="nav-link">
                                         <i class="nav-icon far bi bi-gem"></i>
-                                        <p class="text-md">Item Types</p>
+                                        <p class="text-md">{{ $t('nav.itemTypes') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item">
                                     <router-link to="/vendor" class="nav-link">
                                         <i class="nav-icon far bi bi-person-circle"></i>
-                                        <p class="text-md">Supplier</p>
+                                        <p class="text-md">{{ $t('nav.supplier') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item">
                                     <router-link to="/customer" class="nav-link">
                                         <i class="nav-icon far bi bi-person-circle"></i>
-                                        <p class="text-md">Customer</p>
+                                        <p class="text-md">{{ $t('nav.customer') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item">
                                     <router-link to="/broker" class="nav-link">
                                         <i class="nav-icon fas fa-handshake"></i>
-                                        <p class="text-md">Broker</p>
+                                        <p class="text-md">{{ $t('nav.broker') }}</p>
                                     </router-link>
                                 </li>
                             </ul>
@@ -97,7 +97,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('stock')"
                             >
-                                <span>Stock</span>
+                                <span>{{ $t('nav.stock') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('stock') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -107,14 +107,14 @@
                                 <li class="nav-item" v-if="can('stock')">
                                     <router-link to="/stock" class="nav-link">
                                         <i class="nav-icon fas fa-boxes"></i>
-                                        <p class="text-md">Stock Ledger</p>
+                                        <p class="text-md">{{ $t('nav.stockLedger') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item" v-if="can('purchases')" data-submenu="purchase">
                                     <a href="#" class="nav-link" @click.prevent.stop="toggleSubmenu">
                                         <i class="nav-icon far bi bi-box-arrow-in-right"></i>
                                         <p class="text-md">
-                                            Purchase
+                                            {{ $t('nav.purchase') }}
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
@@ -122,13 +122,13 @@
                                         <li class="nav-item">
                                             <router-link to="/newinward" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">New Purchase</p>
+                                                <p class="text-md">{{ $t('nav.newPurchase') }}</p>
                                             </router-link>
                                         </li>
                                         <li class="nav-item">
                                             <router-link to="/manageinward" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">Manage Purchase</p>
+                                                <p class="text-md">{{ $t('nav.managePurchase') }}</p>
                                             </router-link>
                                         </li>
                                     </ul>
@@ -136,7 +136,7 @@
                                 <li class="nav-item" v-if="can('karigar')">
                                     <router-link to="/karigar" class="nav-link">
                                         <i class="nav-icon fas fa-hammer"></i>
-                                        <p class="text-md">Karigar</p>
+                                        <p class="text-md">{{ $t('nav.karigar') }}</p>
                                     </router-link>
                                 </li>
                             </ul>
@@ -149,7 +149,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('sales')"
                             >
-                                <span>Sales</span>
+                                <span>{{ $t('nav.sales') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('sales') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -160,7 +160,7 @@
                                     <a href="#" class="nav-link" @click.prevent.stop="toggleSubmenu">
                                         <i class="nav-icon far bi bi-receipt"></i>
                                         <p class="text-md">
-                                            Sales Bill
+                                            {{ $t('nav.salesBill') }}
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
@@ -168,13 +168,13 @@
                                         <li class="nav-item">
                                             <router-link to="/newchallan" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">New Sales Bill</p>
+                                                <p class="text-md">{{ $t('nav.newSalesBill') }}</p>
                                             </router-link>
                                         </li>
                                         <li class="nav-item">
                                             <router-link to="/smchallan" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">Manage Sales Bill</p>
+                                                <p class="text-md">{{ $t('nav.manageSalesBill') }}</p>
                                             </router-link>
                                         </li>
                                     </ul>
@@ -183,7 +183,7 @@
                                     <a href="#" class="nav-link" @click.prevent.stop="toggleSubmenu">
                                         <i class="nav-icon far bi bi-receipt-cutoff"></i>
                                         <p class="text-md">
-                                            Invoice
+                                            {{ $t('nav.invoice') }}
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
@@ -191,25 +191,25 @@
                                         <li class="nav-item">
                                             <router-link to="/newdirectinvoice" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">Direct Invoice</p>
+                                                <p class="text-md">{{ $t('nav.directInvoice') }}</p>
                                             </router-link>
                                         </li>
                                         <li class="nav-item">
                                             <router-link to="/managedirectinvoice" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">Manage Direct Invoice</p>
+                                                <p class="text-md">{{ $t('nav.manageDirectInvoice') }}</p>
                                             </router-link>
                                         </li>
                                         <li class="nav-item">
                                             <router-link to="/invoicefromchallan" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">From Sales Bill</p>
+                                                <p class="text-md">{{ $t('nav.fromSalesBill') }}</p>
                                             </router-link>
                                         </li>
                                         <li class="nav-item">
                                             <router-link to="/managechallaninvoice" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p class="text-md">Manage Invoices</p>
+                                                <p class="text-md">{{ $t('nav.manageInvoices') }}</p>
                                             </router-link>
                                         </li>
                                     </ul>
@@ -224,7 +224,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('money')"
                             >
-                                <span>Money</span>
+                                <span>{{ $t('nav.money') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('money') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -235,7 +235,7 @@
                                     <a href="#" class="nav-link" @click.prevent.stop="toggleSubmenu">
                                         <i class="nav-icon far bi bi-dash-circle"></i>
                                         <p class="text-md">
-                                            Expense
+                                            {{ $t('nav.expense') }}
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
@@ -243,13 +243,13 @@
                                         <li class="nav-item" v-if="isAdmin">
                                             <router-link to="/expensecategory" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p>Expense Category</p>
+                                                <p>{{ $t('nav.expenseCategory') }}</p>
                                             </router-link>
                                         </li>
                                         <li class="nav-item">
                                             <router-link to="/expensemanagement" class="nav-link">
                                                 <i class="far fa-circle nav-icon"></i>
-                                                <p>Expense Management</p>
+                                                <p>{{ $t('nav.expenseManagement') }}</p>
                                             </router-link>
                                         </li>
                                     </ul>
@@ -257,19 +257,19 @@
                                 <li class="nav-item" v-if="isAdmin">
                                     <router-link to="/credit" class="nav-link">
                                         <i class="nav-icon fas fa-money-bill-wave"></i>
-                                        <p class="text-md">Credit</p>
+                                        <p class="text-md">{{ $t('nav.credit') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item" v-if="isAdmin">
                                     <router-link to="/manageinvestors" class="nav-link">
                                         <i class="nav-icon fas fa-hand-holding-usd"></i>
-                                        <p class="text-md">Investors</p>
+                                        <p class="text-md">{{ $t('nav.investors') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item" v-if="isAdmin">
                                     <router-link to="/distributeexpenses" class="nav-link">
                                         <i class="nav-icon fas fa-divide"></i>
-                                        <p class="text-md">Distribute Expenses</p>
+                                        <p class="text-md">{{ $t('nav.distributeExpenses') }}</p>
                                     </router-link>
                                 </li>
                             </ul>
@@ -282,7 +282,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('lab')"
                             >
-                                <span>Lab</span>
+                                <span>{{ $t('nav.lab') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('lab') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -292,7 +292,7 @@
                                 <li class="nav-item">
                                     <router-link to="/laboratory" class="nav-link">
                                         <i class="nav-icon fas fa-flask"></i>
-                                        <p class="text-md">Laboratory</p>
+                                        <p class="text-md">{{ $t('nav.laboratory') }}</p>
                                     </router-link>
                                 </li>
                             </ul>
@@ -305,7 +305,7 @@
                                 class="nav-section__toggle"
                                 @click="toggleSection('admin')"
                             >
-                                <span>Admin</span>
+                                <span>{{ $t('nav.admin') }}</span>
                                 <i
                                     class="fas"
                                     :class="isSectionOpen('admin') ? 'fa-chevron-up' : 'fa-chevron-down'"
@@ -315,19 +315,19 @@
                                 <li class="nav-item">
                                     <router-link to="/workers" class="nav-link">
                                         <i class="nav-icon fas fa-users-cog"></i>
-                                        <p class="text-md">Workers</p>
+                                        <p class="text-md">{{ $t('nav.workers') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item">
                                     <router-link to="/bankdetails" class="nav-link">
                                         <i class="nav-icon far bi bi-bank"></i>
-                                        <p class="text-md">Bank Details</p>
+                                        <p class="text-md">{{ $t('nav.bankDetails') }}</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item">
                                     <router-link to="/auditlogs" class="nav-link">
                                         <i class="nav-icon fas fa-clipboard-list"></i>
-                                        <p class="text-md">Audit Logs</p>
+                                        <p class="text-md">{{ $t('nav.auditLogs') }}</p>
                                     </router-link>
                                 </li>
                             </ul>

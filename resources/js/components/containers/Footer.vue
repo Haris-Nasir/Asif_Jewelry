@@ -1,7 +1,7 @@
 <template>
     <footer class="main-footer text-md">
-    <strong>Copyright &copy; {{new Date().getFullYear()}} <a href="/">Ayub Jewelers</a>.</strong>
-    All rights reserved.
+    <strong>{{ $t('footer.copyright') }} &copy; {{new Date().getFullYear()}} <a href="/">Ayub Jewelers</a>.</strong>
+    {{ $t('footer.rights') }}
   </footer>
 </template>
 

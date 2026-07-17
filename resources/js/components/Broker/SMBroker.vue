@@ -5,7 +5,7 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            Search and Manage Broker
+                            {{ $t('broker.manageTitle') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -20,7 +20,7 @@
                                 <div>
                                     <div class="d-flex align-items-center ml-4">
                                         <label for="paginate" class="text-nowrap mr-2 mb-0 text-md">
-                                            Per Page
+                                            {{ $t('common.perPage') }}
                                         </label>
                                         <select v-model="paginate" class="form-control form-control-sm">
                                             <option value="10">10</option>
@@ -32,7 +32,7 @@
                             </div>
                             <div class="col-md-4">
                                 <input v-model="search" type="search" class="form-control "
-                                    placeholder="Search By ..." />
+                                    :placeholder="$t('common.searchBy')" />
                             </div>
                         </div>
 
@@ -41,28 +41,27 @@
                                 <thead class="text-md">
                                     <tr>
                                         <th width="10%">
-                                            <a href="#" @click.prevent="updateSorting('broker_id')">Sr. No.</a>
+                                            <a href="#" @click.prevent="updateSorting('broker_id')">{{ $t('common.srNo') }}</a>
                                             <span v-if="sort_field == 'broker_id' ? 1 : 0">
                                                 <span v-if="sort_direction == 'asc' ? 1 : 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc' ? 1 : 0">&darr;</span>
                                             </span>
                                         </th>
                                         <th>
-                                            <a href="#" @click.prevent="updateSorting('borker_name')">Broker Name</a>
+                                            <a href="#" @click.prevent="updateSorting('borker_name')">{{ $t('broker.name') }}</a>
                                             <span v-if="sort_field =='broker_name'? 1: 0">
                                                 <span v-if="sort_direction == 'asc'? 1: 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                                             </span>
                                         </th>
                                         <th>
-                                            <a href="#" @click.prevent="updateSorting('broker_contact_no')">Contact
-                                                Number</a>
+                                            <a href="#" @click.prevent="updateSorting('broker_contact_no')">{{ $t('common.contactNo') }}</a>
                                             <span v-if="sort_field =='broker_contact_no'? 1: 0">
                                                 <span v-if="sort_direction == 'asc'? 1: 0">&uarr;</span>
                                                 <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                                             </span>
                                         </th>
-                                        <th width="110" class="text-center">Action</th>
+                                        <th width="110" class="text-center">{{ $t('common.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-md">
@@ -96,7 +95,7 @@
 
                 <div v-if="brokerId == -1 ? 0 : 1" class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Edit Broker</h3>
+                        <h3 class="card-title">{{ $t('broker.editTitle') }}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -110,29 +109,29 @@
                     <div class="card-body">
                         <div class="form-group row">
                             <div class="col-md-2">
-                                <label for="brokerName" class="text-md col-form-label">Broker Name <span
+                                <label for="brokerName" class="text-md col-form-label">{{ $t('broker.name') }} <span
                                         class="required-mark" style="color: red;">*</span></label>
                             </div>
 
                             <div class="col-md-3">
                                 <input type="text" class="form-control" v-model="editBrokerName" maxlength="70"
-                                    placeholder="Enter Broker Name...">
+                                    :placeholder="$t('broker.phName')">
                             </div>
 
                             <div class="col-md-2 ml-auto">
-                                <label for="contactNo" class="text-md col-form-label">Contact Number</label>
+                                <label for="contactNo" class="text-md col-form-label">{{ $t('common.contactNo') }}</label>
                             </div>
 
                             <div class="col-md-3 mr-5">
                                 <input type="text" class="form-control" v-model="editContactNo" maxlength="11"
-                                    placeholder="Enter Broker Contact No...">
+                                    :placeholder="$t('broker.phContact')">
                             </div>
                         </div>
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" @click="updateBroker" class="btn btn-primary text-md">Update</button>
-                        <button type="reset" @click="resetFields" class="btn btn-primary ml-3 text-md">Reset</button>
+                        <button type="submit" @click="updateBroker" class="btn btn-primary text-md">{{ $t('common.update') }}</button>
+                        <button type="reset" @click="resetFields" class="btn btn-primary ml-3 text-md">{{ $t('common.reset') }}</button>
                     </div>
                 </div>
             </div>
@@ -212,7 +211,7 @@
 
             updateBroker: function () {
                 if (this.editBrokerName == '') {
-                    toastr["error"]("Broker Name is Required");
+                    toastr["error"](this.$t('broker.nameRequired'));
                 } else {
                     axios
                         .put('../api/broker/update/' + this.brokerId, {
@@ -236,8 +235,8 @@
                                 toastr["warning"](res.data.message);
                             } else if (res.data.status == 1) {
                                 swal.fire({
-                                    title: 'Success',
-                                    html: "<h5 style='color:#9C9794'>Broker Details Updated Successfully!</h5>",
+                                    title: this.$t('common.success'),
+                                    html: "<h5 style='color:#9C9794'>" + this.$t('broker.updated') + "</h5>",
                                     icon: 'success'
                                 }).then((result) => {
                                     this.resetFields();
@@ -247,7 +246,7 @@
                             }
                         }).catch((err) => {
                             console.log(err.res.data.message);
-                            toastr["error"]('Something went Wrong.');
+                            toastr["error"](this.$t('common.somethingWrong'));
                         });
                 }
             },
@@ -257,9 +256,9 @@
                     .delete('../api/broker/delete/' + broker_id)
                     .then((res) => {
                         swal.fire({
-                            title: "Success",
+                            title: this.$t('common.success'),
                             html:
-                                "<h5 style='color:#9C9794'>Broker Details Deleted Successfully</h5>",
+                                "<h5 style='color:#9C9794'>" + this.$t('broker.deleted') + "</h5>",
                             icon: "success"
                         }).then((result) => {
                             this.getAllBrokers(this.brokers.current_page);
@@ -267,7 +266,7 @@
                     })
                     .catch((err) => {
                         console.log(err.res.data.message);
-                        toastr["error"]('Something went Wrong.');
+                        toastr["error"](this.$t('common.somethingWrong'));
                     });
             },
 

@@ -8,7 +8,7 @@
                                     <h3 :class="['stat-value', statSizeClass(goldWeight + 'g')]">
                                         {{ goldWeight }}<sup class="stat-unit">g</sup>
                                     </h3>
-                                    <p class="stat-label">Gold Stock</p>
+                                    <p class="stat-label">{{ $t('dash.goldStock') }}</p>
                                 </div>
                                 <div class="icon"><i class="fas fa-coins"></i></div>
                                 <div class="dashboard-stat-footer-spacer" aria-hidden="true"></div>
@@ -21,7 +21,7 @@
                                     <h3 :class="['stat-value', statSizeClass(silverWeight + 'g')]">
                                         {{ silverWeight }}<sup class="stat-unit">g</sup>
                                     </h3>
-                                    <p class="stat-label">Silver (Chandi) Stock</p>
+                                    <p class="stat-label">{{ $t('dash.silverStock') }}</p>
                                 </div>
                                 <div class="icon"><i class="fas fa-ring"></i></div>
                                 <div class="dashboard-stat-footer-spacer" aria-hidden="true"></div>
@@ -34,12 +34,12 @@
                                     <h3 :class="['stat-value', statSizeClass(inward)]">
                                         <span v-html="inward"></span>
                                     </h3>
-                                    <p class="stat-label">Purchases</p>
+                                    <p class="stat-label">{{ $t('dash.purchases') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="bi bi-box-arrow-in-right"></i></div>
                                 <router-link to="/manageinward" class="nav-link small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right"></i>
+                                    {{ $t('common.moreInfo') }} <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
                             </div>
                         </div>
@@ -50,12 +50,12 @@
                                     <h3 :class="['stat-value', statSizeClass(invoice)]">
                                         <span v-html="invoice"></span>
                                     </h3>
-                                    <p class="stat-label">Sales Bills</p>
+                                    <p class="stat-label">{{ $t('dash.salesBills') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="bi bi-receipt-cutoff"></i></div>
                                 <router-link to="/managechallaninvoice" class="nav-link small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right"></i>
+                                    {{ $t('common.moreInfo') }} <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                             <div class="small-box dashboard-stat-box stat-indigo">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(profit)]">{{ profit }}</h3>
-                                    <p class="stat-label">Profit (FY)</p>
+                                    <p class="stat-label">{{ $t('dash.profitFy') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="fas fa-chart-line"></i></div>
@@ -76,12 +76,12 @@
                             <div class="small-box dashboard-stat-box stat-amber has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(credit)]">{{ credit }}</h3>
-                                    <p class="stat-label">Credit</p>
+                                    <p class="stat-label">{{ $t('dash.credit') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
                                 <router-link to="/credit" class="nav-link small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right"></i>
+                                    {{ $t('common.moreInfo') }} <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
                             </div>
                         </div>
@@ -92,12 +92,12 @@
                                     <h3 :class="['stat-value', statSizeClass(labJobs)]">
                                         <span v-html="labJobs"></span>
                                     </h3>
-                                    <p class="stat-label">Lab Jobs (FY)</p>
+                                    <p class="stat-label">{{ $t('dash.labJobsFy') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="fas fa-flask"></i></div>
                                 <router-link to="/laboratory" class="nav-link small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right"></i>
+                                    {{ $t('common.moreInfo') }} <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
                             </div>
                         </div>
@@ -106,7 +106,7 @@
                             <div class="small-box dashboard-stat-box stat-teal">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(labProfit)]">{{ labProfit }}</h3>
-                                    <p class="stat-label">Lab Profit (FY)</p>
+                                    <p class="stat-label">{{ $t('dash.labProfitFy') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="fas fa-vial"></i></div>
@@ -118,12 +118,12 @@
                             <div class="small-box dashboard-stat-box stat-rose has-footer">
                                 <div class="inner">
                                     <h3 :class="['stat-value', statSizeClass(expense)]">{{ expense }}</h3>
-                                    <p class="stat-label">Expense</p>
+                                    <p class="stat-label">{{ $t('dash.expense') }}</p>
                                     <p class="stat-fy"><b>{{ financialYear }}</b></p>
                                 </div>
                                 <div class="icon"><i class="bi bi-dash-circle"></i></div>
                                 <router-link to="/expensemanagement" class="nav-link small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right"></i>
+                                    {{ $t('common.moreInfo') }} <i class="fas fa-arrow-circle-right"></i>
                                 </router-link>
                             </div>
                         </div>
@@ -179,7 +179,7 @@ export default {
                 })
                 .catch((err) => {
                     console.log(err);
-                    toastr.error('Something Went Wrong!');
+                    toastr.error(this.$t('common.somethingWrong'));
                 });
         },
 

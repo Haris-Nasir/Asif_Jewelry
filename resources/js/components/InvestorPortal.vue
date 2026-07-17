@@ -5,68 +5,68 @@
                         <div class="col-12">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Investor Portal</h3>
+                                    <h3 class="card-title">{{ $t('portal.title') }}</h3>
                                 </div>
                                 <div class="card-body" v-if="summary">
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label class="text-md">Report Period</label>
+                                            <label class="text-md">{{ $t('portal.reportPeriod') }}</label>
                                             <select class="form-control" v-model="filters.period" @change="loadSummary">
-                                                <option value="daily">Daily</option>
-                                                <option value="weekly">Weekly</option>
-                                                <option value="monthly">Monthly</option>
-                                                <option value="custom">Custom</option>
+                                                <option value="daily">{{ $t('portal.daily') }}</option>
+                                                <option value="weekly">{{ $t('portal.weekly') }}</option>
+                                                <option value="monthly">{{ $t('portal.monthly') }}</option>
+                                                <option value="custom">{{ $t('portal.custom') }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-2" v-if="filters.period !== 'custom'">
-                                            <label class="text-md">Reference Date</label>
+                                            <label class="text-md">{{ $t('portal.refDate') }}</label>
                                             <input type="date" class="form-control" v-model="filters.date" @change="loadSummary">
                                         </div>
                                         <template v-if="filters.period === 'custom'">
                                             <div class="col-md-2">
-                                                <label class="text-md">Start Date</label>
+                                                <label class="text-md">{{ $t('portal.startDate') }}</label>
                                                 <input type="date" class="form-control" v-model="filters.from_date" @change="loadSummary">
                                             </div>
                                             <div class="col-md-2">
-                                                <label class="text-md">End Date</label>
+                                                <label class="text-md">{{ $t('portal.endDate') }}</label>
                                                 <input type="date" class="form-control" v-model="filters.to_date" @change="loadSummary">
                                             </div>
                                         </template>
                                         <div class="col-md-2 d-flex align-items-end">
                                             <a :href="pdfUrl()" target="_blank" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-file-pdf"></i> Download PDF
+                                                <i class="fas fa-file-pdf"></i> {{ $t('portal.downloadPdf') }}
                                             </a>
                                         </div>
                                     </div>
 
-                                    <p class="mb-1"><strong>Name:</strong> {{ summary.investor.investor_name }}</p>
+                                    <p class="mb-1"><strong>{{ $t('portal.name') }}</strong> {{ summary.investor.investor_name }}</p>
                                     <p class="text-muted mb-3">
-                                        Period: {{ summary.period.from_date }} to {{ summary.period.to_date }}
-                                        · Your profit share: {{ summary.lab_summary.share_percentage }}%
-                                        <span class="d-block small">Laboratory investment only — shop purchase/sale not included.</span>
+                                        {{ $t('portal.period') }} {{ summary.period.from_date }} {{ $t('portal.rangeTo') }} {{ summary.period.to_date }}
+                                        · {{ $t('portal.yourShare') }} {{ summary.lab_summary.share_percentage }}%
+                                        <span class="d-block small">{{ $t('portal.labOnly') }}</span>
                                     </p>
 
                                     <div class="alert alert-light border mb-3">
-                                        <strong>Account summary (all time)</strong>
+                                        <strong>{{ $t('portal.accountSummary') }}</strong>
                                         <div class="row mt-2">
                                             <div class="col-md-4">
-                                                <p class="mb-1"><strong>Deposited:</strong> {{ formatMoney(summary.investment_summary.total_deposited) }}</p>
-                                                <p class="mb-1 text-muted small">Cash/gold bought into lab account</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.deposited') }}</strong> {{ formatMoney(summary.investment_summary.total_deposited) }}</p>
+                                                <p class="mb-1 text-muted small">{{ $t('portal.helperCashGold') }}</p>
                                             </div>
                                             <div class="col-md-4">
-                                                <p class="mb-1"><strong>Used in lab:</strong> {{ formatMoney(summary.investment_summary.lab_purchases) }}</p>
-                                                <p class="mb-1"><strong>Capital returned (sold):</strong> {{ formatMoney(summary.investment_summary.lab_capital_returned) }}</p>
-                                                <p class="mb-1"><strong>In open jobs:</strong> {{ formatMoney(summary.investment_summary.capital_in_open_jobs) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.usedInLab') }}</strong> {{ formatMoney(summary.investment_summary.lab_purchases) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.capitalReturned') }}</strong> {{ formatMoney(summary.investment_summary.lab_capital_returned) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.inOpenJobs') }}</strong> {{ formatMoney(summary.investment_summary.capital_in_open_jobs) }}</p>
                                             </div>
                                             <div class="col-md-4">
-                                                <p class="mb-1"><strong>Profit credited:</strong> {{ formatMoney(summary.investment_summary.lab_profit_earned) }}</p>
-                                                <p class="mb-1"><strong>Expenses assigned:</strong> {{ formatMoney(summary.investment_summary.expenses_assigned) }}</p>
-                                                <p class="mb-1"><strong>Net lab profit:</strong> {{ formatMoney(summary.investment_summary.net_lab_profit) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.profitCredited') }}</strong> {{ formatMoney(summary.investment_summary.lab_profit_earned) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.expensesAssigned') }}</strong> {{ formatMoney(summary.investment_summary.expenses_assigned) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.netLabProfit') }}</strong> {{ formatMoney(summary.investment_summary.net_lab_profit) }}</p>
                                             </div>
                                             <div class="col-md-4">
-                                                <p class="mb-1"><strong>Paid out:</strong> {{ formatMoney(summary.investment_summary.total_paid_out) }}</p>
-                                                <p class="mb-1"><strong>Balance payable:</strong> {{ formatMoney(summary.investment_summary.current_balance) }}</p>
-                                                <p class="mb-0 text-muted small">Deposited − open job capital + profit − expenses − paid out</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.paidOut') }}</strong> {{ formatMoney(summary.investment_summary.total_paid_out) }}</p>
+                                                <p class="mb-1"><strong>{{ $t('portal.balancePayable') }}</strong> {{ formatMoney(summary.investment_summary.current_balance) }}</p>
+                                                <p class="mb-0 text-muted small">{{ $t('portal.helperBalance') }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -76,7 +76,7 @@
                                             <div class="small-box investor-stat-box bg-primary">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.current_balance) }}</h3>
-                                                    <p>Balance Payable</p>
+                                                    <p>{{ $t('portal.statBalance') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -84,7 +84,7 @@
                                             <div class="small-box investor-stat-box bg-info">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.total_deposited) }}</h3>
-                                                    <p>Total Deposited</p>
+                                                    <p>{{ $t('portal.statDeposited') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -92,7 +92,7 @@
                                             <div class="small-box investor-stat-box bg-info">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.lab_capital_returned) }}</h3>
-                                                    <p>Capital Returned</p>
+                                                    <p>{{ $t('portal.statReturned') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -100,7 +100,7 @@
                                             <div class="small-box investor-stat-box bg-warning">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.capital_in_open_jobs) }}</h3>
-                                                    <p>In Open Jobs</p>
+                                                    <p>{{ $t('portal.statOpen') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -108,7 +108,7 @@
                                             <div class="small-box investor-stat-box bg-teal">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.lab_profit_earned) }}</h3>
-                                                    <p>Lab Profit Credited</p>
+                                                    <p>{{ $t('portal.statProfit') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -116,7 +116,7 @@
                                             <div class="small-box investor-stat-box bg-success">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.net_lab_profit) }}</h3>
-                                                    <p>Net Lab Profit (all time)</p>
+                                                    <p>{{ $t('portal.statNet') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -124,7 +124,7 @@
                                             <div class="small-box investor-stat-box bg-warning">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.expenses_assigned) }}</h3>
-                                                    <p>Expenses Assigned (all time)</p>
+                                                    <p>{{ $t('portal.statExpenses') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -132,7 +132,7 @@
                                             <div class="small-box investor-stat-box bg-secondary">
                                                 <div class="inner">
                                                     <h3 class="stat-amount">{{ formatMoney(summary.investment_summary.total_paid_out) }}</h3>
-                                                    <p>Paid Out / Redeemed</p>
+                                                    <p>{{ $t('portal.statPaid') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -140,7 +140,7 @@
                                             <div class="small-box investor-stat-box bg-secondary">
                                                 <div class="inner">
                                                     <h3 class="stat-amount stat-compact">{{ summary.gold_holdings.gold }}g</h3>
-                                                    <p>Gold Held</p>
+                                                    <p>{{ $t('portal.statGold') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -148,7 +148,7 @@
                                             <div class="small-box investor-stat-box bg-dark">
                                                 <div class="inner">
                                                     <h3 class="stat-amount stat-compact">{{ summary.lab_summary.total_jobs }}</h3>
-                                                    <p>Lab Jobs</p>
+                                                    <p>{{ $t('portal.statJobs') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -156,43 +156,43 @@
 
                                     <div class="row mb-3">
                                         <div class="col-md-3">
-                                            <p><strong>Your Lab Profit:</strong> {{ formatMoney(summary.lab_summary.total_lab_profit) }}</p>
+                                            <p><strong>{{ $t('portal.yourLabProfit') }}</strong> {{ formatMoney(summary.lab_summary.total_lab_profit) }}</p>
                                         </div>
                                         <div class="col-md-3">
-                                            <p><strong>Expenses Assigned:</strong> {{ formatMoney(summary.lab_summary.allocated_expenses) }}</p>
+                                            <p><strong>{{ $t('portal.expensesAssignedLabel') }}</strong> {{ formatMoney(summary.lab_summary.allocated_expenses) }}</p>
                                         </div>
                                         <div class="col-md-3">
-                                            <p><strong>Net Lab Profit:</strong> {{ formatMoney(summary.lab_summary.net_lab_profit) }}</p>
+                                            <p><strong>{{ $t('portal.netLabProfitLabel') }}</strong> {{ formatMoney(summary.lab_summary.net_lab_profit) }}</p>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-3">
-                                            <p><strong>Metal Weight:</strong> {{ formatWeight(summary.lab_summary.total_weight_grams) }}g</p>
+                                            <p><strong>{{ $t('portal.metalWeight') }}</strong> {{ formatWeight(summary.lab_summary.total_weight_grams) }}g</p>
                                         </div>
                                         <div class="col-md-3">
-                                            <p><strong>Open / Sold Jobs:</strong> {{ summary.lab_summary.open_jobs }} / {{ summary.lab_summary.sold_jobs }}</p>
+                                            <p><strong>{{ $t('portal.openSold') }}</strong> {{ summary.lab_summary.open_jobs }} / {{ summary.lab_summary.sold_jobs }}</p>
                                         </div>
                                         <div class="col-md-3">
-                                            <p><strong>Silver Held:</strong> {{ summary.gold_holdings.silver }}g</p>
+                                            <p><strong>{{ $t('portal.silverHeld') }}</strong> {{ summary.gold_holdings.silver }}g</p>
                                         </div>
                                     </div>
 
-                                    <h5 class="mt-4">Laboratory Jobs</h5>
+                                    <h5 class="mt-4">{{ $t('portal.labJobs') }}</h5>
                                     <div class="table-responsive mb-4">
                                         <table class="table table-bordered table-sm">
                                             <thead>
                                                 <tr>
-                                                    <th>Date</th>
-                                                    <th>Ref</th>
-                                                    <th>Metal</th>
-                                                    <th class="text-right">Weight (g)</th>
-                                                    <th class="text-right">Base</th>
-                                                    <th class="text-right">Refinery</th>
-                                                    <th class="text-right">Sold</th>
-                                                    <th class="text-right">Job Profit</th>
-                                                    <th class="text-right">Your %</th>
-                                                    <th class="text-right">Your Profit</th>
-                                                    <th>Status</th>
+                                                    <th>{{ $t('common.date') }}</th>
+                                                    <th>{{ $t('lab.ref') }}</th>
+                                                    <th>{{ $t('common.metal') }}</th>
+                                                    <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                    <th class="text-right">{{ $t('lab.base') }}</th>
+                                                    <th class="text-right">{{ $t('lab.refinery') }}</th>
+                                                    <th class="text-right">{{ $t('lab.sold') }}</th>
+                                                    <th class="text-right">{{ $t('portal.jobProfit') }}</th>
+                                                    <th class="text-right">{{ $t('portal.yourPct') }}</th>
+                                                    <th class="text-right">{{ $t('portal.yourProfit') }}</th>
+                                                    <th>{{ $t('common.status') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -210,22 +210,22 @@
                                                     <td class="text-capitalize">{{ job.job_status }}</td>
                                                 </tr>
                                                 <tr v-if="!labJobs.data || !labJobs.data.length">
-                                                    <td colspan="11" class="text-center text-muted">No laboratory jobs in this period.</td>
+                                                    <td colspan="11" class="text-center text-muted">{{ $t('portal.noJobs') }}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
-                                    <p class="text-muted small mb-4">Lab amounts in Rs.</p>
+                                    <p class="text-muted small mb-4">{{ $t('common.labAmountsInRs') }}</p>
 
-                                    <h5 class="mt-4">Expense Assignments in Period</h5>
+                                    <h5 class="mt-4">{{ $t('portal.expenseAssignments') }}</h5>
                                     <div class="table-responsive mb-4">
                                         <table class="table table-bordered table-sm">
                                             <thead>
                                                 <tr>
-                                                    <th>Date</th>
-                                                    <th>Description</th>
-                                                    <th class="text-right">Amount</th>
-                                                    <th>Notes</th>
+                                                    <th>{{ $t('common.date') }}</th>
+                                                    <th>{{ $t('common.description') }}</th>
+                                                    <th class="text-right">{{ $t('common.amount') }}</th>
+                                                    <th>{{ $t('common.notes') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -236,24 +236,24 @@
                                                     <td>{{ item.notes || '-' }}</td>
                                                 </tr>
                                                 <tr v-if="!summary.expense_allocations || !summary.expense_allocations.length">
-                                                    <td colspan="4" class="text-center text-muted">No expenses assigned in this period.</td>
+                                                    <td colspan="4" class="text-center text-muted">{{ $t('portal.noExpenses') }}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
 
-                                    <h5 class="mt-4">Investment Transactions in Period</h5>
+                                    <h5 class="mt-4">{{ $t('portal.txnPeriod') }}</h5>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-sm">
                                             <thead>
                                                 <tr>
-                                                    <th>Date</th>
-                                                    <th>Type</th>
-                                                    <th>Metal</th>
-                                                    <th class="text-right">Weight (g)</th>
-                                                    <th class="text-right">Rate/g</th>
-                                                    <th class="text-right">Amount</th>
-                                                    <th>Notes</th>
+                                                    <th>{{ $t('common.date') }}</th>
+                                                    <th>{{ $t('common.type') }}</th>
+                                                    <th>{{ $t('common.metal') }}</th>
+                                                    <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                    <th class="text-right">{{ $t('common.rateG') }}</th>
+                                                    <th class="text-right">{{ $t('common.amount') }}</th>
+                                                    <th>{{ $t('common.notes') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -267,17 +267,17 @@
                                                     <td>{{ txn.notes || '-' }}</td>
                                                 </tr>
                                                 <tr v-if="!summary.transactions.length">
-                                                    <td colspan="7" class="text-center text-muted">No transactions in this period.</td>
+                                                    <td colspan="7" class="text-center text-muted">{{ $t('portal.noTxns') }}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                                 <div class="card-body" v-else-if="summary && summary.error">
-                                    <p class="text-danger mb-0">Unable to load investor data. Please refresh or contact admin.</p>
+                                    <p class="text-danger mb-0">{{ $t('portal.loadFail') }}</p>
                                 </div>
                                 <div class="card-body" v-else>
-                                    <p>Loading investor data...</p>
+                                    <p>{{ $t('portal.loading') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -342,7 +342,7 @@ export default {
                 .catch((err) => {
                     console.log(err);
                     this.summary = { error: true };
-                    toastr.error(err.response?.data?.message || 'Unable to load investor summary.');
+                    toastr.error(err.response?.data?.message || this.$t('portal.summaryFail'));
                 });
         },
         loadLabJobs() {
@@ -379,13 +379,13 @@ export default {
         },
         formatType(type) {
             const labels = {
-                deposit: 'Deposit',
-                withdrawal: 'Payout / Redemption',
-                lab_purchase: 'Lab Job Purchase',
-                lab_sale_return: 'Lab Capital Returned',
-                lab_profit: 'Lab Profit Credited',
-                gold_buy: 'Gold Buy',
-                gold_sell: 'Gold Sell / Redemption',
+                deposit: this.$t('portal.typeDeposit'),
+                withdrawal: this.$t('portal.typePayout'),
+                lab_purchase: this.$t('portal.typeLabPurchase'),
+                lab_sale_return: this.$t('portal.typeCapitalReturned'),
+                lab_profit: this.$t('portal.typeProfitCredited'),
+                gold_buy: this.$t('portal.typeGoldBuy'),
+                gold_sell: this.$t('portal.typeGoldSell'),
             };
             return labels[type] || (type || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
         },

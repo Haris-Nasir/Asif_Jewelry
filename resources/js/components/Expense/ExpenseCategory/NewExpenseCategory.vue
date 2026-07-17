@@ -7,7 +7,7 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            New Expense Category
+                            {{ $t('expCat.newTitle') }}
                         </h3>
                         <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -22,7 +22,7 @@
                                 <label
                                     for="category-name-txt"
                                     class="text-md col-form-label"
-                                    >Category Name</label
+                                    >{{ $t('expCat.categoryName') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -31,7 +31,7 @@
                                     type="text"
                                     class="form-control text-md"
                                     v-model="expenseCategoryTxt"
-                                    placeholder="Enter Category Name..."
+                                    :placeholder="$t('expCat.phName')"
                                 />
                             </div>
                         </div>
@@ -45,14 +45,14 @@
                             class="btn btn-primary text-md"
                             @click="addCategory"
                         >
-                            Add
+                            {{ $t('common.add') }}
                         </button>
                         <button
                             type="reset"
                             class="btn btn-primary ml-3 text-md"
                             @click="resetNewCategoryForm"
                         >
-                            Reset
+                            {{ $t('common.reset') }}
                         </button>
 
                         
@@ -82,9 +82,9 @@ export default {
 
         addCategory: function() {
             if (this.expenseCategoryTxt == "") {
-                toastr.info("Please Enter Expense Category");
+                toastr.info(this.$t('expCat.required'));
             } else if (this.expenseCategoryTxt.length > 50) {
-                toastr.warning("Max Character In Expense Category is 50");
+                toastr.warning(this.$t('expCat.max'));
             } else {
                 let payload = {
                     expenseCategory: this.expenseCategoryTxt
@@ -94,9 +94,9 @@ export default {
                     .then(res => {
                         if (res.data.status == 1) {
                             swal.fire({
-                                title: "Success",
+                                title: this.$t('common.success'),
                                 html:
-                                    "<h5 style='color:#9C9794'>Expense Category Added Successfully</h5>",
+                                    "<h5 style='color:#9C9794'>" + this.$t('expCat.added') + "</h5>",
                                 icon: "success"
                             }).then(result => {
                                 this.expenseCategoryTxt = "";
@@ -109,7 +109,7 @@ export default {
                         }
                     })
                     .catch(err => {
-                        toastr.error("Some Thing Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                     });
             }
         },

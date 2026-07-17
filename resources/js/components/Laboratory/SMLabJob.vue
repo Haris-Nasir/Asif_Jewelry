@@ -3,7 +3,7 @@
         <div class="col-md-12 mt-3">
             <div class="card card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Manage Laboratory Jobs</h3>
+                    <h3 class="card-title">{{ $t('lab.manageTitle') }}</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse">
                             <i class="fas fa-minus"></i>
@@ -16,7 +16,7 @@
                             <div class="small-box lab-stat-box bg-info mb-0">
                                 <div class="inner">
                                     <h3>{{ summary.total_jobs }}</h3>
-                                    <p>Total Jobs</p>
+                                    <p>{{ $t('lab.totalJobs') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -24,7 +24,7 @@
                             <div class="small-box lab-stat-box bg-warning mb-0">
                                 <div class="inner">
                                     <h3>{{ summary.open_jobs }}</h3>
-                                    <p>Open</p>
+                                    <p>{{ $t('common.open') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -32,7 +32,7 @@
                             <div class="small-box lab-stat-box bg-success mb-0">
                                 <div class="inner">
                                     <h3 class="stat-amount">{{ formatMoney(summary.total_lab_profit) }}</h3>
-                                    <p>Lab Profit</p>
+                                    <p>{{ $t('lab.labProfit') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -40,7 +40,7 @@
                             <div class="small-box lab-stat-box bg-secondary mb-0">
                                 <div class="inner">
                                     <h3 class="stat-amount">{{ formatWeight(summary.total_weight_grams) }}g</h3>
-                                    <p>Total Weight</p>
+                                    <p>{{ $t('lab.totalWeight') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -48,28 +48,28 @@
 
                     <div class="form-row lab-filter-row mb-3">
                         <div class="form-group col-md-3 col-sm-6 mb-2">
-                            <label>From Date</label>
+                            <label>{{ $t('common.fromDate') }}</label>
                             <input type="date" class="form-control" v-model="filters.from_date" @change="loadJobs">
                         </div>
                         <div class="form-group col-md-3 col-sm-6 mb-2">
-                            <label>To Date</label>
+                            <label>{{ $t('common.toDate') }}</label>
                             <input type="date" class="form-control" v-model="filters.to_date" @change="loadJobs">
                         </div>
                         <div class="form-group col-md-3 col-sm-6 mb-2">
-                            <label>Investor</label>
+                            <label>{{ $t('lab.investor') }}</label>
                             <select class="form-control" v-model="filters.investor_id" @change="loadJobs">
-                                <option value="">All investors</option>
+                                <option value="">{{ $t('common.allInvestors') }}</option>
                                 <option v-for="inv in investors" :key="inv.investor_id" :value="inv.investor_id">
                                     {{ inv.investor_name }}
                                 </option>
                             </select>
                         </div>
                         <div class="form-group col-md-3 col-sm-6 mb-2">
-                            <label>Status</label>
+                            <label>{{ $t('common.status') }}</label>
                             <select class="form-control" v-model="filters.job_status" @change="loadJobs">
-                                <option value="">All</option>
-                                <option value="open">Open</option>
-                                <option value="sold">Sold</option>
+                                <option value="">{{ $t('common.all') }}</option>
+                                <option value="open">{{ $t('common.open') }}</option>
+                                <option value="sold">{{ $t('lab.sold') }}</option>
                             </select>
                         </div>
                     </div>
@@ -78,17 +78,17 @@
                         <table class="table table-bordered table-sm lab-jobs-table">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Ref</th>
-                                    <th>Investors</th>
-                                    <th>Metal</th>
-                                    <th class="text-right text-nowrap">Weight (g)</th>
-                                    <th class="text-right">Base</th>
-                                    <th class="text-right">Refinery</th>
-                                    <th class="text-right">Sold</th>
-                                    <th class="text-right">Profit</th>
-                                    <th>Status</th>
-                                    <th class="text-center" width="90">Action</th>
+                                    <th>{{ $t('common.date') }}</th>
+                                    <th>{{ $t('lab.ref') }}</th>
+                                    <th>{{ $t('lab.investors') }}</th>
+                                    <th>{{ $t('common.metal') }}</th>
+                                    <th class="text-right text-nowrap">{{ $t('common.weightG') }}</th>
+                                    <th class="text-right">{{ $t('lab.base') }}</th>
+                                    <th class="text-right">{{ $t('lab.refinery') }}</th>
+                                    <th class="text-right">{{ $t('lab.sold') }}</th>
+                                    <th class="text-right">{{ $t('common.profit') }}</th>
+                                    <th>{{ $t('common.status') }}</th>
+                                    <th class="text-center" width="90">{{ $t('common.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -109,22 +109,22 @@
                                     </td>
                                     <td class="text-center text-nowrap">
                                         <div class="table-actions">
-                                            <button type="button" class="btn btn-primary btn-sm" @click="startEdit(job)" title="Edit">
+                                            <button type="button" class="btn btn-primary btn-sm" @click="startEdit(job)" :title="$t('common.edit')">
                                                 <i class="fas fa-pen"></i>
                                             </button>
-                                            <button type="button" class="btn btn-danger btn-sm" @click="deleteJob(job.lab_job_id)" title="Delete">
+                                            <button type="button" class="btn btn-danger btn-sm" @click="deleteJob(job.lab_job_id)" :title="$t('common.delete')">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr v-if="!jobs.data || !jobs.data.length">
-                                    <td colspan="11" class="text-center text-muted py-3">No laboratory jobs found.</td>
+                                    <td colspan="11" class="text-center text-muted py-3">{{ $t('lab.noJobsFound') }}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <p class="text-muted small mb-0 mt-2">Amounts in Rs.</p>
+                    <p class="text-muted small mb-0 mt-2">{{ $t('common.amountsInRs') }}</p>
 
                     <div class="row mt-3" v-if="jobs.data && jobs.data.length">
                         <div class="col-sm-6 offset-sm-3 col-md-4 offset-md-4">
@@ -139,63 +139,63 @@
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content" v-if="editForm.lab_job_id">
                     <div class="modal-header">
-                        <h5 class="modal-title">Edit Laboratory Job</h5>
+                        <h5 class="modal-title">{{ $t('lab.editTitle') }}</h5>
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label>Job Date</label>
+                                <label>{{ $t('lab.jobDate') }}</label>
                                 <input type="datetime-local" class="form-control" v-model="editForm.job_date">
                             </div>
                             <div class="form-group col-md-5">
-                                <label>Investors *</label>
+                                <label>{{ $t('lab.investors') }} *</label>
                                 <investor-multi-select
                                     :investors="investors"
                                     v-model="editForm.investor_ids"
-                                    placeholder="Select investors..."
+                                    :placeholder="$t('lab.phInvestors')"
                                 />
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Reference</label>
+                                <label>{{ $t('common.reference') }}</label>
                                 <input type="text" class="form-control" v-model="editForm.job_reference">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-3">
-                                <label>Metal</label>
+                                <label>{{ $t('common.metal') }}</label>
                                 <select class="form-control" v-model="editForm.metal_type">
-                                    <option value="gold">Gold</option>
-                                    <option value="silver">Silver</option>
+                                    <option value="gold">{{ $t('common.gold') }}</option>
+                                    <option value="silver">{{ $t('common.silver') }}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Weight (g)</label>
+                                <label>{{ $t('common.weightG') }}</label>
                                 <input type="number" class="form-control" v-model="editForm.weight_grams" step="0.001">
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Base Price (Rs.)</label>
+                                <label>{{ $t('lab.basePrice') }}</label>
                                 <input type="number" class="form-control" v-model="editForm.base_price" step="0.01">
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Refinery Cost (Rs.)</label>
+                                <label>{{ $t('lab.refineryCost') }}</label>
                                 <input type="number" class="form-control" v-model="editForm.refinery_cost" step="0.01">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label>Sold Amount (Rs.)</label>
+                                <label>{{ $t('lab.soldAmount') }}</label>
                                 <input type="number" class="form-control" v-model="editForm.sold_amount" step="0.01">
                             </div>
                             <div class="form-group col-md-8">
-                                <label>Notes</label>
+                                <label>{{ $t('common.notes') }}</label>
                                 <input type="text" class="form-control" v-model="editForm.notes">
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" @click="updateJob">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ $t('common.cancel') }}</button>
+                        <button type="button" class="btn btn-primary" @click="updateJob">{{ $t('lab.saveChanges') }}</button>
                     </div>
                 </div>
             </div>
@@ -295,7 +295,7 @@ export default {
                 })
                 .catch((err) => {
                     console.log(err);
-                    toastr['error']('Unable to load laboratory jobs.');
+                    toastr['error'](this.$t('lab.loadFail'));
                 });
         },
         loadSummary() {
@@ -329,35 +329,35 @@ export default {
         updateJob() {
             const investorIds = (this.editForm.investor_ids || []).map((id) => parseInt(id, 10)).filter((id) => !Number.isNaN(id));
             if (!investorIds.length) {
-                toastr['error']('Select at least one investor.');
+                toastr['error'](this.$t('lab.selectInvestor'));
                 return;
             }
             axios.put(`/api/lab/jobs/${this.editForm.lab_job_id}`, { ...this.editForm, investor_ids: investorIds })
                 .then((res) => {
                     if (res.data.status === 1) {
                         swal.fire({
-                            title: 'Success',
-                            html: "<h5 style='color:#9C9794'>Laboratory Job Updated Successfully!</h5>",
+                            title: this.$t('common.success'),
+                            html: "<h5 style='color:#9C9794'>" + this.$t('lab.updated') + "</h5>",
                             icon: 'success',
                         }).then(() => {
                             $('#editLabJobModal').modal('hide');
                             this.loadJobs(this.jobs.current_page || 1);
                         });
                     } else {
-                        toastr['error'](res.data.message || 'Update failed.');
+                        toastr['error'](res.data.message || this.$t('lab.updateFail'));
                     }
                 })
                 .catch((err) => {
-                    toastr['error'](err.response?.data?.message || 'Update failed.');
+                    toastr['error'](err.response?.data?.message || this.$t('lab.updateFail'));
                 });
         },
         deleteJob(labJobId) {
             swal.fire({
-                title: 'Delete job?',
-                text: 'This laboratory job will be removed.',
+                title: this.$t('lab.deleteConfirm'),
+                text: this.$t('lab.deleteJobText'),
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Delete',
+                confirmButtonText: this.$t('common.delete'),
             }).then((result) => {
                 if (result.isConfirmed) {
                     axios.delete(`/api/lab/jobs/${labJobId}`)
@@ -368,7 +368,7 @@ export default {
                             }
                         })
                         .catch((err) => {
-                            toastr['error'](err.response?.data?.message || 'Delete failed.');
+                            toastr['error'](err.response?.data?.message || this.$t('lab.deleteFail'));
                         });
                 }
             });

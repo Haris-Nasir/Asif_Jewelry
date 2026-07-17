@@ -9,8 +9,11 @@ require('../../node_modules/toastr/build/toastr.min.js');
 import App from './components/App';
 import router from '../router';
 import { CURRENCY_CODE, formatCurrency } from './currency';
+import { initI18n } from './i18n';
 
 window.Vue = require('vue').default;
+
+initI18n();
 
 Vue.prototype.$currencyCode = CURRENCY_CODE;
 Vue.prototype.$formatCurrency = formatCurrency;

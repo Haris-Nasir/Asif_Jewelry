@@ -4,7 +4,7 @@
       <div class="col-md-12 mt-3">
         <div class="card card-primary">
           <div class="card-header">
-            <h3 class="card-title">Search and Manage Credit</h3>
+            <h3 class="card-title">{{ $t('credit.manageTitle') }}</h3>
             <div class="card-tools">
               <button
                 type="button"
@@ -24,7 +24,7 @@
                 <div>
                   <div class="d-flex align-items-center ml-4">
                     <label for="paginate" class="text-nowrap mr-2 mb-0">
-                      Per Page
+                      {{ $t('common.perPage') }}
                     </label>
                     <select
                       v-model="paginate"
@@ -42,7 +42,7 @@
                   v-model="search"
                   type="search"
                   class="form-control"
-                  placeholder="Search By..."
+                  :placeholder="$t('common.searchBy')"
                 />
               </div>
             </div>
@@ -55,7 +55,7 @@
                   <tr>
                     <th width="10%">
                       <a href="#" @click.prevent="updateSorting('credit_id')"
-                        >Sr. No.</a
+                        >{{ $t('common.srNo') }}</a
                       >
                       <span v-if="sort_field == 'credit_id' ? 1 : 0">
                         <span v-if="sort_direction == 'asc' ? 1 : 0"
@@ -68,7 +68,7 @@
                     </th>
                     <th>
                       <a href="#" @click.prevent="updateSorting('credit_date')"
-                        >Credit Date</a
+                        >{{ $t('credit.date') }}</a
                       >
                       <span v-if="sort_field == 'credit_date' ? 1 : 0">
                         <span v-if="sort_direction == 'asc' ? 1 : 0"
@@ -79,12 +79,12 @@
                         >
                       </span>
                     </th>
-                    <th width="20%">Credit Description</th>
+                    <th width="20%">{{ $t('credit.description') }}</th>
                     <th>
                       <a
                         href="#"
                         @click.prevent="updateSorting('credit_amount')"
-                        >Credit Amount</a
+                        >{{ $t('credit.amount') }}</a
                       >
                       <span v-if="sort_field == 'credit_amount' ? 1 : 0">
                         <span v-if="sort_direction == 'asc' ? 1 : 0"
@@ -95,7 +95,7 @@
                         >
                       </span>
                     </th>
-                    <th width="110" class="text-center">Action</th>
+                    <th width="110" class="text-center">{{ $t('common.action') }}</th>
                   </tr>
                 </thead>
                 <tbody class="text-md">
@@ -155,7 +155,7 @@
 
         <div v-if="creditId == -1 ? 0 : 1" class="card card-primary">
           <div class="card-header">
-            <h3 class="card-title">Update Credit</h3>
+            <h3 class="card-title">{{ $t('credit.updateTitle') }}</h3>
             <div class="card-tools">
               <button
                 type="button"
@@ -176,45 +176,45 @@
           <div class="card-body">
             <div class="form-group" style="display: flex; flex-direction: row">
               <label for="creditDate" class="col-md-2 text-md"
-                >Credit Date
+                >{{ $t('credit.date') }}
                 <span class="required-mark" style="color: red">*</span></label
               >
               <input
                 type="date"
                 class="form-control col-md-2"
                 v-model="creditDate"
-                placeholder="Enter Credit Date..."
+                :placeholder="$t('credit.phDate')"
               />
               <div class="col-md-2"></div>
               <label for="creditAmount" class="col-md-2 text-md"
-                >Amount
+                >{{ $t('credit.amount') }}
                 <span class="required-mark" style="color: red">*</span></label
               >
               <input
                 type="text"
                 class="form-control col-md-3"
                 v-model="creditAmount"
-                placeholder="Enter Amount..."
+                :placeholder="$t('credit.phAmount')"
               />
             </div>
             <div class="form-group" style="display: flex; flex-direction: row">
               <label for="creditDesc" class="col-md-2 text-md"
-                >Description
+                >{{ $t('credit.description') }}
                 <span class="required-mark" style="color: red">*</span></label
               >
               <textarea
                 class="form-control col-md-3"
                 v-model="creditDesc"
-                placeholder="Enter Description..."
+                :placeholder="$t('credit.phDesc')"
               ></textarea>
             </div>
           </div>
           <div class="card-footer">
             <button class="btn btn-primary" @click="updateDetailsSaveUpdate">
-              Update
+              {{ $t('common.update') }}
             </button>
             <button class="btn btn-primary" @click="resetUpdateDetail">
-              Reset
+              {{ $t('common.reset') }}
             </button>
           </div>
         </div>
@@ -299,7 +299,7 @@ export default {
       credit_description,
       credit_amount
     ) {
-      toastr.info("Please scroll down the page!");
+      toastr.info(this.$t('common.scrollDown'));
       this.creditId = credit_id;
       this.creditDate = this.getStdDate(credit_date);
       this.creditDesc = credit_description;
@@ -312,7 +312,7 @@ export default {
         this.creditDesc == "" ||
         this.creditAmount == ""
       ) {
-        toastr["error"]("All Fields are Required");
+        toastr["error"](this.$t('common.allFieldsRequired'));
       } else {
         axios
           .put("/api/credit/update/" + this.creditId, {
@@ -324,8 +324,8 @@ export default {
             if (res.data.status == 1) {
               swal
                 .fire({
-                  title: "Success",
-                  html: "<h5 style='color:#9C9794'>Credit Details Updated Successfully</h5>",
+                  title: this.$t('common.success'),
+                  html: "<h5 style='color:#9C9794'>" + this.$t('credit.updated') + "</h5>",
                   icon: "success",
                 })
                 .then((result) => {
@@ -340,7 +340,7 @@ export default {
             }
           })
           .catch((err) => {
-            toastr.error("Something Went Wrong");
+            toastr.error(this.$t('common.somethingWrong'));
           });
       }
     },
@@ -361,8 +361,8 @@ export default {
         .then((res) => {
           swal
             .fire({
-              title: "Success",
-              html: "<h5 style='color:#9C9794'>Credit Deleted Successfully</h5>",
+              title: this.$t('common.success'),
+              html: "<h5 style='color:#9C9794'>" + this.$t('credit.deleted') + "</h5>",
               icon: "success",
             })
             .then((result) => {

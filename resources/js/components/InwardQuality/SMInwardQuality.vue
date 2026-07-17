@@ -8,7 +8,7 @@
         <div class="card card-primary">
           <div class="card-header">
             <h3 class="card-title">
-              Search and Manage Inward Quality
+              {{ $t('inwardQuality.manageTitle') }}
             </h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -24,7 +24,7 @@
                 <div>
                   <div class="d-flex align-items-center ml-4">
                     <label for="paginate" class="text-nowrap mr-2 mb-0 text-md">
-                      Per Page
+                      {{ $t('common.perPage') }}
                     </label>
                     <select v-model="paginate" class="form-control form-control-sm">
                       <option value="10">10</option>
@@ -35,7 +35,7 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <input v-model="search" type="search" class="form-control " placeholder="Search By ..." />
+                <input v-model="search" type="search" class="form-control " :placeholder="$t('common.searchBy')" />
               </div>
             </div>
 
@@ -44,27 +44,27 @@
                 <thead class="text-md">
                   <tr>
                     <th width="10%">
-                      <a href="#" @click.prevent="updateSorting('inward_quality_id')">Sr. No.</a>
+                      <a href="#" @click.prevent="updateSorting('inward_quality_id')">{{ $t('common.srNo') }}</a>
                       <span v-if="sort_field == 'inward_quality_id' ? 1 : 0">
                         <span v-if="sort_direction == 'asc' ? 1 : 0">&uarr;</span>
                         <span v-if="sort_direction == 'desc' ? 1 : 0">&darr;</span>
                       </span>
                     </th>
                     <th>
-                      <a href="#" @click.prevent="updateSorting('quality_name')">Quality Name</a>
+                      <a href="#" @click.prevent="updateSorting('quality_name')">{{ $t('quality.qualityName') }}</a>
                       <span v-if="sort_field =='quality_name'? 1: 0">
                         <span v-if="sort_direction == 'asc'? 1: 0">&uarr;</span>
                         <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                       </span>
                     </th>
                     <th>
-                      <a href="#" @click.prevent="updateSorting('inward_category_name')">Category</a>
+                      <a href="#" @click.prevent="updateSorting('inward_category_name')">{{ $t('common.category') }}</a>
                       <span v-if="sort_field =='inward_category_name'? 1: 0">
                         <span v-if="sort_direction == 'asc'? 1: 0">&uarr;</span>
                         <span v-if="sort_direction == 'desc'? 1: 0">&darr;</span>
                       </span>
                     </th>
-                    <th width="110" class="text-center">Action</th>
+                    <th width="110" class="text-center">{{ $t('common.action') }}</th>
                   </tr>
                 </thead>
                 <tbody class="text-md">
@@ -75,11 +75,11 @@
 
                     <td class="text-center">
                       <div class="table-actions">
-                        <button type="button" class="btn btn-primary btn-sm" title="Edit"
+                        <button type="button" class="btn btn-primary btn-sm" :title="$t('common.edit')"
                           @click="editInwardQuality(inwardquality.inward_quality_id, inwardquality.inward_quality_category_id,inwardquality.inward_category_name,inwardquality.quality_name)">
                           <i class="fas fa-pen"></i>
                         </button>
-                        <button type="button" class="btn btn-danger btn-sm" title="Delete"
+                        <button type="button" class="btn btn-danger btn-sm" :title="$t('common.delete')"
                           @click="deleteInwardQuality(inwardquality.inward_quality_id)">
                           <i class="fas fa-trash"></i>
                         </button>
@@ -99,7 +99,7 @@
 
         <div v-if="inwardQualityId == -1 ? 0 : 1" class="card card-primary">
           <div class="card-header">
-            <h3 class="card-title">Edit Inward Quality</h3>
+            <h3 class="card-title">{{ $t('inwardQuality.editTitle') }}</h3>
             <div class="card-tools">
               <button type="button" class="btn btn-tool" data-card-widget="collapse">
                 <i class="fas fa-minus"></i>
@@ -114,31 +114,31 @@
           <div class="card-body">
             <div class="form-group row">
               <div class="col-md-2">
-                <label for="qualitycategory" class="text-md col-form-label">Quality Category <span class="required-mark"
+                <label for="qualitycategory" class="text-md col-form-label">{{ $t('common.category') }} <span class="required-mark"
                     style="color: red;">*</span></label>
               </div>
               <div class="col-md-4">
                 <model-select :options="qualityCategories" v-model="selectedQualityCategory"
-                  placeholder="Select Quality Category">
+                  :placeholder="$t('quality.selectCategory')">
                 </model-select>
               </div>
             </div>
 
             <div class="form-group row">
               <div class="col-md-2">
-                <label for="qualityname" class="text-md col-form-label">Quality Name <span class="required-mark"
+                <label for="qualityname" class="text-md col-form-label">{{ $t('quality.qualityName') }} <span class="required-mark"
                     style="color: red;">*</span></label>
               </div>
               <div class="col-md-4">
                 <input type="text" class="form-control" v-model="editQualityName" maxlength="50"
-                  placeholder="Enter Quality Name...">
+                  :placeholder="$t('quality.phName')">
               </div>
             </div>
           </div>
           <!-- /.card-body -->
 
           <div class="card-footer">
-            <button type="submit" @click="updateInwardQuality" class="btn btn-primary text-md">Update</button>
+            <button type="submit" @click="updateInwardQuality" class="btn btn-primary text-md">{{ $t('common.update') }}</button>
           </div>
         </div>
       </div>
@@ -234,13 +234,13 @@
           });
         }).catch(err => {
           console.log(err);
-          toastr["error"]("Something went Wrong");
+          toastr["error"](this.$t('common.somethingWrong'));
         })
       },
 
       updateInwardQuality: function () {
         if ((this.selectedQualityCategory == '') || (this.editQualityName == '')) {
-          toastr["error"]('All Fields are Required');
+          toastr["error"](this.$t('common.allFieldsRequired'));
         } else {
           axios
             .put('../api/inwardquality/update/' + this.inwardQualityId, {
@@ -265,8 +265,8 @@
                 toastr["warning"](res.data.message);
               } else if (res.data.status == 1) {
                 swal.fire({
-                  title: 'Success',
-                  html: "<h5 style='color:#9C9794'>Inward Quality Data Updated Successfully!</h5>",
+                  title: this.$t('common.success'),
+                  html: "<h5 style='color:#9C9794'>" + this.$t('inwardQuality.updated') + "</h5>",
                   icon: 'success'
                 }).then((result) => {
                   this.resetFields();
@@ -276,7 +276,7 @@
               }
             }).catch((err) => {
               console.log(err.res.data.message);
-              toastr["error"]('Something went Wrong.');
+              toastr["error"](this.$t('common.somethingWrong'));
             });
         }
       },
@@ -286,9 +286,9 @@
           .delete('../api/inwardquality/delete/' + inward_quality_id)
           .then((res) => {
             swal.fire({
-              title: "Success",
+              title: this.$t('common.success'),
               html:
-                "<h5 style='color:#9C9794'>Inward Quality Deleted Successfully</h5>",
+                "<h5 style='color:#9C9794'>" + this.$t('inwardQuality.deleted') + "</h5>",
               icon: "success"
             }).then((result) => {
               this.getAllInwardQualities(this.inwardqualities.current_page);
@@ -296,7 +296,7 @@
           })
           .catch((err) => {
             console.log(err.res.data.message);
-            toastr["error"]('Something went Wrong.');
+            toastr["error"](this.$t('common.somethingWrong'));
           });
       },
 

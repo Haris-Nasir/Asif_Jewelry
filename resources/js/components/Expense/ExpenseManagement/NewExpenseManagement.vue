@@ -7,7 +7,7 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            New Expense
+                            {{ $t('expense.newTitle') }}
                         </h3>
                         <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -22,7 +22,7 @@
                                 <label
                                     for="expense-date"
                                     class="text-md col-form-label"
-                                    >Date</label
+                                    >{{ $t('common.date') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -40,13 +40,13 @@
                                 <label
                                     for="expense-category"
                                     class="text-md col-form-label"
-                                    >Expense Category</label
+                                    >{{ $t('expCat.category') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
                             <div class="col-md-3">
                                 <model-select :options="expenseCategories" v-model="expenseCategory"
-                                    placeholder="Select Category">
+                                    :placeholder="$t('expense.selectCategory')">
                                 </model-select>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                                 <label
                                     for="expense-description"
                                     class="text-md col-form-label"
-                                    >Expense Description</label
+                                    >{{ $t('common.description') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -67,7 +67,7 @@
                                     class="form-control text-md"
                                     rows="5"
                                     v-model="expenseDescription"
-                                    placeholder="Enter Description Of Expense..."
+                                    :placeholder="$t('expense.phDesc')"
                                 />
                             </div>
                         </div>
@@ -77,7 +77,7 @@
                                 <label
                                     for="expense-amount"
                                     class="text-md col-form-label"
-                                    >Amount</label
+                                    >{{ $t('common.amount') }}</label
                                 >
                                 <span class="required-mark" style="color: red;">*</span>
                             </div>
@@ -103,14 +103,14 @@
                             class="btn btn-primary text-md"
                             @click="addExpense"
                         >
-                            Add
+                            {{ $t('common.add') }}
                         </button>
                         <button
                             type="reset"
                             class="btn btn-primary ml-3 text-md"
                             @click="resetNewExpenseForm"
                         >
-                            Reset
+                            {{ $t('common.reset') }}
                         </button>
 
                         
@@ -173,8 +173,8 @@ export default {
                     .then((res) => {
                         if(res.data.status == 1){
                             swal.fire({
-                                    title: "Success",
-                                    html:"<h5 style='color:#9C9794'>Expense Added Successfully</h5>",
+                                    title: this.$t('common.success'),
+                                    html:"<h5 style='color:#9C9794'>" + this.$t('expense.added') + "</h5>",
                                     icon: "success"
                             })
                             .then(result => {
@@ -182,7 +182,7 @@ export default {
                                 this.$emit("refreashExpenseTable");
                             })
                             .catch(err=>{
-                                toastr.error("Something Went Wrong");
+                                toastr.error(this.$t('common.somethingWrong'));
                                 console.log("Exception in New Expense Addition");
                             });
                         }
@@ -203,19 +203,19 @@ export default {
                             }
                         }
                         else{
-                            toastr.error("Some thing Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                         }
                     })
                     .catch(err => {
                         console.log("Exception In Add New Expense Function");
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                     });
             }    
         },
 
         validateExpenseDate: function(){
             if(this.expenseDate == ""){
-                toastr.info("Expense Date Is Required");
+                toastr.info(this.$t('expense.dateRequired'));
                 return false;
             }
 
@@ -224,7 +224,7 @@ export default {
         
         validateExpenseDescription: function(){
             if(this.expenseDescription == ""){
-                toastr.info("Expense Description Is Required");
+                toastr.info(this.$t('expense.descRequired'));
                 return false;
             }
             return true;
@@ -232,12 +232,12 @@ export default {
 
         validateExpenseAmount: function(){
             if(this.expenseAmount == "" || isNaN(this.expenseAmount)){
-                toastr.info("Expense Amount is required");
+                toastr.info(this.$t('expense.amountRequired'));
                 return false;
             }
             
             if(this.expenseAmount < 0){
-                toastr.info("Expense Amount Can't be Negative");
+                toastr.info(this.$t('expense.amountNegative'));
                 return false;
             }
 
@@ -246,7 +246,7 @@ export default {
 
         validateExpenseCategory: function () {
             if(this.expenseCategory == -1){
-                toastr.info("Expense Category Is Required");
+                toastr.info(this.$t('expense.categoryRequired'));
                 return false;
             }
 
@@ -288,7 +288,7 @@ export default {
                 }
             })
             .catch(() => {
-                toastr.error("Some thing Went Wrong, Please Refreash The Page");
+                toastr.error(this.$t('common.somethingWrongRefresh'));
             })
         }
     }

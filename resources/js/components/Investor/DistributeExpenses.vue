@@ -5,20 +5,20 @@
                         <div class="col-lg-5 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Distribute Expense to Investors</h3>
+                                    <h3 class="card-title">{{ $t('dist.title') }}</h3>
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted small mb-3">
-                                        Assign lab overhead (rent, utilities, etc.) to investors. Amounts appear on the investor portal and reduce net lab profit. Shop sales are not included in investor accounts.
+                                        {{ $t('dist.helperOverhead') }}
                                     </p>
                                     <div class="form-group">
-                                        <label>Date *</label>
+                                        <label>{{ $t('common.date') }} *</label>
                                         <input type="date" class="form-control" v-model="form.allocation_date" @change="loadShopExpenses">
                                     </div>
                                     <div class="form-group">
-                                        <label>Link to Shop Expense (optional)</label>
+                                        <label>{{ $t('dist.linkShop') }}</label>
                                         <select class="form-control" v-model="form.expense_id" @change="onExpenseSelect">
-                                            <option value="">None — manual charge</option>
+                                            <option value="">{{ $t('dist.noneManual') }}</option>
                                             <option
                                                 v-for="exp in shopExpenses"
                                                 :key="exp.expense_id"
@@ -30,17 +30,17 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label>Description *</label>
-                                        <input type="text" class="form-control" v-model="form.description" placeholder="e.g. Rent, utilities, salary">
+                                        <label>{{ $t('common.description') }} *</label>
+                                        <input type="text" class="form-control" v-model="form.description" :placeholder="$t('dist.phDesc')">
                                     </div>
                                     <div class="form-group">
-                                        <label>Notes</label>
+                                        <label>{{ $t('common.notes') }}</label>
                                         <textarea class="form-control" rows="2" v-model="form.notes"></textarea>
                                     </div>
 
-                                    <h6 class="mt-3">Assign to Investors</h6>
+                                    <h6 class="mt-3">{{ $t('dist.assign') }}</h6>
                                     <div class="form-group">
-                                        <label class="d-block">Distribution method</label>
+                                        <label class="d-block">{{ $t('dist.method') }}</label>
                                         <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                             <label
                                                 class="btn btn-outline-primary"
@@ -52,7 +52,7 @@
                                                     v-model="form.allocation_mode"
                                                     @change="onAllocationModeChange"
                                                 >
-                                                By Amount (Rs.)
+                                                {{ $t('dist.byAmount') }}
                                             </label>
                                             <label
                                                 class="btn btn-outline-primary"
@@ -64,34 +64,34 @@
                                                     v-model="form.allocation_mode"
                                                     @change="onAllocationModeChange"
                                                 >
-                                                By Percentage (%)
+                                                {{ $t('dist.byPercentage') }}
                                             </label>
                                         </div>
                                         <small v-if="form.allocation_mode === 'percentage'" class="text-muted d-block mt-1">
-                                            Percentage is calculated from the total expense amount.
+                                            {{ $t('dist.helperPct') }}
                                         </small>
                                     </div>
                                     <div
                                         class="form-group"
                                         v-if="form.allocation_mode === 'percentage' && !form.expense_id"
                                     >
-                                        <label>Total Expense (Rs.) *</label>
+                                        <label>{{ $t('dist.totalExpense') }} *</label>
                                         <input
                                             type="number"
                                             class="form-control"
                                             v-model="form.manual_total"
                                             min="0"
                                             step="0.01"
-                                            placeholder="Enter total to split by percentage"
+                                            :placeholder="$t('dist.phTotal')"
                                         >
                                     </div>
                                     <div
                                         class="alert alert-info py-2"
                                         v-if="form.allocation_mode === 'percentage' && expenseBaseTotal > 0"
                                     >
-                                        Base total: Rs. {{ formatAmount(expenseBaseTotal) }}
+                                        {{ $t('dist.baseTotal', { amount: formatAmount(expenseBaseTotal) }) }}
                                         <span v-if="selectedExpense">
-                                            (linked expense)
+                                            {{ $t('dist.linkedExpense') }}
                                         </span>
                                     </div>
                                     <div
@@ -100,10 +100,10 @@
                                         :key="'row-' + index"
                                     >
                                         <div class="form-group col-md-5 mb-0">
-                                            <label v-if="index === 0">Investor</label>
+                                            <label v-if="index === 0">{{ $t('lab.investor') }}</label>
                                             <label v-else class="allocation-label-spacer">&nbsp;</label>
                                             <select class="form-control" v-model="row.investor_id">
-                                                <option value="">Select investor</option>
+                                                <option value="">{{ $t('common.selectInvestor') }}</option>
                                                 <option
                                                     v-for="inv in investors"
                                                     :key="inv.investor_id"
@@ -115,7 +115,7 @@
                                         </div>
                                         <div class="form-group col-md-6 mb-0">
                                             <label v-if="index === 0">
-                                                {{ form.allocation_mode === 'percentage' ? 'Percentage (%)' : 'Amount (Rs.)' }}
+                                                {{ form.allocation_mode === 'percentage' ? $t('dist.percentageLabel') : $t('investor.amountRs') }}
                                             </label>
                                             <label v-else class="allocation-label-spacer">&nbsp;</label>
                                             <input
@@ -125,11 +125,11 @@
                                                 min="0"
                                                 :max="form.allocation_mode === 'percentage' ? 100 : undefined"
                                                 step="0.01"
-                                                :placeholder="form.allocation_mode === 'percentage' ? 'e.g. 50' : 'e.g. 5000'"
+                                                :placeholder="form.allocation_mode === 'percentage' ? $t('dist.phPct') : $t('dist.phAmt')"
                                             >
                                             <small class="text-muted d-block allocation-hint">
                                                 <template v-if="form.allocation_mode === 'percentage' && row.value !== ''">
-                                                    = Rs. {{ formatAmount(rowAmount(row)) }}
+                                                    {{ $t('dist.rowEquals', { amount: formatAmount(rowAmount(row)) }) }}
                                                 </template>
                                             </small>
                                         </div>
@@ -147,22 +147,22 @@
                                         </div>
                                     </div>
                                     <button type="button" class="btn btn-sm btn-outline-secondary mb-3" @click="addRow">
-                                        <i class="fas fa-plus"></i> Add investor row
+                                        <i class="fas fa-plus"></i> {{ $t('dist.addInvestorRow') }}
                                     </button>
 
                                     <div class="alert alert-light border mb-0">
-                                        <strong>Total distributing:</strong> Rs. {{ formatAmount(distributionTotal) }}
+                                        {{ $t('dist.totalDistributing', { amount: formatAmount(distributionTotal) }) }}
                                         <span v-if="selectedExpense">
-                                            &nbsp;|&nbsp; Remaining on expense: Rs. {{ formatAmount(remainingAfterDistribution) }}
+                                            &nbsp;|&nbsp; {{ $t('dist.remainingOnExpense', { amount: formatAmount(remainingAfterDistribution) }) }}
                                         </span>
                                         <span v-if="form.allocation_mode === 'percentage' && percentageTotal > 0">
-                                            &nbsp;|&nbsp; Percentage assigned: {{ percentageTotal.toFixed(2) }}%
+                                            &nbsp;|&nbsp; {{ $t('dist.percentageAssigned', { pct: percentageTotal.toFixed(2) }) }}
                                         </span>
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <button class="btn btn-primary" @click="saveDistribution">Distribute</button>
-                                    <button class="btn btn-secondary" @click="resetForm">Reset</button>
+                                    <button class="btn btn-primary" @click="saveDistribution">{{ $t('dist.distribute') }}</button>
+                                    <button class="btn btn-secondary" @click="resetForm">{{ $t('common.reset') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -170,22 +170,22 @@
                         <div class="col-lg-7 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Distribution History</h3>
+                                    <h3 class="card-title">{{ $t('dist.history') }}</h3>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-row mb-3">
                                         <div class="form-group col-md-4">
-                                            <label>From</label>
+                                            <label>{{ $t('common.from') }}</label>
                                             <input type="date" class="form-control" v-model="filters.fromdate" @change="loadAllocations">
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <label>To</label>
+                                            <label>{{ $t('common.to') }}</label>
                                             <input type="date" class="form-control" v-model="filters.todate" @change="loadAllocations">
                                         </div>
                                         <div class="form-group col-md-4">
-                                            <label>Investor</label>
+                                            <label>{{ $t('lab.investor') }}</label>
                                             <select class="form-control" v-model="filters.investor_id" @change="loadAllocations">
-                                                <option value="">All investors</option>
+                                                <option value="">{{ $t('common.allInvestors') }}</option>
                                                 <option
                                                     v-for="inv in investors"
                                                     :key="'filter-' + inv.investor_id"
@@ -201,11 +201,11 @@
                                         <table class="table table-bordered table-sm">
                                             <thead>
                                                 <tr>
-                                                    <th>Date</th>
-                                                    <th>Investor</th>
-                                                    <th>Description</th>
-                                                    <th class="text-right">Amount</th>
-                                                    <th width="90">Actions</th>
+                                                    <th>{{ $t('common.date') }}</th>
+                                                    <th>{{ $t('lab.investor') }}</th>
+                                                    <th>{{ $t('common.description') }}</th>
+                                                    <th class="text-right">{{ $t('common.amount') }}</th>
+                                                    <th width="90">{{ $t('common.actions') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -215,7 +215,7 @@
                                                     <td>
                                                         {{ item.description }}
                                                         <small v-if="item.expense_description" class="text-muted d-block">
-                                                            Linked: {{ item.expense_description }}
+                                                            {{ $t('dist.linked', { name: item.expense_description }) }}
                                                         </small>
                                                     </td>
                                                     <td class="text-right">Rs. {{ formatAmount(item.allocated_amount) }}</td>
@@ -226,7 +226,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr v-if="!allocations.data || !allocations.data.length">
-                                                    <td colspan="5" class="text-center text-muted">No distributions in this period.</td>
+                                                    <td colspan="5" class="text-center text-muted">{{ $t('dist.noHistory') }}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -371,7 +371,7 @@ export default {
                 .then(res => {
                     this.investors = res.data.data || [];
                 })
-                .catch(() => toastr.error('Failed to load investors.'));
+                .catch(() => toastr.error(this.$t('dist.loadInvestorsFail')));
         },
         loadShopExpenses() {
             const toDate = maxDate(today(), this.form.allocation_date, daysAhead(90));
@@ -382,18 +382,18 @@ export default {
                 .then(res => {
                     this.shopExpenses = res.data.data || [];
                 })
-                .catch(() => toastr.error('Failed to load shop expenses.'));
+                .catch(() => toastr.error(this.$t('dist.loadExpensesFail')));
         },
         loadAllocations() {
             axios.get('/api/investor/expense-allocations', { params: this.filters })
                 .then(res => {
                     this.allocations = res.data;
                 })
-                .catch(() => toastr.error('Failed to load distributions.'));
+                .catch(() => toastr.error(this.$t('dist.loadDistFail')));
         },
         saveDistribution() {
             if (this.form.allocation_mode === 'percentage' && this.expenseBaseTotal <= 0) {
-                toastr.warning('Link a shop expense or enter total expense amount for percentage distribution.');
+                toastr.warning(this.$t('dist.linkOrTotal'));
                 return;
             }
 
@@ -411,17 +411,17 @@ export default {
             };
 
             if (!payload.allocation_date || !payload.description) {
-                toastr.warning('Date and description are required.');
+                toastr.warning(this.$t('dist.dateDescRequired'));
                 return;
             }
 
             if (!payload.allocations.length) {
-                toastr.warning('Assign at least one investor with a positive amount.');
+                toastr.warning(this.$t('dist.assignOne'));
                 return;
             }
 
             if (this.form.allocation_mode === 'percentage' && this.percentageTotal > 100.001) {
-                toastr.warning('Total percentage cannot exceed 100%.');
+                toastr.warning(this.$t('dist.pctOver'));
                 return;
             }
 
@@ -433,23 +433,23 @@ export default {
                         this.loadAllocations();
                         this.loadShopExpenses();
                     } else {
-                        toastr.error(res.data.message || 'Distribution failed.');
+                        toastr.error(res.data.message || this.$t('dist.distributeFail'));
                     }
                 })
                 .catch(err => {
                     const message = err.response && err.response.data && err.response.data.message
                         ? err.response.data.message
-                        : 'Distribution failed.';
+                        : this.$t('dist.distributeFail');
                     toastr.error(message);
                 });
         },
         deleteAllocation(item) {
             swal.fire({
-                title: 'Delete this distribution?',
+                title: this.$t('dist.deleteConfirm'),
                 text: `${item.investor_name} — Rs. ${this.formatAmount(item.allocated_amount)}`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Delete',
+                confirmButtonText: this.$t('common.delete'),
             }).then(result => {
                 if (!result.isConfirmed) {
                     return;
@@ -462,10 +462,10 @@ export default {
                             this.loadAllocations();
                             this.loadShopExpenses();
                         } else {
-                            toastr.error(res.data.message || 'Delete failed.');
+                            toastr.error(res.data.message || this.$t('dist.deleteFail'));
                         }
                     })
-                    .catch(() => toastr.error('Delete failed.'));
+                    .catch(() => toastr.error(this.$t('dist.deleteFail')));
             });
         },
     },

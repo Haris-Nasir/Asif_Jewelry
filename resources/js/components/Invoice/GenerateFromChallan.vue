@@ -5,7 +5,7 @@
                         <div class="col-md-12 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
-                                    <h3 class="card-title">Generate Invoice From Sales Bill</h3>
+                                    <h3 class="card-title">{{ $t('invoice.fromChallanTitle') }}</h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
                                                 class="fas fa-minus"></i></button>
@@ -15,7 +15,7 @@
                                 <div class="card-body">
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="salesBillNo" class="text-md col-form-label">Sales Bill No. <span
+                                            <label for="salesBillNo" class="text-md col-form-label">{{ $t('invoice.salesBillNo') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-4">
@@ -23,28 +23,28 @@
                                                 :options="availableSalesBills"
                                                 v-model="salesBillNo"
                                                 @input="onSalesBillSelected"
-                                                placeholder="Select Sales Bill No...">
+                                                :placeholder="$t('invoice.selectSalesBill')">
                                             </model-select>
-                                            <small class="text-muted">Sales bills not yet invoiced.</small>
+                                            <small class="text-muted">{{ $t('invoice.helperNotInvoiced') }}</small>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="financialYear" class="text-md col-form-label">Financial Year
+                                            <label for="financialYear" class="text-md col-form-label">{{ $t('invoice.financialYear') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
                                             <model-select :options="financialYear" v-model="selectedFinancialYear"
                                                 @input="loadSalesBillData"
-                                                placeholder="Select a Financial Year">
+                                                :placeholder="$t('invoice.selectFy')">
                                             </model-select>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="challanNo" class="text-md col-form-label">Sales Bill No
+                                            <label for="challanNo" class="text-md col-form-label">{{ $t('challan.no') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -53,7 +53,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="challanDate" class="text-md col-form-label">Sales Bill Date
+                                            <label for="challanDate" class="text-md col-form-label">{{ $t('challan.date') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -62,7 +62,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="brokerName" class="text-md col-form-label">Broker Name
+                                            <label for="brokerName" class="text-md col-form-label">{{ $t('invoice.brokerName') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -73,7 +73,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="customerName" class="text-md col-form-label">Customer Name
+                                            <label for="customerName" class="text-md col-form-label">{{ $t('invoice.customerName') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -82,7 +82,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="gstNo" class="text-md col-form-label">GST Number</label>
+                                            <label for="gstNo" class="text-md col-form-label">{{ $t('invoice.gstNumber') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control" v-model="gstNo"
@@ -90,7 +90,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="code" class="text-md col-form-label">Code</label>
+                                            <label for="code" class="text-md col-form-label">{{ $t('invoice.code') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control" v-model="code"
@@ -100,7 +100,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="address" class="text-md col-form-label">Address
+                                            <label for="address" class="text-md col-form-label">{{ $t('common.address') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-10">
@@ -111,7 +111,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="productQuality" class="text-md col-form-label">Product Quality
+                                            <label for="productQuality" class="text-md col-form-label">{{ $t('common.productQuality') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -120,7 +120,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="totalPieces" class="text-md col-form-label">Total Pieces
+                                            <label for="totalPieces" class="text-md col-form-label">{{ $t('common.totalPieces') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -129,7 +129,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="weightGrams" class="text-md col-form-label">Weight (g)
+                                            <label for="weightGrams" class="text-md col-form-label">{{ $t('common.weightG') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -140,21 +140,21 @@
 
                                     <div class="form-group row" v-if="pendingKarigarJobs.length">
                                         <div class="col-md-2">
-                                            <label class="text-md col-form-label">Karigar Job</label>
+                                            <label class="text-md col-form-label">{{ $t('common.karigarJob') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <model-select :options="karigarJobOptions" v-model="karigarJobId"
-                                                placeholder="Link returned karigar job (optional)">
+                                                :placeholder="$t('common.linkKarigarOptional')">
                                             </model-select>
                                         </div>
                                         <div class="col-md-6">
-                                            <small class="text-muted">If this sale is from karigar work, select the job — mazduri is deducted from profit</small>
+                                            <small class="text-muted">{{ $t('invoice.helperKarigarFrom') }}</small>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="invoiceDate" class="text-md col-form-label">Invoice Date <span
+                                            <label for="invoiceDate" class="text-md col-form-label">{{ $t('common.invoiceDate') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -162,7 +162,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="dueDate" class="text-md col-form-label">Due Date <span
+                                            <label for="dueDate" class="text-md col-form-label">{{ $t('common.dueDate') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -172,18 +172,18 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="rate" class="text-md col-form-label">Rate / gram (Rs.)
+                                            <label for="rate" class="text-md col-form-label">{{ $t('common.ratePerG') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" step="0.01" class="text-md text-right form-control"
-                                                v-model="rate" placeholder="Rate per gram..."
+                                                v-model="rate" :placeholder="$t('invoice.phRate')"
                                                 @change="recalculateTotals">
-                                            <small class="text-muted">Amount = weight (g) × rate/g</small>
+                                            <small class="text-muted">{{ $t('invoice.helperAmountWeight') }}</small>
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="amount" class="text-md col-form-label">Base Amount (Rs.)
+                                            <label for="amount" class="text-md col-form-label">{{ $t('common.baseAmount') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -194,7 +194,7 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="gstPercentage" class="text-md col-form-label">GST</label>
+                                            <label for="gstPercentage" class="text-md col-form-label">{{ $t('common.gst') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <select class="form-select form-control" v-model="gstPercentage"
@@ -208,7 +208,7 @@
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label for="gstAmount" class="text-md col-form-label">GST Amount</label>
+                                            <label for="gstAmount" class="text-md col-form-label">{{ $t('common.gstAmount') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="text-md text-right form-control"
@@ -218,26 +218,26 @@
 
                                     <div class="form-group row" v-if="metalType === 'gold'">
                                         <div class="col-md-2">
-                                            <label class="text-md col-form-label">Polish / g (Rs.)</label>
+                                            <label class="text-md col-form-label">{{ $t('common.polishPerG') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" step="0.01" min="0" class="text-md text-right form-control"
                                                 v-model="polishRatePerGram">
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md col-form-label">Polish Total</label>
+                                            <label class="text-md col-form-label">{{ $t('common.polishTotal') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control" :value="polishCostTotal" disabled>
                                         </div>
                                         <div class="col-md-4">
-                                            <small class="text-muted">= polish/g × weight (gold only)</small>
+                                            <small class="text-muted">{{ $t('invoice.helperPolish') }}</small>
                                         </div>
                                     </div>
 
                                     <div class="form-group row" v-if="showMazduriField">
                                         <div class="col-md-2">
-                                            <label class="text-md col-form-label">Mazduri (Rs.)</label>
+                                            <label class="text-md col-form-label">{{ $t('common.mazduri') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" step="0.01" min="0" class="text-md text-right form-control"
@@ -250,19 +250,19 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label class="text-md col-form-label">Processing Cost</label>
+                                            <label class="text-md col-form-label">{{ $t('common.processingCost') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="text-md text-right form-control" :value="totalProcessingCost" disabled>
                                         </div>
                                         <div class="col-md-8">
-                                            <small class="text-muted">Deducted from profit (polish for gold, mazduri for silver)</small>
+                                            <small class="text-muted">{{ $t('invoice.helperProcessing') }}</small>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="grandTotal" class="text-md col-form-label">Grand Total <span
+                                            <label for="grandTotal" class="text-md col-form-label">{{ $t('invoice.grandTotal') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-2">
@@ -273,19 +273,19 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="bank" class="text-md col-form-label">Bank <span
+                                            <label for="bank" class="text-md col-form-label">{{ $t('common.bank') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="bank" v-model="selectedBank"
-                                                placeholder="Select a Bank" @blur="getBranchName">
+                                                :placeholder="$t('common.selectBank')" @blur="getBranchName">
                                             </model-select>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="branch" class="text-md col-form-label">Branch <span
+                                            <label for="branch" class="text-md col-form-label">{{ $t('invoice.branch') }} <span
                                                     class="required-mark" style="color: red;">*</span></label>
                                         </div>
                                         <div class="col-md-3">
@@ -296,9 +296,9 @@
 
                                 <div class="card-footer">
                                     <button type="submit" class="btn btn-primary text-md"
-                                        @click="addInvoice">Add</button>
+                                        @click="addInvoice">{{ $t('common.add') }}</button>
                                     <button type="reset" class="btn btn-primary ml-3 text-md"
-                                        @click="resetFields">Reset</button>
+                                        @click="resetFields">{{ $t('common.reset') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -428,9 +428,9 @@
             },
             mazduriHelpText() {
                 if (this.karigarJobId) {
-                    return 'Karigar labour — deducted from profit when this item is sold';
+                    return this.$t('invoice.helperMazduriKarigar');
                 }
-                return 'Overall labour charge for this silver sale';
+                return this.$t('invoice.helperMazduriSilver');
             },
             karigarJobOptions() {
                 return this.pendingKarigarJobs.map(job => ({
@@ -481,7 +481,7 @@
                     }));
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]('Unable to load sales bills.');
+                    toastr["error"](this.$t('invoice.loadBillsFail'));
                 });
             },
 
@@ -502,7 +502,7 @@
                         this.financialYear = [];
                         this.selectedFinancialYear = '';
                         this.resetDisplayDataFields();
-                        toastr["warning"]('No sales bill found with this number. Create a sales bill first, or check the number in Manage Sales Bill.');
+                        toastr["warning"](this.$t('invoice.noBillFoundDetailed'));
                         return;
                     }
 
@@ -519,7 +519,7 @@
                     }
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]('Something went Wrong.');
+                    toastr["error"](this.$t('common.somethingWrong'));
                 })
             },
 
@@ -560,7 +560,7 @@
 
                 }).catch(err => {
                     console.log(err);
-                    toastr['error']("Something Went Wrong!");
+                    toastr['error'](this.$t('common.somethingWrong'));
                 })
             },
 
@@ -638,7 +638,7 @@
                     })
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]('Something went Wrong.');
+                    toastr["error"](this.$t('common.somethingWrong'));
                 });
             },
 
@@ -651,7 +651,7 @@
                     this.branch = response.data.branch_name;
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]('Something went Wrong!');
+                    toastr["error"](this.$t('common.somethingWrong'));
                 })
             },
 
@@ -680,13 +680,13 @@
                 }
 
                 if (this.salesBillNo == '' || this.challanMstId == '' || this.invoiceDate == '' || this.dueDate == '' || this.rate == '' || this.selectedBank == '' || this.selectedBank == undefined || this.selectedFinancialYear == '' || this.selectedFinancialYear == undefined) {
-                    toastr["error"]("All Fields are Required!");
+                    toastr["error"](this.$t('common.allFieldsRequired'));
                 } else {
                     axios.get('../api/verifyinvoicedate/' + this.invoiceDate + '/' + fromDate + '/' + toDate).then(response => {
                         if (response.data.status == 1) {
                             axios.post('../api/invoice/insert', addData).then(response => {
                                 if (response.data.status == -1) {
-                                    toastr.error(response.data.message || 'Unable to create invoice.');
+                                    toastr.error(response.data.message || this.$t('invoice.createInvoiceFail'));
                                     var errormsg = response.data.errors;
 
                                     try {
@@ -724,8 +724,8 @@
                                 } else if (response.data.status == 1) {
                                     const profit = response.data.profit != null ? parseFloat(response.data.profit).toFixed(2) : '0.00';
                                     swal.fire({
-                                        title: 'Success',
-                                        html: "<h5 style='color:#9C9794'>Invoice created successfully.</h5><p>Profit recorded: Rs. " + profit + "</p>",
+                                        title: this.$t('common.success'),
+                                        html: "<h5 style='color:#9C9794'>" + this.$t('invoice.fromCreated') + "</h5><p>" + this.$t('invoice.profitRecorded', { profit }) + "</p>",
                                         icon: 'success'
                                     }).then((result) => {
                                         this.resetFields();
@@ -734,7 +734,7 @@
 
                             }).catch(err => {
                                 console.log(err);
-                                toastr.error(err.response?.data?.message || 'Unable to create invoice. Check item type stock and weight.');
+                                toastr.error(err.response?.data?.message || this.$t('invoice.createInvoiceFailDetailed'));
                             })
                         }else if(response.data.status == 0){
                             toastr["error"](response.data.message);

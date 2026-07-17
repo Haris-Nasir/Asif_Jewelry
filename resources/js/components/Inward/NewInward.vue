@@ -8,7 +8,7 @@
                 <div class="card card-primary">
                   <!-- Add Inward Card header -->
                   <div class="card-header">
-                    <h3 class="card-title">Add New Purchase (Gold / Silver)</h3>
+                    <h3 class="card-title">{{ $t('purchase.newTitle') }}</h3>
                     <div class="card-tools">
                       <button
                         type="button"
@@ -29,7 +29,7 @@
                     >
                       <div class="col-md-2">
                         <label for="date" class="col-form-label text-md"
-                          >Inward Date &amp; Time
+                          >{{ $t('purchase.inwardDate') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -41,13 +41,13 @@
                           class="form-control"
                           v-model="date"
                           @change="loadNextInvoiceNo"
-                          placeholder="Enter Inward Date..."
+                          :placeholder="$t('purchase.phDate')"
                         />
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="companyName" class="col-form-label text-md"
-                          >Supplier
+                          >{{ $t('common.supplier') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           >
@@ -58,7 +58,7 @@
                           :options="companyNames"
                           @blur="getFromSelectedCompany"
                           v-model="selectedCompanyName"
-                          placeholder="Select Supplier..."
+                          :placeholder="$t('common.selectSupplier')"
                         >
                         </model-select>
                       </div>
@@ -69,7 +69,7 @@
                     >
                       <div class="col-md-2">
                         <label for="gstNo" class="col-form-label text-md"
-                          >GST No.</label
+                          >{{ $t('common.gstNo') }}</label
                         >
                       </div>
                       <div class="col-md-3">
@@ -77,14 +77,14 @@
                           type="text"
                           class="form-control"
                           v-model="gstNo"
-                          placeholder="GST No..."
+                          :placeholder="$t('purchase.phGst')"
                           disabled
                         />
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="mobileNo" class="col-form-label text-md"
-                          >Mobile No.
+                          >{{ $t('common.mobileNo') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -95,7 +95,7 @@
                           type="text"
                           class="form-control"
                           v-model="mobileNo"
-                          placeholder="Mobile No..."
+                          :placeholder="$t('purchase.phMobile')"
                           disabled
                         />
                       </div>
@@ -106,7 +106,7 @@
                     >
                       <div class="col-md-2">
                         <label for="invoiceNo" class="col-form-label text-md"
-                          >Invoice No.</label
+                          >{{ $t('common.invoiceNo') }}</label
                         >
                       </div>
                       <div class="col-md-3">
@@ -120,7 +120,7 @@
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="broker" class="col-form-label text-md"
-                          >Broker Name<span
+                          >{{ $t('broker.name') }}<span
                             class="required-mark"
                             style="color: red"
                             >*</span
@@ -131,7 +131,7 @@
                         <model-select
                           :options="brokers"
                           v-model="selectedBroker"
-                          placeholder="Select Broker Name.."
+                          :placeholder="$t('purchase.phBroker')"
                         >
                         </model-select>
                       </div>
@@ -142,7 +142,7 @@
                     >
                       <div class="col-md-2">
                         <label for="" class="col-form-label text-md"
-                          >Metal Type
+                          >{{ $t('purchase.metalType') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           >
@@ -153,7 +153,7 @@
                           :options="productQualityCategories"
                           @blur="loadFromSelectedCategory"
                           v-model="selectedProductQualityCategory"
-                          placeholder="Select Product Category..."
+                          :placeholder="$t('purchase.phCategory')"
                         >
                         </model-select>
                       </div>
@@ -162,7 +162,7 @@
                         <label
                           for="productQuality"
                           class="col-form-label text-md"
-                          >Item Type
+                          >{{ $t('common.itemType') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           >
@@ -172,7 +172,7 @@
                         <model-select
                           :options="productQualities"
                           v-model="selectedProductQuality"
-                          placeholder="Select Product Quality..."
+                          :placeholder="$t('purchase.phQuality')"
                         >
                         </model-select>
                       </div>
@@ -183,7 +183,7 @@
                     >
                       <div class="col-md-2">
                         <label for="weightGrams" class="col-form-label text-md"
-                          >Weight (grams)
+                          >{{ $t('purchase.weightGrams') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -195,13 +195,13 @@
                           step="0.001"
                           class="form-control"
                           v-model="weightGrams"
-                          placeholder="Enter weight in grams..."
+                          :placeholder="$t('purchase.phWeight')"
                         />
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="quantity" class="col-form-label text-md"
-                          >Pieces
+                          >{{ $t('purchase.pieces') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -213,7 +213,7 @@
                           id="quantity"
                           class="form-control"
                           v-model="quantity"
-                          placeholder="Enter quantity..."
+                          :placeholder="$t('purchase.phQty')"
                         />
                       </div>
                     </div>
@@ -226,7 +226,7 @@
                           for="rate"
                           id="rate"
                           class="col-form-label text-md"
-                          >Rate / gram (Rs.)
+                          >{{ $t('common.ratePerG') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -238,12 +238,12 @@
                           id="rate"
                           class="form-control"
                           v-model="rate"
-                          placeholder="Enter Rate..."
+                          :placeholder="$t('purchase.phRate')"
                         />
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
-                        <label for="gstPercentage" class="col-form-label text-md">GST</label>
+                        <label for="gstPercentage" class="col-form-label text-md">{{ $t('common.gst') }}</label>
                       </div>
                       <div class="col-md-3">
                         <select class="form-select form-control" id="gstPercentage"
@@ -262,7 +262,7 @@
                     >
                       <div class="col-md-2">
                         <label for="totalAmount" class="col-form-label text-md"
-                          >Total Amount
+                          >{{ $t('common.totalAmount') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -273,14 +273,14 @@
                           type="text"
                           class="form-control"
                           v-model="totalAmount"
-                          placeholder="Total Amount..."
+                          :placeholder="$t('purchase.phTotal')"
                           disabled
                         />
                       </div>
                       <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <label for="gstAmount" class="col-form-label text-md"
-                          >GST Amount</label
+                          >{{ $t('common.gstAmount') }}</label
                         >
                       </div>
                       <div class="col-md-3">
@@ -288,7 +288,7 @@
                           type="text"
                           class="form-control"
                           v-model="gstAmount"
-                          placeholder="GST Amount..."
+                          :placeholder="$t('purchase.phGstAmt')"
                           disabled
                         />
                       </div>
@@ -299,7 +299,7 @@
                     >
                       <div class="col-md-2">
                         <label for="netAmount" class="col-form-label text-md"
-                          >Net Amount
+                          >{{ $t('common.netAmount') }}
                           <span class="required-mark" style="color: red"
                             >*</span
                           ></label
@@ -310,7 +310,7 @@
                           type="text"
                           class="form-control"
                           v-model="netAmount"
-                          placeholder="Net Amount..."
+                          :placeholder="$t('purchase.phNet')"
                           disabled
                         />
                       </div>
@@ -325,14 +325,14 @@
                       v-on:click="addInward"
                       class="btn btn-primary"
                     >
-                      Add
+                      {{ $t('common.add') }}
                     </button>
                     <button
                       type="reset"
                       v-on:click="resetInwardDetails"
                       class="btn btn-primary"
                     >
-                      Reset
+                      {{ $t('common.reset') }}
                     </button>
                   </div>
                   <!-- Add Inward Card Buttons Footer end -->
@@ -454,7 +454,7 @@ export default {
     //Function is whether the date is Empty or not
     dateValidation: function () {
       if (this.date == "") {
-        toastr.info("Please Enter Date");
+        toastr.info(this.$t('purchase.dateRequired'));
         return false;
       } else {
         return true;
@@ -467,7 +467,7 @@ export default {
         this.selectedCompanyName == "" ||
         typeof this.selectedCompanyName === "undefined"
       ) {
-        toastr.info("Please select a supplier");
+        toastr.info(this.$t('purchase.supplierRequired'));
         return false;
       } else {
         return true;
@@ -486,14 +486,14 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["error"]("Unable to load next invoice number.");
+          toastr["error"](this.$t('purchase.loadNextInvoiceFail'));
         });
     },
 
     //Function is to Validate Invoice No.
     invoiceNoValidation: function () {
       if (this.invoiceNo == "") {
-        toastr.info("Invoice number is not ready yet. Please wait or refresh.");
+        toastr.info(this.$t('purchase.invoiceNotReady'));
         return false;
       }
 
@@ -506,7 +506,7 @@ export default {
         this.selectedBroker == "" ||
         typeof this.selectedBroker === "undefined"
       ) {
-        toastr.info("Please Enter Broker");
+        toastr.info(this.$t('purchase.brokerRequired'));
         return false;
       } else {
         return true;
@@ -519,7 +519,7 @@ export default {
         this.selectedProductQualityCategory == "" ||
         typeof this.selectedProductQualityCategory === "undefined"
       ) {
-        toastr.info("Please Enter Product Category");
+        toastr.info(this.$t('purchase.categoryRequired'));
         return false;
       } else {
         return true;
@@ -533,7 +533,7 @@ export default {
         this.selectedProductQuality == "" ||
         typeof this.selectedProductQuality === "undefined"
       ) {
-        toastr.info("Please Enter Product Quality");
+        toastr.info(this.$t('purchase.qualityRequired'));
         return false;
       } else {
         return true;
@@ -545,7 +545,7 @@ export default {
       if (this.quantity == "") {
         this.quantity = 1;
       } else if (this.quantity < 0) {
-        toastr.info("Pieces can't be negative");
+        toastr.info(this.$t('purchase.piecesNegative'));
         return false;
       } else {
         return true;
@@ -554,7 +554,7 @@ export default {
 
     weightGramsValidation: function () {
       if (this.weightGrams == "" || parseFloat(this.weightGrams) <= 0) {
-        toastr.info("Please enter weight in grams");
+        toastr.info(this.$t('purchase.weightRequired'));
         return false;
       }
       return true;
@@ -563,15 +563,13 @@ export default {
     //Function is to check Rate per gram
     ratePerQtyValidation: function () {
       if (this.rate == "") {
-        toastr.info("Please Enter Rate Per Gram");
+        toastr.info(this.$t('purchase.rateRequired'));
         return false;
       } else if (this.rate < 0) {
-        toastr.info("Rate Can't Be minus");
+        toastr.info(this.$t('purchase.rateNegative'));
         return false;
       } else if (this.rate.length > 18) {
-        toastr.warning(
-          "Rate Per Quantity must be less or equal than 18 digits"
-        );
+        toastr.warning(this.$t('purchase.rateDigits'));
         return false;
       } else {
         return true;
@@ -592,7 +590,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["error"]("Something went Wrong");
+          toastr["error"](this.$t('common.somethingWrong'));
         });
     },
 
@@ -611,7 +609,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["error"]("Something Went Wrong");
+          toastr["error"](this.$t('common.somethingWrong'));
         });
     },
 
@@ -629,7 +627,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["error"]("Something went Wrong");
+          toastr["error"](this.$t('common.somethingWrong'));
         });
     },
 
@@ -652,7 +650,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["info"]("Please select a supplier.");
+          toastr["info"](this.$t('purchase.supplierRequired'));
         });
     },
 
@@ -688,7 +686,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
-          toastr["info"]("Please Select Product Category.");
+          toastr["info"](this.$t('purchase.selectCategory'));
         });
     },
 
@@ -802,8 +800,8 @@ export default {
             } else if (res.data.status == 1) {
               swal
                 .fire({
-                  title: "Success",
-                  html: "<h5 style='color:#9C9794'>Purchase added and stock updated</h5>",
+                  title: this.$t('common.success'),
+                  html: "<h5 style='color:#9C9794'>" + this.$t('purchase.added') + "</h5>",
                   icon: "success",
                 })
                 .then((result) => {
@@ -813,7 +811,7 @@ export default {
           })
           .catch((err) => {
             console.log(err.response.data.message);
-            toastr["error"]("Something Went Wrong.");
+            toastr["error"](this.$t('common.somethingWrong'));
           });
       }
     },

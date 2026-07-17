@@ -2,12 +2,12 @@
   <div>
     <div class="card card-info mt-3">
       <div class="card-header">
-        <h3 class="card-title">Karigar Jobs — Outward / Inward</h3>
+        <h3 class="card-title">{{ $t('karigar.jobsTitle') }}</h3>
         <div class="card-tools d-flex align-items-center">
           <select class="form-control form-control-sm mr-2" v-model="statusFilter" @change="loadJobs">
-            <option value="">All statuses</option>
-            <option value="issued">Issued (with karigar)</option>
-            <option value="returned">Returned (ready for sale)</option>
+            <option value="">{{ $t('karigar.allStatuses') }}</option>
+            <option value="issued">{{ $t('karigar.statusIssued') }}</option>
+            <option value="returned">{{ $t('karigar.statusReturned') }}</option>
           </select>
           <button type="button" class="btn btn-tool" data-card-widget="collapse">
             <i class="fas fa-minus"></i>
@@ -19,15 +19,15 @@
         <table class="table table-bordered table-sm">
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Karigar</th>
-              <th>Metal</th>
-              <th class="text-right">Issued (g)</th>
-              <th class="text-right">Returned (g)</th>
-              <th>Item Type</th>
-              <th class="text-right">Mazduri</th>
-              <th>Status</th>
-              <th width="220" class="text-center">Action</th>
+              <th>{{ $t('common.date') }}</th>
+              <th>{{ $t('nav.karigar') }}</th>
+              <th>{{ $t('common.metal') }}</th>
+              <th class="text-right">{{ $t('karigar.issuedG') }}</th>
+              <th class="text-right">{{ $t('karigar.returnedG') }}</th>
+              <th>{{ $t('common.itemType') }}</th>
+              <th class="text-right">{{ $t('common.mazduri') }}</th>
+              <th>{{ $t('common.status') }}</th>
+              <th width="220" class="text-center">{{ $t('common.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -47,9 +47,9 @@
                     type="button"
                     class="btn btn-sm btn-success table-actions__label"
                     @click="openAddOutward(job)"
-                    title="Give more metal on this job"
+                    :title="$t('karigar.tipMoreMetal')"
                   >
-                    Add Outward
+                    {{ $t('karigar.btnAddOutward') }}
                   </button>
                   <button
                     v-if="job.job_status === 'issued'"
@@ -57,18 +57,18 @@
                     class="btn btn-sm btn-primary table-actions__label"
                     @click="openReturn(job)"
                   >
-                    Record Inward
+                    {{ $t('karigar.btnRecordInward') }}
                   </button>
                   <button
                     v-if="!job.invoice_mst_id"
                     type="button"
                     class="btn btn-sm btn-danger"
                     @click="deleteJob(job)"
-                    title="Delete job and restore stock"
+                    :title="$t('karigar.tipDeleteRestore')"
                   >
                     <i class="fas fa-trash"></i>
                   </button>
-                  <span v-else-if="job.invoice_mst_id" class="text-muted small">Invoiced</span>
+                  <span v-else-if="job.invoice_mst_id" class="text-muted small">{{ $t('karigar.statusInvoiced') }}</span>
                 </div>
               </td>
             </tr>
@@ -83,7 +83,7 @@
     <div v-if="addOutwardJob" class="card card-success mt-3">
       <div class="card-header">
         <h3 class="card-title">
-          Add Outward — {{ addOutwardJob.karigar ? addOutwardJob.karigar.karigar_name : 'Karigar' }}
+          {{ $t('karigar.addOutward', { name: addOutwardJob.karigar ? addOutwardJob.karigar.karigar_name : $t('nav.karigar') }) }}
         </h3>
         <div class="card-tools">
           <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -93,18 +93,18 @@
       </div>
       <div class="card-body">
         <p class="text-muted mb-3">
-          Already issued:
+          {{ $t('karigar.alreadyIssued') }}
           <strong>{{ addOutwardJob.issued_weight_grams }}g</strong>
           {{ addOutwardJob.metal_type }}
           <span v-if="addOutwardItemLabel !== '-'">
-            (first item: <strong>{{ addOutwardItemLabel }}</strong>)
+            ({{ $t('karigar.firstItem') }}: <strong>{{ addOutwardItemLabel }}</strong>)
           </span>
         </p>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Item Type <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('common.itemType') }} <span style="color:red">*</span></label>
           <div class="col-md-4">
             <select class="form-control" v-model="addForm.sellQualityId" @change="onAddQualityChange">
-              <option disabled value="">Select item type in stock</option>
+              <option disabled value="">{{ $t('karigar.phItemStock') }}</option>
               <option
                 v-for="opt in addQualityOptions"
                 :key="opt.value"
@@ -113,18 +113,18 @@
                 {{ opt.text }}
               </option>
             </select>
-            <small class="text-muted">You can issue a different item type if it is still in stock.</small>
+            <small class="text-muted">{{ $t('karigar.helperDiffItem') }}</small>
           </div>
         </div>
         <p class="text-muted small mb-2" v-if="addStock">
-          In stock for <strong>{{ addStock.quality_name }}</strong>:
-          {{ addStock.weight_grams }}g, {{ addStock.pieces }} pcs
+          {{ $t('challan.inStockFor') }} <strong>{{ addStock.quality_name }}</strong>:
+          {{ addStock.weight_grams }}g, {{ addStock.pieces }} {{ $t('common.pcs') }}
           <span v-if="addStock.available_piece_weights_label">
             ({{ addStock.available_piece_weights_label }})
           </span>
         </p>
         <div class="mb-3" v-if="addWeightOptions.length">
-          <span class="small text-muted mr-2">Pick from available weights:</span>
+          <span class="small text-muted mr-2">{{ $t('karigar.pickWeights') }}</span>
           <button
             v-for="opt in addWeightOptions"
             :key="opt.weight"
@@ -134,15 +134,15 @@
             @click="selectAddWeight(opt)"
           >
             {{ opt.weight }}g
-            <span v-if="opt.count > 1" class="badge badge-light ml-1">{{ opt.count }} pcs</span>
+            <span v-if="opt.count > 1" class="badge badge-light ml-1">{{ opt.count }} {{ $t('common.pcs') }}</span>
           </button>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Weight / pc (g) <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.weightPc') }} <span style="color:red">*</span></label>
           <div class="col-md-2">
             <input type="number" step="0.001" min="0.001" class="form-control text-right" v-model="addForm.weightPerPiece">
           </div>
-          <label class="col-md-2 col-form-label">Pieces <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('common.pieces') }} <span style="color:red">*</span></label>
           <div class="col-md-2">
             <input
               type="number"
@@ -152,28 +152,28 @@
               v-model.number="addForm.issuedPieces"
             >
           </div>
-          <label class="col-md-2 col-form-label">Extra Total (g)</label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.extraTotal') }}</label>
           <div class="col-md-2">
             <input type="text" class="form-control text-right" :value="addTotalWeightLabel" disabled>
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Notes</label>
+          <label class="col-md-2 col-form-label">{{ $t('common.notes') }}</label>
           <div class="col-md-10">
-            <input type="text" class="form-control" v-model="addForm.notes" placeholder="Optional, e.g. extra 1g requested">
+            <input type="text" class="form-control" v-model="addForm.notes" :placeholder="$t('karigar.phExtra')">
           </div>
         </div>
       </div>
       <div class="card-footer">
-        <button class="btn btn-success" @click="submitAddOutward">Save Extra Outward</button>
-        <button class="btn btn-secondary ml-2" @click="addOutwardJob = null">Cancel</button>
+        <button class="btn btn-success" @click="submitAddOutward">{{ $t('karigar.btnSaveExtra') }}</button>
+        <button class="btn btn-secondary ml-2" @click="addOutwardJob = null">{{ $t('common.cancel') }}</button>
       </div>
     </div>
 
     <!-- Record inward -->
     <div v-if="returnJob" class="card card-warning mt-3">
       <div class="card-header">
-        <h3 class="card-title">Inward — Receive from {{ returnJob.karigar ? returnJob.karigar.karigar_name : 'Karigar' }}</h3>
+        <h3 class="card-title">{{ $t('karigar.inwardReceive', { name: returnJob.karigar ? returnJob.karigar.karigar_name : $t('nav.karigar') }) }}</h3>
         <div class="card-tools">
           <button type="button" class="btn btn-tool" data-card-widget="collapse">
             <i class="fas fa-minus"></i>
@@ -182,21 +182,21 @@
       </div>
       <div class="card-body">
         <p class="text-muted mb-3">
-          Issued:
+          {{ $t('karigar.issuedLabel') }}
           <strong>{{ returnJob.issued_weight_grams }}g</strong>
           {{ returnJob.metal_type }}
-          <span v-if="issuedSourceLabel"> from <strong>{{ issuedSourceLabel }}</strong></span>
-          <span v-if="itemToMakeLabel"> — make: <strong>{{ itemToMakeLabel }}</strong></span>
+          <span v-if="issuedSourceLabel"> {{ $t('karigar.fromLabel') }} <strong>{{ issuedSourceLabel }}</strong></span>
+          <span v-if="itemToMakeLabel"> — {{ $t('karigar.itemToMake') }}: <strong>{{ itemToMakeLabel }}</strong></span>
         </p>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Return Date <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.returnDate') }} <span style="color:red">*</span></label>
           <div class="col-md-4">
             <input type="datetime-local" class="form-control" v-model="returnForm.returnDate">
           </div>
-          <label class="col-md-2 col-form-label">Item Type <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('common.itemType') }} <span style="color:red">*</span></label>
           <div class="col-md-4">
             <select class="form-control" v-model="returnForm.sellQualityId">
-              <option disabled value="">Select item type</option>
+              <option disabled value="">{{ $t('karigar.phItemType') }}</option>
               <option
                 v-for="opt in qualityOptions"
                 :key="opt.value"
@@ -211,7 +211,7 @@
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Returned Weight (g) <span style="color:red">*</span></label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.returnedWeight') }} <span style="color:red">*</span></label>
           <div class="col-md-2">
             <input
               type="number"
@@ -221,11 +221,11 @@
               @input="onReturnedWeightInput"
             >
           </div>
-          <label class="col-md-2 col-form-label">Pieces</label>
+          <label class="col-md-2 col-form-label">{{ $t('common.pieces') }}</label>
           <div class="col-md-2">
             <input type="number" min="1" class="form-control text-right" v-model="returnForm.returnedPieces">
           </div>
-          <label class="col-md-2 col-form-label">Wastage (g)</label>
+          <label class="col-md-2 col-form-label">{{ $t('karigar.wastage') }}</label>
           <div class="col-md-2">
             <input
               type="number"
@@ -235,20 +235,20 @@
               v-model="returnForm.wastageGrams"
               @input="wastageManuallyEdited = true"
             >
-            <small class="text-muted">Auto: issued − returned</small>
+            <small class="text-muted">{{ $t('karigar.helperWastage') }}</small>
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-md-2 col-form-label">Mazduri (Rs.)</label>
+          <label class="col-md-2 col-form-label">{{ $t('common.mazduri') }}</label>
           <div class="col-md-4">
             <input type="number" step="0.01" min="0" class="form-control text-right" v-model="returnForm.mazduriCost">
-            <small class="text-muted">Deducted from profit when this item is sold on invoice</small>
+            <small class="text-muted">{{ $t('karigar.helperMazduri') }}</small>
           </div>
         </div>
       </div>
       <div class="card-footer">
-        <button class="btn btn-warning" @click="submitReturn">Save Inward</button>
-        <button class="btn btn-secondary ml-2" @click="returnJob = null">Cancel</button>
+        <button class="btn btn-warning" @click="submitReturn">{{ $t('karigar.btnSaveInward') }}</button>
+        <button class="btn btn-secondary ml-2" @click="returnJob = null">{{ $t('common.cancel') }}</button>
       </div>
     </div>
   </div>
@@ -304,10 +304,10 @@ export default {
     },
     inwardDefaultHint() {
       if (this.itemToMakeLabel) {
-        return `Defaults to Item to make (“${this.itemToMakeLabel}”) when it matches an item type. You can change it if needed.`;
+        return this.$t('karigar.defaultsToItemToMake', { item: this.itemToMakeLabel });
       }
       if (this.issuedSourceLabel) {
-        return `Defaults to outward stock item (${this.issuedSourceLabel}). You can change it if needed.`;
+        return this.$t('karigar.defaultsToOutwardStock', { item: this.issuedSourceLabel });
       }
       return '';
     },
@@ -502,7 +502,7 @@ export default {
 
       this.loadQualities().then(applyForm).catch(() => {
         applyForm();
-        toastr.warning('Could not load item types. Try again.');
+        toastr.warning(this.$t('karigar.loadTypesFailRetry'));
       });
     },
     openAddOutward(job) {
@@ -527,7 +527,7 @@ export default {
 
       this.loadQualities().then(start).catch(() => {
         start();
-        toastr.warning('Could not load item types. Try again.');
+        toastr.warning(this.$t('karigar.loadTypesFailRetry'));
       });
     },
     preferAddQualityWithStock(preferredId) {
@@ -584,7 +584,7 @@ export default {
         this.addStock = res.data;
       }).catch(() => {
         this.addStock = null;
-        toastr.error('Unable to load stock for this item.');
+        toastr.error(this.$t('karigar.loadStockForItemFail'));
       });
     },
     isAddWeightSelected(weight) {
@@ -599,21 +599,21 @@ export default {
         return;
       }
       if (!this.addForm.sellQualityId) {
-        toastr.info('Select an item type from stock.');
+        toastr.info(this.$t('karigar.selectItemStock'));
         return;
       }
       const per = parseFloat(this.addForm.weightPerPiece || 0);
       const pcs = parseInt(this.addForm.issuedPieces || 0, 10);
       if (!(per > 0) || !(pcs > 0)) {
-        toastr.info('Weight/pc and pieces are required.');
+        toastr.info(this.$t('karigar.weightPiecesRequired'));
         return;
       }
       if (this.addMaxPieces > 0 && pcs > this.addMaxPieces) {
-        toastr.error('Only ' + this.addMaxPieces + ' piece(s) available at ' + per + 'g.');
+        toastr.error(this.$t('karigar.onlyPieces', { n: this.addMaxPieces, weight: per }));
         return;
       }
       if (this.addStock && parseFloat(this.addStock.weight_grams || 0) <= 0) {
-        toastr.error('No stock for this item type. Choose another (e.g. Angothi).');
+        toastr.error(this.$t('karigar.noStockItem'));
         return;
       }
       const total = Math.round(per * pcs * 1000) / 1000;
@@ -624,18 +624,18 @@ export default {
         notes: this.addForm.notes || null,
       }).then(res => {
         if (res.data.status === 1) {
-          swal.fire('Success', res.data.message, 'success');
+          swal.fire(this.$t('common.success'), res.data.message, 'success');
           this.addOutwardJob = null;
           this.loadJobs();
           this.$emit('job-changed');
         } else {
           toastr.error(res.data.message);
         }
-      }).catch(err => toastr.error(err.response?.data?.message || 'Extra outward failed.'));
+      }).catch(err => toastr.error(err.response?.data?.message || this.$t('karigar.extraFail')));
     },
     submitReturn() {
       if (!this.returnJob || !this.returnForm.sellQualityId || !this.returnForm.returnedWeightGrams) {
-        toastr.info('Item type and returned weight are required.');
+        toastr.info(this.$t('karigar.returnRequired'));
         return;
       }
       axios.post('/api/karigar/jobs/' + this.returnJob.karigar_job_id + '/return', {
@@ -647,30 +647,30 @@ export default {
         mazduriCost: this.returnForm.mazduriCost || 0,
       }).then(res => {
         if (res.data.status === 1) {
-          swal.fire('Success', res.data.message, 'success');
+          swal.fire(this.$t('common.success'), res.data.message, 'success');
           this.returnJob = null;
           this.loadJobs();
           this.$emit('job-changed');
         } else {
           toastr.error(res.data.message);
         }
-      }).catch(err => toastr.error(err.response?.data?.message || 'Return failed.'));
+      }).catch(err => toastr.error(err.response?.data?.message || this.$t('karigar.returnFail')));
     },
     deleteJob(job) {
       swal.fire({
-        title: 'Delete karigar job?',
-        html: 'This will remove the job and <strong>restore stock</strong> to your inventory.',
+        title: this.$t('karigar.deleteJobConfirm'),
+        html: this.$t('karigar.deleteJobText'),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
-        confirmButtonText: 'Delete',
+        confirmButtonText: this.$t('common.delete'),
       }).then(result => {
         if (!result.isConfirmed) {
           return;
         }
         axios.delete('/api/karigar/jobs/' + job.karigar_job_id).then(res => {
           if (res.data.status === 1) {
-            swal.fire('Deleted', res.data.message, 'success');
+            swal.fire(this.$t('common.deleted'), res.data.message, 'success');
             if (this.returnJob && this.returnJob.karigar_job_id === job.karigar_job_id) {
               this.returnJob = null;
             }
@@ -687,8 +687,8 @@ export default {
           const data = err.response?.data;
           const msg = data?.message
             || (data?.errors && Object.values(data.errors).flat()[0])
-            || (status === 404 ? 'Delete route not found — restart the server or run: php artisan route:clear' : null)
-            || 'Delete failed.';
+            || (status === 404 ? this.$t('karigar.deleteRouteNotFound') : null)
+            || this.$t('karigar.deleteJobFail');
           toastr.error(msg);
         });
       });

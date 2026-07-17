@@ -17,7 +17,7 @@ NOTES
                             <div class="card card-primary mt-3">
                                 <div class="card-header card-title d-flex">
                                     <span class="p-2 flex-grow-1 bd-highlight">
-                                        Manage Direct Invoice
+                                        {{ $t('invoice.manageDirect') }}
                                     </span>
                                     <span class="p-2 bd-highlight">
                                         <button type="button" class="btn btn-tool text-md" data-card-widget="collapse">
@@ -29,57 +29,57 @@ NOTES
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-1">
-                                            <label for="from-date" class="text-md">From Date</label>
+                                            <label for="from-date" class="text-md">{{ $t('common.fromDate') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <input type="date" class="form-control" id="from-date" v-model="filters.fromDate" />
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="to-date" class="text-md">To Date</label>
+                                            <label for="to-date" class="text-md">{{ $t('common.toDate') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <input type="date" class="form-control" id="to-date" v-model="filters.toDate" />
                                         </div>
                                         <div class="col-md-1">
-                                            <label for="company-name" class="text-md">Customer</label>
+                                            <label for="company-name" class="text-md">{{ $t('common.customer') }}</label>
                                         </div>
                                         <div class="col-md-3">
-                                            <model-select :options="filters.options.customers" v-model="filters.customer" placeholder="Select Company">
+                                            <model-select :options="filters.options.customers" v-model="filters.customer" :placeholder="$t('common.selectCompany')">
                                             </model-select>
                                         </div>
                                     </div>
 
                                     <div class="row mt-2">
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Category</label>
+                                            <label for="" class="text-md">{{ $t('common.category') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select :options="filters.options.categories"
                                                 v-model="filters.category"
-                                                placeholder="Select Category">
+                                                :placeholder="$t('common.selectCategory')">
                                             </model-select>
                                         </div>
 
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Quality</label>
+                                            <label for="" class="text-md">{{ $t('common.quality') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select
                                                 :options="filters.options.qualities"
                                                 v-model="filters.quality"
-                                                placeholder="Select Quality"
+                                                :placeholder="$t('common.selectQuality')"
                                             >
                                             </model-select>
                                         </div>
 
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Broker</label>
+                                            <label for="" class="text-md">{{ $t('common.broker') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <model-select
                                                 :options="filters.options.brokers"
                                                 v-model="filters.broker"
-                                                placeholder="Select Broker"
+                                                :placeholder="$t('common.selectBroker')"
                                             >
                                             </model-select>
                                         </div>
@@ -87,7 +87,7 @@ NOTES
 
                                     <div class="row mt-4">
                                         <div class="col-md-1">
-                                            <label for="" class="text-md">Per Page</label>
+                                            <label for="" class="text-md">{{ $t('common.perPage') }}</label>
                                         </div>
                                         <div class="col-md-3">
                                             <select v-model="filters.paginate" class="form-control">
@@ -99,7 +99,7 @@ NOTES
                                     <!-- <div class="col-md-5"></div>
                                         <div class="col-md-3 form-group">
                                             <input v-model="search" type="search" class="form-control "
-                                                placeholder="Search By ..." />
+                                                :placeholder="$t('common.searchBy')" />
                                         </div> -->
                                     </div>
 
@@ -108,28 +108,28 @@ NOTES
                                             <thead class="text-md">
                                                 <tr>
                                                     <th width="12%">
-                                                        <a href="#" @click.prevent="updateSorting('invoice_date')">Date</a>
+                                                        <a href="#" @click.prevent="updateSorting('invoice_date')">{{ $t('common.date') }}</a>
                                                         <span v-if="filters.sort_field == 'invoice_date'?1:0">
                                                             <span v-if=" filters.sort_direction == 'asc' ? 1 : 0 " >&uarr;</span>
                                                             <span v-if=" filters.sort_direction == 'desc' ? 1 : 0 " >&darr;</span>
                                                         </span>
                                                     </th>
                                                     <th>
-                                                        <a href="#"  @click.prevent="updateSorting('challan_no')">Invoice No</a>
+                                                        <a href="#"  @click.prevent="updateSorting('challan_no')">{{ $t('common.invoiceNo') }}</a>
                                                         <span v-if=" filters.sort_field == 'challan_no'?1:0">
                                                             <span v-if=" filters.sort_direction == 'asc'? 1: 0">&uarr;</span>
                                                             <span v-if="filters.sort_direction =='desc'? 1: 0">&darr;</span>
                                                         </span>
                                                     </th>
-                                                    <th>Company</th>
-                                                    <th>Broker</th>
-                                                    <th>Item Type</th>
-                                                    <th>Category</th>
-                                                    <th class="text-right">Weight (g)</th>
-                                                    <th class="text-right">Sold Amount</th>
-                                                    <th class="text-right">Profit</th>
-                                                    <th class="text-right">Net Amount</th>
-                                                    <th width="140" class="text-center">Action</th>
+                                                    <th>{{ $t('common.company') }}</th>
+                                                    <th>{{ $t('common.broker') }}</th>
+                                                    <th>{{ $t('common.itemType') }}</th>
+                                                    <th>{{ $t('common.category') }}</th>
+                                                    <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                    <th class="text-right">{{ $t('common.soldAmount') }}</th>
+                                                    <th class="text-right">{{ $t('common.profit') }}</th>
+                                                    <th class="text-right">{{ $t('common.netAmount') }}</th>
+                                                    <th width="140" class="text-center">{{ $t('common.action') }}</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="text-md">
@@ -151,10 +151,10 @@ NOTES
                                                     <td class="text-right">{{ invoice.netAmount }}</td>
                                                     <td class="text-center">
                                                         <div class="table-actions">
-                                                            <a :href="pdfLink('/directinvoice/pdf/' + invoice.invoice_mst_id)" target="_blank" class="btn btn-danger btn-sm" title="PDF"><i class="fas fa-file-pdf"></i></a>
-                                                            <button type="button" class="btn btn-info btn-sm" title="View" @click="viewInvoice(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-eye"></i></button>
-                                                            <button type="button" class="btn btn-primary btn-sm" title="Edit" @click="editInvoice(invoice.invoice_mst_id)"><i class="fas fa-pen"></i></button>
-                                                            <button type="button" class="btn btn-danger btn-sm" title="Delete" @click="confirmInvoiceDeletation(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-trash"></i></button>
+                                                            <a :href="pdfLink('/directinvoice/pdf/' + invoice.invoice_mst_id)" target="_blank" class="btn btn-danger btn-sm" :title="$t('common.pdf')"><i class="fas fa-file-pdf"></i></a>
+                                                            <button type="button" class="btn btn-info btn-sm" :title="$t('common.view')" @click="viewInvoice(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-eye"></i></button>
+                                                            <button type="button" class="btn btn-primary btn-sm" :title="$t('common.edit')" @click="editInvoice(invoice.invoice_mst_id)"><i class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-danger btn-sm" :title="$t('common.delete')" @click="confirmInvoiceDeletation(invoice.invoice_mst_id, invoice.challan_no)"><i class="fas fa-trash"></i></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -175,7 +175,7 @@ NOTES
                                         <!-- <div class="col-md-5"></div> -->
                                         <div class="col-md-9 text-right">
                                             <label for="" class="mt-2 text-md">
-                                                Total Amount of this page :
+                                                {{ $t('common.totalPageAmount') }}
                                             </label>
                                         </div>
                                         <div class="col-md-3">
@@ -194,7 +194,7 @@ NOTES
                                 
                                 <div class="card-header card-title d-flex">
                                     <span class="p-2 flex-grow-1 bd-highlight">
-                                        Edit Invoice
+                                        {{ $t('invoice.editTitle') }}
                                     </span>
                                     <span class="p-2 bd-highlight">
                                         <button type="button" class="btn btn-tool text-md" data-card-widget="collapse">
@@ -209,14 +209,14 @@ NOTES
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-2">
-                                            <label for="invoice-date" class="text-md mt-1">Invoice Date</label>
+                                            <label for="invoice-date" class="text-md mt-1">{{ $t('common.invoiceDate') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="datetime-local" id="invoice-date" class="form-control" v-model="invoiceToEdit.invoiceDate">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
-                                            <label for="invoice-no" class="text-md mt-1">Invoice No</label>
+                                            <label for="invoice-no" class="text-md mt-1">{{ $t('common.invoiceNo') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" id="invoice-no" class="form-control text-right" v-model="invoiceToEdit.invoiceNo">
@@ -224,43 +224,43 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Customer</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.customer') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <model-select :options="invoiceToEdit.customersOptions" v-model="invoiceToEdit.customer"
-                                            placeholder="Select Customer">
+                                            :placeholder="$t('common.selectCustomer')">
                                             </model-select>
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Broker</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.broker') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <model-select :options="invoiceToEdit.brokersOptions" v-model="invoiceToEdit.broker"
-                                            placeholder="Select Broker">
+                                            :placeholder="$t('common.selectBroker')">
                                             </model-select>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Category</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.category') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <model-select :options="invoiceToEdit.categoriesOptions" v-model="invoiceToEdit.category"
-                                            placeholder="Select Category">
+                                            :placeholder="$t('common.selectCategory')">
                                             </model-select>
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Quality</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.quality') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <model-select :options="invoiceToEdit.qualitiesOptions" v-model="invoiceToEdit.quality"
-                                            placeholder="Select Quality">
+                                            :placeholder="$t('common.selectQuality')">
                                             </model-select>
                                         </div>
                                     </div>
                                     <div class="row mt-3">  
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Weight / piece (g)</label>
+                                            <label class="text-md mt-1">{{ $t('common.weightPerPiece') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" step="0.001" class="form-control text-right" v-model="invoiceToEdit.weightGrams" @input="updateAmounts">
@@ -268,14 +268,14 @@ NOTES
                                     </div>
                                     <div class="row mt-3">  
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Qty (pieces)</label>
+                                            <label for="" class="text-md mt-1">{{ $t('invoice.qtyPieces') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="form-control text-right" v-model="invoiceToEdit.qty" @input="updateAmounts">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Unit</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.unit') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToEdit.unit">
@@ -283,14 +283,14 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Rate / gram (Rs.)</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.ratePerG') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="form-control text-right" v-model="invoiceToEdit.rate" @input="updateAmounts">
                                         </div>
                                         <div class="col-md-2"></div>
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">GST Percentage</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.gstPercent') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <select class="form-control text-right" v-model="invoiceToEdit.gstPercentage">
@@ -304,19 +304,19 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Total Amount</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.totalAmount') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="form-control text-right" disabled v-model="invoiceToEdit.totalAmount">
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">GST Amount</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.gstAmount') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="form-control text-right" disabled v-model="invoiceToEdit.gstAmount">
                                         </div>
                                         <div class="col-md-2">
-                                            <label for="" class="text-md mt-1">Net Amount</label>
+                                            <label for="" class="text-md mt-1">{{ $t('common.netAmount') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="number" class="form-control text-right" disabled v-model="invoiceToEdit.netAmount">
@@ -324,7 +324,7 @@ NOTES
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <button class="btn btn-primary" @click="updateInvoice">Update</button>
+                                    <button class="btn btn-primary" @click="updateInvoice">{{ $t('common.update') }}</button>
                                 </div>
                             </div>
 
@@ -332,7 +332,7 @@ NOTES
                                 
                                 <div class="card-header card-title d-flex">
                                     <span class="p-2 flex-grow-1 bd-highlight">
-                                        View Invoice
+                                        {{ $t('invoice.viewTitle') }}
                                     </span>
                                     <span class="p-2 bd-highlight">
                                         <button type="button" class="btn btn-tool text-md" data-card-widget="collapse">
@@ -347,19 +347,19 @@ NOTES
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Invoice Date</label>
+                                            <label class="text-md mt-1">{{ $t('common.invoiceDate') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceDate" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Challan Date</label>
+                                            <label class="text-md mt-1">{{ $t('challan.challanDate') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceDate" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Challan No / Invoice No</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.challanInvoiceNo') }}</label>
                                         </div>
                                         <div class="col-md-2">
                                             <input type="text" class="form-control" v-model="invoiceToView.invoiceNo" disabled>
@@ -367,13 +367,13 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Customer</label>
+                                            <label class="text-md mt-1">{{ $t('common.customer') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.customer" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Broker</label>
+                                            <label class="text-md mt-1">{{ $t('common.broker') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.broker" disabled>
@@ -381,13 +381,13 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Customer Mobile</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.customerMobile') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.customerMobileNo" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Customer GST No</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.customerGstNo') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.customerGSTNo" disabled>
@@ -395,13 +395,13 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Quality</label>
+                                            <label class="text-md mt-1">{{ $t('common.quality') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.quality" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Category</label>
+                                            <label class="text-md mt-1">{{ $t('common.category') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.category" disabled>
@@ -409,7 +409,7 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Total Weight (g)</label>
+                                            <label class="text-md mt-1">{{ $t('common.totalWeightG') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.totalWeightGrams" disabled>
@@ -417,13 +417,13 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Qty (pieces)</label>
+                                            <label class="text-md mt-1">{{ $t('invoice.qtyPieces') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.qty" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Unit</label>
+                                            <label class="text-md mt-1">{{ $t('common.unit') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control" v-model="invoiceToView.unit" disabled>
@@ -431,13 +431,13 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Rate / gram (Rs.)</label>
+                                            <label class="text-md mt-1">{{ $t('common.ratePerG') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.rate" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">GST</label>
+                                            <label class="text-md mt-1">{{ $t('common.gst') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.gstPercentage" disabled>
@@ -445,13 +445,13 @@ NOTES
                                     </div>
                                     <div class="row mt-3">
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Total Amount</label>
+                                            <label class="text-md mt-1">{{ $t('common.totalAmount') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.totalAmount" disabled>
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">GST Amount</label>
+                                            <label class="text-md mt-1">{{ $t('common.gstAmount') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.gstAmount" disabled>
@@ -460,7 +460,7 @@ NOTES
                                     <div class="row mt-3">
                                         <div class="col-md-6"></div>
                                         <div class="col-md-2">
-                                            <label class="text-md mt-1">Net Amount</label>
+                                            <label class="text-md mt-1">{{ $t('common.netAmount') }}</label>
                                         </div>
                                         <div class="col-md-4">
                                             <input type="text" class="form-control text-right" v-model="invoiceToView.netAmount" disabled>
@@ -504,7 +504,7 @@ export default {
                     customers: [],
                     brokers: [],
                     categories: [],
-                    qualities: [{text: "All", value: ""}]
+                    qualities: [{text: this.$t('common.all'), value: ""}]
                 },
 
                 invoices: {}
@@ -635,7 +635,7 @@ export default {
         loadCustomersForFilter: function(){
             axios
                 .get('../api/customerlist').then((response) => {
-                    let allEntry = [{text: "All", value: ""}];
+                    let allEntry = [{text: this.$t('common.all'), value: ""}];
                     let individualEntry = response.data.map(company => {
                         return {
                             value: company.customer_id,
@@ -646,7 +646,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
         },   
 
@@ -654,7 +654,7 @@ export default {
             
             axios
             .get('../api/sellqualitycategories').then((response) => {
-                let allEntry = [{text: "All", value: ""}];
+                let allEntry = [{text: this.$t('common.all'), value: ""}];
                 let individualEntry = response.data.qualityCategories.map(category => {
                     return {
                         value: category.qualityCategoryId,
@@ -666,13 +666,13 @@ export default {
             })
             .catch(err => {
                 console.log(err);
-                toastr["error"]("Something went Wrong");
+                toastr["error"](this.$t('common.somethingWrong'));
             })
         },
 
         loadQualitiesFromCategoryForFilter: function(){
             if(typeof this.filters.category === 'undefined' || this.filters.category == '' || this.filters.category == null){
-                this.filters.options.qualities = [{text:"All", value:""}];
+                this.filters.options.qualities = [{text: this.$t('common.all'), value:""}];
                 this.filters.quality = "";
                 return;
             }
@@ -680,7 +680,7 @@ export default {
             axios
                 .get('../api/sellqualityofcategory/' + this.filters.category)
                 .then(response => {
-                    let allEntry = [{text:"All", value: ""}];
+                    let allEntry = [{text: this.$t('common.all'), value: ""}];
                     let individualEntry = response.data.map(quality => {
                         return {
                             value: quality.sell_quality_id,
@@ -692,13 +692,13 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
         },
 
         loadBrokersForFilter: function(){
             axios.get('../api/brokerslist').then((response) => {
-                let allEntry = [{text: "All", value: ""}];
+                let allEntry = [{text: this.$t('common.all'), value: ""}];
                 let individualEntry = response.data.map(broker => {
                     return {
                         value: broker.broker_id,
@@ -710,7 +710,7 @@ export default {
 
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
         },
         
@@ -768,7 +768,7 @@ export default {
                 .catch(err => {
                     console.error(err)
                     console.log("Err in Fetching Challans");
-                    toastr.error("Something Went Wrong, Please Refrash");
+                    toastr.error(this.$t('common.somethingWrongRefresh'));
                 });
         },
 
@@ -847,7 +847,7 @@ export default {
                         this.invoiceToView.invoiceId = response.data.data.invoice_mst_id;
                     }
                     else{
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                         console.log("Other then Expected Answer Recieved In Viewing Invoice");
                     }
                 })
@@ -895,7 +895,7 @@ export default {
                         this.invoiceToEdit.invoiceId = response.data.data.invoice_mst_id;
                     }
                     else{
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                         console.log("Other then Expected Answer Recieved In Viewing Invoice");
                     }
                 })
@@ -909,7 +909,7 @@ export default {
         // validate Method
         isInvoiceDateValid: function(){
             if(this.invoiceToEdit.invoiceDate == "" || typeof this.invoiceToEdit.invoiceDate === 'undefined' || this.invoiceToEdit.invoiceDate == null){
-                toastr.info("Please Selecte Invoice Date");
+                toastr.info(this.$t('invoice.dateRequired'));
                 return false;
             }
             return true;
@@ -917,12 +917,12 @@ export default {
 
         isInvoiceNoValid: function () {
             if(this.invoiceToEdit.invoiceNo == ""){
-                toastr.info("Please Insert Invoice No");
+                toastr.info(this.$t('invoice.noRequired'));
                 return false;
             }
 
             if(this.invoiceToEdit.invoiceNo <= 0){
-                toastr.info("Invoice No Is In-Valid");
+                toastr.info(this.$t('invoice.noInvalid'));
                 return false;
             }
 
@@ -931,7 +931,7 @@ export default {
 
         isCustomerValid: function(){
             if(typeof this.invoiceToEdit.customer === 'undefined' || this.invoiceToEdit.customer == ""){
-                toastr.info("Please Select Customer");
+                toastr.info(this.$t('invoice.customerRequired'));
                 return false;
             }
             return true;
@@ -939,7 +939,7 @@ export default {
 
         isBrokerValid: function(){
             if(typeof this.invoiceToEdit.broker === 'undefined' || this.invoiceToEdit.broker == ""){
-                toastr.info("Please Select Broker");
+                toastr.info(this.$t('invoice.brokerRequired'));
                 return false;
             }
             return true;
@@ -947,7 +947,7 @@ export default {
 
         isCategoryValid: function(){
             if(typeof this.invoiceToEdit.category === 'undefined' || this.invoiceToEdit.category == ""){
-                toastr.info("Please Select Category");
+                toastr.info(this.$t('invoice.categoryRequired'));
                 return false;
             }
             return true;
@@ -955,7 +955,7 @@ export default {
 
         isQualityValid: function(){
             if(typeof this.invoiceToEdit.quality === 'undefined' || this.invoiceToEdit.quality == ""){
-                toastr.info("Please Select Quality");
+                toastr.info(this.$t('invoice.qualityRequired'));
                 return false;
             }
             return true;
@@ -963,7 +963,7 @@ export default {
 
         isUnitValid: function(){
             if(typeof this.invoiceToEdit.unit === 'undefined' || this.invoiceToEdit.unit == ""){
-                toastr.info("Please Select Unit");
+                toastr.info(this.$t('invoice.unitRequired'));
                 return false;
             }
             return true;
@@ -971,11 +971,11 @@ export default {
 
         isQtyValid: function(){
             if(this.invoiceToEdit.qty == "" || typeof this.invoiceToEdit.qty === 'undefined'){
-                toastr.info("Please Enter Qty");
+                toastr.info(this.$t('invoice.qtyRequired'));
                 return false;
             }
             if(this.invoiceToEdit.qty < 0){
-                toastr.info("Qty Is Invalid");
+                toastr.info(this.$t('invoice.qtyInvalid'));
                 return false;
             }
 
@@ -984,11 +984,11 @@ export default {
 
         isRateValid: function(){
             if(this.invoiceToEdit.rate == "" || typeof this.invoiceToEdit.rate === 'undefined'){
-                toastr.info("Please Enter Rate");
+                toastr.info(this.$t('invoice.rateRequired'));
                 return false;
             }
             if(this.invoiceToEdit.rate < 0){
-                toastr.info("Rate Is Invalid");
+                toastr.info(this.$t('invoice.rateInvalid'));
                 return false;
             }
 
@@ -997,7 +997,7 @@ export default {
 
         isGSTPercentageValid: function(){
             if(this.invoiceToEdit.gstPercentage === "" || typeof this.invoiceToEdit.gstPercentage === 'undefined'){
-                toastr.info("Please Select GST Pecentage");
+                toastr.info(this.$t('invoice.gstRequired'));
                 return false;
             }
             return true;
@@ -1040,8 +1040,8 @@ export default {
                         if(response.data.status == 1){
                             swal
                                 .fire({
-                                    title: "Success",
-                                    html:  "<h5 style='color:#9C9794'>Invoice Updated Successfully</h5>",
+                                    title: this.$t('common.success'),
+                                    html:  "<h5 style='color:#9C9794'>" + this.$t('invoice.updated') + "</h5>",
                                     icon: "success",
                                     allowOutsideClick: false
                                 })
@@ -1065,13 +1065,13 @@ export default {
                             }
                         }
                         else{
-                            toastr.error("Something Went Wrong");
+                            toastr.error(this.$t('common.somethingWrong'));
                             console.log("Err In Update Invoice API Call");
                         }
                     })  
                     .catch(err=>{
                         console.log("Err In Generatin Invoice");
-                        toastr.error("Something Went Wrong");
+                        toastr.error(this.$t('common.somethingWrong'));
                     });
             }
         },
@@ -1150,7 +1150,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
         },
 
@@ -1164,7 +1164,7 @@ export default {
                     })
                 }).catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
         },
 
@@ -1180,7 +1180,7 @@ export default {
             })
             .catch(err => {
                 console.log(err);
-                toastr["error"]("Something went Wrong");
+                toastr["error"](this.$t('common.somethingWrong'));
             })
         },
 
@@ -1210,7 +1210,7 @@ export default {
                 })
                 .catch(err => {
                     console.log(err);
-                    toastr["error"]("Something went Wrong.")
+                    toastr["error"](this.$t('common.somethingWrong'))
                 })
         },
 
@@ -1230,20 +1230,20 @@ export default {
         confirmInvoiceDeletation: function(invoiceMstId, invoiceNo){
             swal
                 .fire({
-                    title: `<h5 style='color:#9C9794'>Are you sure to delete Invoice No: ${invoiceNo} ?</h5>`,
-                    html: `<h5 style='color:#9C9794'>Once Invoice Is Deleted It can not be undo.</h5>`,
+                    title: `<h5 style='color:#9C9794'>${this.$t('invoice.deleteConfirmTitle', { no: invoiceNo })}</h5>`,
+                    html: `<h5 style='color:#9C9794'>${this.$t('invoice.deleteConfirm')}</h5>`,
                     icon: "info",
                     allowOutsideClick: false,
                     showDenyButton: true,
-                    confirmButtonText: 'Yes, Delete',
-                    denyButtonText: `No`,
+                    confirmButtonText: this.$t('common.yesDelete'),
+                    denyButtonText: this.$t('common.no'),
                 })
                 .then((result) => {
                     if(result.isConfirmed){
                         this.deleteInvoice(invoiceMstId);
                     }
                     else if(result.isDenied){
-                        toastr.info("Invoice Deletation Canceled");
+                        toastr.info(this.$t('invoice.deleteCanceled'));
                     }
                 })
         },
@@ -1255,8 +1255,8 @@ export default {
                     if(res.data.status == 1){
                         swal
                             .fire({
-                                title: "Success",
-                                html:  `<h5 style='color:#9C9794'>Invoice No: ${res.data.invoiceNo} Deleted Successfully</h5>`,
+                                title: this.$t('common.success'),
+                                html:  `<h5 style='color:#9C9794'>${this.$t('invoice.deletedWithNo', { no: res.data.invoiceNo })}</h5>`,
                                 icon: "success",
                                 allowOutsideClick: false
                             })
@@ -1265,16 +1265,16 @@ export default {
                             });
                     }
                     else if(res.data.status == -1){
-                        toastr.error(res.data.message || "Something went wrong");
+                        toastr.error(res.data.message || this.$t('common.somethingWrong'));
                     }
                     else{
                         console.log("Unexpected Respose Recived In Delete Delete Invoice API Call");
-                        toastr.error("Something Went wrong");           
+                        toastr.error(this.$t('common.somethingWrong'));           
                     }
                 })
                 .catch(error => {
                     console.log("Err While Invoice Deletation API Call");
-                    toastr.error("Something Went Wrong");
+                    toastr.error(this.$t('common.somethingWrong'));
                 })
         }
     },
