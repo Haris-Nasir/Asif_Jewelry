@@ -69,7 +69,7 @@
                                     <tr v-for="broker in brokers.data" v-bind:key="broker.broker_id">
                                         <td>{{ broker.broker_id }}</td>
                                         <td>{{ broker.broker_name }}</td>
-                                        <td>{{ broker.broker_contact_no }}</td>
+                                        <td>{{ broker.broker_contact_no || '-' }}</td>
                                         <td class="text-center">
                         <div class="table-actions"><button type="button" class="btn btn-primary btn-sm"
                                                 @click="editBroker(broker.broker_id, broker.broker_name, broker.broker_contact_no)">
@@ -120,8 +120,7 @@
                             </div>
 
                             <div class="col-md-2 ml-auto">
-                                <label for="contactNo" class="text-md col-form-label">Contact Number <span
-                                        class="required-mark" style="color: red;">*</span></label>
+                                <label for="contactNo" class="text-md col-form-label">Contact Number</label>
                             </div>
 
                             <div class="col-md-3 mr-5">
@@ -212,13 +211,13 @@
             },
 
             updateBroker: function () {
-                if ((this.editBrokerName == '' || this.editContactNo == '')) {
-                    toastr["error"]("All Fileds are Required");
+                if (this.editBrokerName == '') {
+                    toastr["error"]("Broker Name is Required");
                 } else {
                     axios
                         .put('../api/broker/update/' + this.brokerId, {
                             editBrokerName: this.editBrokerName,
-                            editContactNo: this.editContactNo
+                            editContactNo: this.editContactNo || null
                         })
                         .then((res) => {
                             if (res.data.status == -1) {

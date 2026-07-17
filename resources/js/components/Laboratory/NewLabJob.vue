@@ -10,19 +10,19 @@
                         </button>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body lab-job-form">
                     <p class="text-muted small mb-3">
                         Select investors from the dropdown. Base price is cut equally from each selected investor.
                         Profit uses each investor's configured profit share % from Manage Investors.
                     </p>
 
-                    <div class="form-group row">
-                        <div class="col-md-2">
-                            <label class="text-md">Job Date &amp; Time *</label>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">Job Date &amp; Time <span class="text-danger">*</span></label>
                             <input type="datetime-local" class="form-control" v-model="form.job_date">
                         </div>
-                        <div class="col-md-3">
-                            <label class="text-md">Investors *</label>
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">Investors <span class="text-danger">*</span></label>
                             <investor-multi-select
                                 :investors="investors"
                                 v-model="form.investor_ids"
@@ -30,19 +30,19 @@
                                 @change="refreshSharePreview"
                             />
                         </div>
-                        <div class="col-md-2">
-                            <label class="text-md">Reference</label>
+                        <div class="form-group col-md-2">
+                            <label class="lab-label">Reference</label>
                             <input type="text" class="form-control" v-model="form.job_reference" placeholder="Job no.">
                         </div>
-                        <div class="col-md-2">
-                            <label class="text-md">Metal *</label>
+                        <div class="form-group col-md-2">
+                            <label class="lab-label">Metal <span class="text-danger">*</span></label>
                             <select class="form-control" v-model="form.metal_type">
                                 <option value="gold">Gold</option>
                                 <option value="silver">Silver</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label class="text-md">Weight (g) *</label>
+                        <div class="form-group col-md-2">
+                            <label class="lab-label">Weight (g) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control text-right" v-model="form.weight_grams" min="0" step="0.001">
                         </div>
                     </div>
@@ -79,26 +79,26 @@
                         </table>
                     </div>
 
-                    <div class="form-group row">
-                        <div class="col-md-2">
-                            <label class="text-md">Base Price (Rs.) *</label>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">Base Price (Rs.) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control text-right" v-model="form.base_price" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
-                        <div class="col-md-2">
-                            <label class="text-md">Refinery Cost (Rs.)</label>
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">Refinery Cost (Rs.)</label>
                             <input type="number" class="form-control text-right" v-model="form.refinery_cost" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
-                        <div class="col-md-2">
-                            <label class="text-md">Sold Amount (Rs.)</label>
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">Sold Amount (Rs.)</label>
                             <input type="number" class="form-control text-right" v-model="form.sold_amount" min="0" step="0.01" @input="refreshSharePreview">
                         </div>
-                        <div class="col-md-2">
-                            <label class="text-md">Est. Profit (Rs.)</label>
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">Est. Profit (Rs.)</label>
                             <input type="text" class="form-control text-right" :value="estimatedProfit" disabled>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="text-md">Notes</label>
+                    <div class="form-group mb-0">
+                        <label class="lab-label">Notes</label>
                         <textarea class="form-control" v-model="form.notes" rows="2"></textarea>
                     </div>
                 </div>
@@ -254,3 +254,21 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.lab-job-form .lab-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #4a4035;
+}
+
+.lab-job-form .form-group {
+    margin-bottom: 0.9rem;
+}
+
+.lab-job-form .form-control {
+    width: 100%;
+}
+</style>

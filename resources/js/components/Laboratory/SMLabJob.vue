@@ -11,51 +11,51 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-sm-6 col-lg-3 mb-2">
-                            <div class="small-box lab-stat-box bg-info">
+                    <div class="row lab-stat-row mb-3">
+                        <div class="col-6 col-md-3 mb-2">
+                            <div class="small-box lab-stat-box bg-info mb-0">
                                 <div class="inner">
                                     <h3>{{ summary.total_jobs }}</h3>
                                     <p>Total Jobs</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-lg-3 mb-2">
-                            <div class="small-box lab-stat-box bg-warning">
+                        <div class="col-6 col-md-3 mb-2">
+                            <div class="small-box lab-stat-box bg-warning mb-0">
                                 <div class="inner">
                                     <h3>{{ summary.open_jobs }}</h3>
                                     <p>Open</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-lg-3 mb-2">
-                            <div class="small-box lab-stat-box bg-success">
+                        <div class="col-6 col-md-3 mb-2">
+                            <div class="small-box lab-stat-box bg-success mb-0">
                                 <div class="inner">
                                     <h3 class="stat-amount">{{ formatMoney(summary.total_lab_profit) }}</h3>
                                     <p>Lab Profit</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-lg-3 mb-2">
-                            <div class="small-box lab-stat-box bg-secondary">
+                        <div class="col-6 col-md-3 mb-2">
+                            <div class="small-box lab-stat-box bg-secondary mb-0">
                                 <div class="inner">
-                                    <h3>{{ formatWeight(summary.total_weight_grams) }}g</h3>
+                                    <h3 class="stat-amount">{{ formatWeight(summary.total_weight_grams) }}g</h3>
                                     <p>Total Weight</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-row mb-3">
-                        <div class="form-group col-md-2 col-sm-6">
+                    <div class="form-row lab-filter-row mb-3">
+                        <div class="form-group col-md-3 col-sm-6 mb-2">
                             <label>From Date</label>
                             <input type="date" class="form-control" v-model="filters.from_date" @change="loadJobs">
                         </div>
-                        <div class="form-group col-md-2 col-sm-6">
+                        <div class="form-group col-md-3 col-sm-6 mb-2">
                             <label>To Date</label>
                             <input type="date" class="form-control" v-model="filters.to_date" @change="loadJobs">
                         </div>
-                        <div class="form-group col-md-4 col-sm-6">
+                        <div class="form-group col-md-3 col-sm-6 mb-2">
                             <label>Investor</label>
                             <select class="form-control" v-model="filters.investor_id" @change="loadJobs">
                                 <option value="">All investors</option>
@@ -64,7 +64,7 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="form-group col-md-2 col-sm-6">
+                        <div class="form-group col-md-3 col-sm-6 mb-2">
                             <label>Status</label>
                             <select class="form-control" v-model="filters.job_status" @change="loadJobs">
                                 <option value="">All</option>
@@ -82,7 +82,7 @@
                                     <th>Ref</th>
                                     <th>Investors</th>
                                     <th>Metal</th>
-                                    <th class="text-right">Weight (g)</th>
+                                    <th class="text-right text-nowrap">Weight (g)</th>
                                     <th class="text-right">Base</th>
                                     <th class="text-right">Refinery</th>
                                     <th class="text-right">Sold</th>
@@ -97,7 +97,7 @@
                                     <td>{{ job.job_reference || '-' }}</td>
                                     <td class="investor-cell">{{ formatParticipants(job) }}</td>
                                     <td class="text-capitalize">{{ job.metal_type }}</td>
-                                    <td class="text-right">{{ formatWeight(job.weight_grams) }}</td>
+                                    <td class="text-right text-nowrap">{{ formatWeight(job.weight_grams) }}</td>
                                     <td class="text-right text-nowrap">{{ formatAmount(job.base_price) }}</td>
                                     <td class="text-right text-nowrap">{{ formatAmount(job.refinery_cost) }}</td>
                                     <td class="text-right text-nowrap">{{ job.sold_amount != null ? formatAmount(job.sold_amount) : '-' }}</td>
@@ -108,14 +108,15 @@
                                         </span>
                                     </td>
                                     <td class="text-center text-nowrap">
-                        <div class="table-actions"><button type="button" class="btn btn-primary btn-sm" @click="startEdit(job)" title="Edit">
-                                            <i class="fas fa-pen"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-danger btn-sm ml-1" @click="deleteJob(job.lab_job_id)" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                        </div>
-                      </td>
+                                        <div class="table-actions">
+                                            <button type="button" class="btn btn-primary btn-sm" @click="startEdit(job)" title="Edit">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" @click="deleteJob(job.lab_job_id)" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr v-if="!jobs.data || !jobs.data.length">
                                     <td colspan="11" class="text-center text-muted py-3">No laboratory jobs found.</td>
@@ -143,7 +144,11 @@
                     </div>
                     <div class="modal-body">
                         <div class="form-row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label>Job Date</label>
+                                <input type="datetime-local" class="form-control" v-model="editForm.job_date">
+                            </div>
+                            <div class="form-group col-md-5">
                                 <label>Investors *</label>
                                 <investor-multi-select
                                     :investors="investors"
@@ -151,16 +156,12 @@
                                     placeholder="Select investors..."
                                 />
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label>Reference</label>
                                 <input type="text" class="form-control" v-model="editForm.job_reference">
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label>Job Date</label>
-                                <input type="datetime-local" class="form-control" v-model="editForm.job_date">
-                            </div>
                             <div class="form-group col-md-3">
                                 <label>Metal</label>
                                 <select class="form-control" v-model="editForm.metal_type">
@@ -377,25 +378,61 @@ export default {
 </script>
 
 <style scoped>
+.lab-stat-row > [class*="col-"] {
+    display: flex;
+}
+
+.lab-stat-box {
+    width: 100%;
+    min-height: 6.5rem;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 .lab-stat-box .inner {
-    padding-right: 4.75rem;
+    padding: 0.85rem 1rem !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     overflow: hidden;
 }
 
+.lab-stat-box .inner h3,
 .lab-stat-box h3.stat-amount {
-    font-size: clamp(0.9rem, 1.1rem + 0.35vw, 1.45rem);
-    line-height: 1.25;
+    font-size: 1.35rem;
+    line-height: 1.3;
     font-weight: 700;
     margin: 0 0 0.35rem;
-    white-space: normal;
-    word-break: break-word;
-    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lab-stat-box .inner p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.lab-filter-row .form-group {
+    margin-bottom: 0.5rem;
+}
+
+.lab-filter-row label {
+    display: block;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
 }
 
 .lab-jobs-table th,
 .lab-jobs-table td {
     vertical-align: middle;
     padding: 0.45rem 0.6rem;
+}
+
+.lab-jobs-table thead th {
+    white-space: nowrap;
 }
 
 .lab-jobs-table .investor-cell {

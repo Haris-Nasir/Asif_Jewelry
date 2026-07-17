@@ -81,6 +81,12 @@
                                         <p class="text-md">Customer</p>
                                     </router-link>
                                 </li>
+                                <li class="nav-item">
+                                    <router-link to="/broker" class="nav-link">
+                                        <i class="nav-icon fas fa-handshake"></i>
+                                        <p class="text-md">Broker</p>
+                                    </router-link>
+                                </li>
                             </ul>
                         </li>
 
@@ -417,6 +423,7 @@ export default {
                 '/sellquality': 'setup',
                 '/vendor': 'setup',
                 '/customer': 'setup',
+                '/broker': 'setup',
                 '/stock': 'stock',
                 '/newinward': 'stock',
                 '/manageinward': 'stock',
@@ -545,6 +552,7 @@ export default {
                 c: { path: '/customer', permission: 'masters', section: 'setup' },
                 v: { path: '/vendor', permission: 'masters', section: 'setup' },
                 t: { path: '/sellquality', permission: 'masters', section: 'setup' },
+                r: { path: '/broker', permission: 'masters', section: 'setup' },
             };
 
             const action = shortcuts[key];
