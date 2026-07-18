@@ -70,8 +70,8 @@
                 <tbody class="text-md">
                   <tr v-for="sellquality in sellqualities.data" v-bind:key="sellquality.sell_quality_id">
                     <td>{{ sellquality.sell_quality_id }}</td>
-                    <td>{{ sellquality.quality_name }}</td>
-                    <td>{{ sellquality.sell_category_name }}</td>
+                    <td>{{ $label(sellquality.quality_name) }}</td>
+                    <td>{{ $label(sellquality.sell_category_name) }}</td>
 
                     <td class="text-center">
                         <div class="table-actions"><button type="button" class="btn btn-primary btn-sm"
@@ -226,12 +226,7 @@
 
       loadQualityCategories: function () {
         axios.get('../api/sellqualitycategories').then((response) => {
-          this.qualityCategories = response.data.qualityCategories.map(category => {
-            return {
-              value: category.qualityCategoryId,
-              text: category.qualityCategoryName
-            }
-          });
+          this.qualityCategories = response.data.qualityCategories.map(c => this.$categoryOption(c));
         }).catch(err => {
           console.log(err);
           toastr["error"](this.$t('common.somethingWrong'));

@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import en from './en';
 import ur from './ur';
+import { label, categoryOption } from './labels';
 
 const messages = { en, ur };
 const LOCALE_KEY = 'ayub_jewelry_locale';
@@ -44,6 +45,8 @@ export function t(key, params) {
     return text;
 }
 
+export { label, categoryOption };
+
 export function applyLocale(locale) {
     const next = locale === 'ur' ? 'ur' : 'en';
     i18nState.locale = next;
@@ -63,6 +66,16 @@ export function initI18n() {
     Vue.prototype.$t = function (key, params) {
         void i18nState.locale;
         return t(key, params);
+    };
+
+    Vue.prototype.$label = function (text) {
+        void i18nState.locale;
+        return label(text);
+    };
+
+    Vue.prototype.$categoryOption = function (category, opts) {
+        void i18nState.locale;
+        return categoryOption(category, opts);
     };
 
     Vue.prototype.$locale = i18nState;

@@ -226,12 +226,7 @@
 
       loadQualityCategories: function () {
         axios.get('../api/inwardqualitycategories').then((response) => {
-          this.qualityCategories = response.data.qualityCategories.map(category => {
-            return {
-              value: category.qualityCategoryId,
-              text: category.qualityCategoryName
-            }
-          });
+          this.qualityCategories = response.data.qualityCategories.map(c => this.$categoryOption(c));
         }).catch(err => {
           console.log(err);
           toastr["error"](this.$t('common.somethingWrong'));

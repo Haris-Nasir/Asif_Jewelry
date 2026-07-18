@@ -34,10 +34,10 @@
             <tr v-for="job in jobs.data" :key="job.karigar_job_id">
               <td class="text-nowrap">{{ formatJobDate(job.job_date) }}</td>
               <td>{{ job.karigar ? job.karigar.karigar_name : '-' }}</td>
-              <td>{{ job.metal_type }}</td>
+              <td>{{ $label(job.metal_type) }}</td>
               <td class="text-right">{{ job.issued_weight_grams }}</td>
               <td class="text-right">{{ job.returned_weight_grams || '-' }}</td>
-              <td>{{ job.quality ? job.quality.quality_name : (job.item_description || '-') }}</td>
+              <td>{{ job.quality ? $label(job.quality.quality_name) : (job.item_description || '-') }}</td>
               <td class="text-right">{{ job.mazduri_cost ? 'Rs. ' + job.mazduri_cost : '-' }}</td>
               <td><span class="badge" :class="statusClass(job.job_status)">{{ job.job_status }}</span></td>
               <td class="text-center">
@@ -95,7 +95,7 @@
         <p class="text-muted mb-3">
           {{ $t('karigar.alreadyIssued') }}
           <strong>{{ addOutwardJob.issued_weight_grams }}g</strong>
-          {{ addOutwardJob.metal_type }}
+          {{ $label(addOutwardJob.metal_type) }}
           <span v-if="addOutwardItemLabel !== '-'">
             ({{ $t('karigar.firstItem') }}: <strong>{{ addOutwardItemLabel }}</strong>)
           </span>
@@ -117,7 +117,7 @@
           </div>
         </div>
         <p class="text-muted small mb-2" v-if="addStock">
-          {{ $t('challan.inStockFor') }} <strong>{{ addStock.quality_name }}</strong>:
+          {{ $t('challan.inStockFor') }} <strong>{{ $label(addStock.quality_name) }}</strong>:
           {{ addStock.weight_grams }}g, {{ addStock.pieces }} {{ $t('common.pcs') }}
           <span v-if="addStock.available_piece_weights_label">
             ({{ addStock.available_piece_weights_label }})
@@ -184,7 +184,7 @@
         <p class="text-muted mb-3">
           {{ $t('karigar.issuedLabel') }}
           <strong>{{ returnJob.issued_weight_grams }}g</strong>
-          {{ returnJob.metal_type }}
+          {{ $label(returnJob.metal_type) }}
           <span v-if="issuedSourceLabel"> {{ $t('karigar.fromLabel') }} <strong>{{ issuedSourceLabel }}</strong></span>
           <span v-if="itemToMakeLabel"> — {{ $t('karigar.itemToMake') }}: <strong>{{ itemToMakeLabel }}</strong></span>
         </p>

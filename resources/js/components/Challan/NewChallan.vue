@@ -392,12 +392,7 @@ NOTES
             id and tet as a company name*/
             loadQualityCategories() {
                 axios.get('../api/sellqualitycategories').then((response) => {
-                    this.productCategories = response.data.qualityCategories.map(category => {
-                        return {
-                            value: category.qualityCategoryId,
-                            text: category.qualityCategoryName
-                        }
-                    });
+                    this.productCategories = response.data.qualityCategories.map(c => this.$categoryOption(c));
                 }).catch(err => {
                     console.log(err);
                     toastr["error"](this.$t('common.somethingWrong'))

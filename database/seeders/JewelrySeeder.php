@@ -64,8 +64,6 @@ class JewelrySeeder extends Seeder
         $this->call([
             JewelryItemTypesSeeder::class,
             JewelryExpenseCategoriesSeeder::class,
-            DefaultBrokerSeeder::class,
-            DefaultBankSeeder::class,
         ]);
     }
 }

@@ -945,11 +945,11 @@ body.dark-mode .jewelry-app {
     }
 }
 
-/* Urdu locale — clear Nastaliq, keep LTR layout for AdminLTE */
+/* Urdu locale — Nastaliq for labels/chrome; Naskh in fields so text stays centered */
 body.locale-urdu,
 body.locale-urdu .jewelry-app,
 body.locale-urdu .login-page {
-    font-family: "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif;
+    font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif;
     line-height: 1.7;
 }
 
@@ -967,11 +967,10 @@ body.locale-urdu .btn,
 body.locale-urdu th,
 body.locale-urdu td,
 body.locale-urdu .stat-label,
-body.locale-urdu .form-control,
 body.locale-urdu .swal2-title,
 body.locale-urdu .swal2-html-container,
 body.locale-urdu #toast-container > div {
-    font-family: "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif;
+    font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", "Segoe UI", Tahoma, sans-serif;
     letter-spacing: 0;
 }
 
@@ -979,4 +978,189 @@ body.locale-urdu .nav-sidebar .nav-link p,
 body.locale-urdu .card-title,
 body.locale-urdu label {
     line-height: 1.85;
+}
+
+/* Form fields: Naskh + room so Urdu never clips; arrows stay INSIDE */
+body.locale-urdu .form-control,
+body.locale-urdu select.form-control,
+body.locale-urdu input.form-control,
+body.locale-urdu textarea.form-control,
+body.locale-urdu .custom-select,
+body.locale-urdu .jewelry-lang-select,
+body.locale-urdu .login-page input,
+body.locale-urdu .ui.selection.dropdown,
+body.locale-urdu .ui.search.selection.dropdown,
+body.locale-urdu .ui.dropdown > .text,
+body.locale-urdu .ui.dropdown > .default.text {
+    font-family: "Noto Naskh Arabic", "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif !important;
+    letter-spacing: 0;
+    line-height: 1.45 !important;
+    font-size: 0.95rem;
+}
+
+body.locale-urdu .form-control,
+body.locale-urdu select.form-control,
+body.locale-urdu input.form-control,
+body.locale-urdu .custom-select,
+body.locale-urdu .jewelry-lang-select {
+    box-sizing: border-box !important;
+    min-height: 2.75rem !important;
+    height: 2.75rem !important;
+    max-height: 2.75rem !important;
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* Keep native select look — no custom arrow image (was tiling) */
+body.locale-urdu select.form-control,
+body.locale-urdu select.custom-select,
+body.locale-urdu .jewelry-lang-select {
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    appearance: auto;
+    background-image: none !important;
+}
+
+body.locale-urdu textarea.form-control {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 5.5rem !important;
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+    padding-right: 0.85rem !important;
+    line-height: 1.7 !important;
+    white-space: pre-wrap;
+    overflow-y: auto !important;
+}
+
+body.locale-urdu .form-control-sm,
+body.locale-urdu select.form-control-sm,
+body.locale-urdu .btn-sm {
+    min-height: 2.35rem !important;
+    height: 2.35rem !important;
+    max-height: 2.35rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    line-height: 1.4 !important;
+}
+
+body.locale-urdu .btn:not(.btn-sm):not(.btn-lg) {
+    min-height: 2.5rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.45rem;
+    line-height: 1.5;
+}
+
+/* vue-search-select / Semantic UI dropdowns — text + arrow inside box */
+body.locale-urdu .ui.selection.dropdown,
+body.locale-urdu .ui.search.selection.dropdown {
+    box-sizing: border-box !important;
+    min-height: 2.75rem !important;
+    height: 2.75rem !important;
+    max-height: 2.75rem !important;
+    padding: 0.35rem 2.25rem 0.35rem 0.75rem !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body.locale-urdu .ui.selection.dropdown > .text,
+body.locale-urdu .ui.selection.dropdown > .default.text,
+body.locale-urdu .ui.search.selection.dropdown > .text,
+body.locale-urdu .ui.search.dropdown > input.search {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.locale-urdu .ui.dropdown > .dropdown.icon {
+    position: absolute !important;
+    top: 50% !important;
+    right: 0.75rem !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    line-height: 1 !important;
+    pointer-events: none;
+}
+
+body.locale-urdu .ui.search.dropdown > input.search {
+    padding-right: 2rem !important;
+}
+
+body.locale-urdu .table td,
+body.locale-urdu .table th {
+    vertical-align: middle;
+    line-height: 1.75;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+    overflow: visible;
+    white-space: normal;
+    word-break: break-word;
+}
+
+body.locale-urdu .card-title,
+body.locale-urdu h5,
+body.locale-urdu .content h5 {
+    line-height: 1.9 !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+}
+
+body.locale-urdu .card-header {
+    min-height: auto;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    overflow: visible;
+}
+
+body.locale-urdu .card-header .card-title {
+    margin: 0;
+    float: none;
+    display: inline-block;
+    max-width: calc(100% - 2.5rem);
+}
+
+body.locale-urdu .input-group-text {
+    font-family: "Noto Naskh Arabic", "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.45;
+    min-height: 2.75rem;
+    height: 2.75rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+}
+
+body.locale-urdu .login-page .input-wrap input {
+    min-height: 2.75rem;
+    height: 2.75rem;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    line-height: 1.45;
+    font-family: "Noto Naskh Arabic", "Noto Nastaliq Urdu", "Segoe UI", Tahoma, sans-serif;
+}
+
+/* Keep filter columns from letting selects spill past card edge */
+body.locale-urdu .card-body .row > [class*="col-"] {
+    min-width: 0;
+}
+
+body.locale-urdu .card-body select.form-control,
+body.locale-urdu .card-body .ui.selection.dropdown {
+    max-width: 100% !important;
 }

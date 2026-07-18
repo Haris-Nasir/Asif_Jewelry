@@ -67,8 +67,8 @@
                                         </thead>
                                         <tbody>
                                             <tr v-for="row in byQuality" :key="row.sell_quality_id">
-                                                <td>{{ row.quality_name }}</td>
-                                                <td>{{ row.metal_type || '-' }}</td>
+                                                <td>{{ $label(row.quality_name) }}</td>
+                                                <td>{{ row.metal_type ? $label(row.metal_type) : '-' }}</td>
                                                 <td class="text-right">{{ row.weight_grams }}</td>
                                                 <td class="text-right">{{ row.pieces }}</td>
                                             </tr>
@@ -97,9 +97,9 @@
                                         <tbody class="text-md">
                                             <tr v-for="row in ledger.data" :key="row.stock_ledger_id">
                                                 <td>{{ formatDate(row.created_at) }}</td>
-                                                <td>{{ row.metal_type }}</td>
-                                                <td>{{ row.item ? row.item.quality_name : '-' }}</td>
-                                                <td>{{ row.transaction_type }}</td>
+                                                <td>{{ $label(row.metal_type) }}</td>
+                                                <td>{{ row.item ? $label(row.item.quality_name) : '-' }}</td>
+                                                <td>{{ $label(row.transaction_type) }}</td>
                                                 <td class="text-right">{{ row.weight_grams }}</td>
                                                 <td class="text-right">{{ row.quantity_pieces }}</td>
                                                 <td class="text-right">{{ row.rate_per_gram || '-' }}</td>

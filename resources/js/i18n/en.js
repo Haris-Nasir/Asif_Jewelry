@@ -787,4 +787,18 @@ export default {
     'perm.laboratory_delete': 'Delete laboratory jobs',
     'perm.karigar': 'Karigar (outward/inward)',
 
+
+    'data.goldItems': 'Gold Items',
+    'data.silverItems': 'Silver (Chandi) Items',
+    'data.item.tops': 'Tops',
+    'data.item.angothi': 'Angothi',
+    'data.item.kanty': 'Kanty',
+    'data.item.balian': 'Balian',
+    'data.item.kadySet': 'Kady Set',
+    'data.item.nail': 'Nail',
+    'data.item.daddy': 'Daddy',
+    'data.item.pazeb': 'Pazeb',
+    'data.item.tweeeez': 'Tweeeez',
+    'data.item.locketSet': 'Locket Set',
+
 };

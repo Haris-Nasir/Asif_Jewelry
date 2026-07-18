@@ -199,7 +199,7 @@
                                                 <tr v-for="job in labJobs.data" :key="job.lab_job_id">
                                                     <td class="text-nowrap">{{ formatJobDate(job.job_date) }}</td>
                                                     <td>{{ job.job_reference || '-' }}</td>
-                                                    <td class="text-capitalize">{{ job.metal_type }}</td>
+                                                    <td class="text-capitalize">{{ $label(job.metal_type) }}</td>
                                                     <td class="text-right">{{ formatJobWeight(job.weight_grams) }}</td>
                                                     <td class="text-right text-nowrap">{{ formatTableAmount(job.base_price) }}</td>
                                                     <td class="text-right text-nowrap">{{ formatTableAmount(job.refinery_cost) }}</td>
@@ -260,7 +260,7 @@
                                                 <tr v-for="txn in summary.transactions" :key="txn.investor_transaction_id">
                                                     <td class="text-nowrap">{{ formatJobDate(txn.transaction_date) }}</td>
                                                     <td>{{ formatType(txn.transaction_type) }}</td>
-                                                    <td>{{ txn.metal_type || '-' }}</td>
+                                                    <td>{{ txn.metal_type ? $label(txn.metal_type) : '-' }}</td>
                                                     <td class="text-right">{{ txn.weight_grams || '-' }}</td>
                                                     <td class="text-right">{{ txn.rate_per_gram || '-' }}</td>
                                                     <td class="text-right">{{ formatMoney(txn.amount) }}</td>
