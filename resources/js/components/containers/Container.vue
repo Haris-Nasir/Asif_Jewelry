@@ -11,7 +11,7 @@
       <Sidebar/>
       <div class="content-wrapper">
         <transition name="fade" mode="out-in">
-          <router-view :key="$route.path"></router-view>
+          <router-view :key="$route.path + '-' + localeKey"></router-view>
         </transition>
       </div>
       <Footer/>
@@ -24,12 +24,19 @@
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import { i18nState } from "../../i18n";
+
 export default {
   name: "Container",
   components: {
     Header,
     Sidebar,
     Footer,
+  },
+  computed: {
+    localeKey() {
+      return i18nState.locale;
+    },
   },
 };
 

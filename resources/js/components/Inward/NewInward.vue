@@ -599,13 +599,10 @@ export default {
       axios
         .get("../api/sellqualitycategories")
         .then((response) => {
-          this.productQualityCategories = response.data.qualityCategories.map((category) => {
-            return {
-              value: category.qualityCategoryId,
-              text: category.qualityCategoryName + " (" + category.metalType + ")",
-              metalType: category.metalType,
-            };
-          });
+          this.productQualityCategories = response.data.qualityCategories.map((category) => ({
+            ...this.$categoryOption(category, { withMetal: true }),
+            metalType: category.metalType,
+          }));
         })
         .catch((err) => {
           console.log(err);

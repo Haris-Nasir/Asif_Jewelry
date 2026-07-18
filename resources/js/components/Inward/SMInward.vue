@@ -139,8 +139,8 @@ NOTES
                           <td>{{ inward.inward_mst_invoice_no }}</td>
                           <td>{{ inward.vendor_company_name }}</td>
                           <td>{{ inward.broker_name }}</td>
-                          <td>{{ inward.quality_name }}</td>
-                          <td>{{ inward.metal_type || '-' }}</td>
+                          <td>{{ $label(inward.quality_name) }}</td>
+                          <td>{{ inward.metal_type ? $label(inward.metal_type) : '-' }}</td>
                           <td class="text-right">{{ inward.weight_grams || inward.qty }}</td>
                           <td class="text-right">{{ inward.rate }}</td>
                           <td class="text-right">
@@ -427,7 +427,7 @@ NOTES
                       <label class="text-md">{{ $t('common.category') }}</label>
                     </div>
                     <div class="col-md-4">
-                      <input type="text" class="form-control" v-model="inwardToView.category" disabled>
+                      <input type="text" class="form-control" :value="$label(inwardToView.category)" disabled>
                     </div>
                     <div class="col-md-2">
                       <label class="text-md">{{ $t('common.unit') }}</label>
@@ -442,7 +442,7 @@ NOTES
                       <label class="text-md">{{ $t('common.quality') }}</label>
                     </div>
                     <div class="col-md-4">
-                      <input type="text" class="form-control" v-model="inwardToView.quality" disabled>
+                      <input type="text" class="form-control" :value="$label(inwardToView.quality)" disabled>
                     </div>
                     <div class="col-md-2">
                       <label class="text-md">{{ $t('common.quantity') }}</label>
@@ -700,12 +700,9 @@ NOTES
           .get("/api/sellqualitycategories")
           .then((response) => {
             let allEntry = [{ text: this.$t('common.all'), value: "" }];
-            let individualEntry = response.data.qualityCategories.map((category) => {
-              return {
-                value: category.qualityCategoryId,
-                text: category.qualityCategoryName + " (" + category.metalType + ")",
-              };
-            });
+            let individualEntry = response.data.qualityCategories.map(c =>
+              this.$categoryOption(c, { withMetal: true })
+            );
             this.categoriesForFilter = allEntry.concat(individualEntry);
           })
           .catch((err) => {
@@ -873,13 +870,10 @@ NOTES
         axios
           .get("../api/sellqualitycategories")
           .then((response) => {
-            this.editProductQualityCategories = response.data.qualityCategories.map((category) => {
-              return {
-                value: category.qualityCategoryId,
-                text: category.qualityCategoryName + " (" + category.metalType + ")",
-                metalType: category.metalType,
-              };
-            });
+            this.editProductQualityCategories = response.data.qualityCategories.map((category) => ({
+              ...this.$categoryOption(category, { withMetal: true }),
+              metalType: category.metalType,
+            }));
           })
           .catch((err) => {
             console.log(err);

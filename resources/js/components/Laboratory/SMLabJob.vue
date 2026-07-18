@@ -96,7 +96,7 @@
                                     <td class="text-nowrap">{{ formatDate(job.job_date) }}</td>
                                     <td>{{ job.job_reference || '-' }}</td>
                                     <td class="investor-cell">{{ formatParticipants(job) }}</td>
-                                    <td class="text-capitalize">{{ job.metal_type }}</td>
+                                    <td class="text-capitalize">{{ $label(job.metal_type) }}</td>
                                     <td class="text-right text-nowrap">{{ formatWeight(job.weight_grams) }}</td>
                                     <td class="text-right text-nowrap">{{ formatAmount(job.base_price) }}</td>
                                     <td class="text-right text-nowrap">{{ formatAmount(job.refinery_cost) }}</td>

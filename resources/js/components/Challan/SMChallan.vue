@@ -148,8 +148,8 @@ NOTES
                                                     <td>{{ challan.challan_no }}</td>
                                                     <td>{{ challan.customer_company_name }}</td>
                                                     <td>{{ challan.broker_name }}</td>
-                                                    <td>{{ challan.quality_name }}</td>
-                                                    <td>{{ challan.sell_category_name }}</td>
+                                                    <td>{{ $label(challan.quality_name) }}</td>
+                                                    <td>{{ $label(challan.sell_category_name) }}</td>
                                                     <td class="text-right">{{ challan.totalqty }}</td>
                                                     <td class="text-right">{{ challan.weight_grams || '-' }}</td>
                                                     <td class="text-center">
@@ -510,13 +510,13 @@ NOTES
                                             {{ $t('common.quality') }}
                                         </label>
                                         <div class="col-md-4">
-                                            <input type="text" class="form-control" v-model="challanToView.quality" disabled>
+                                            <input type="text" class="form-control" :value="$label(challanToView.quality)" disabled>
                                         </div>
                                         <label class="col-md-2 mt-2 text-md">
                                             {{ $t('common.category') }}
                                         </label>
                                         <div class="col-md-4">
-                                            <input type="text" class="form-control" v-model="challanToView.category" disabled>
+                                            <input type="text" class="form-control" :value="$label(challanToView.category)" disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
@@ -904,14 +904,7 @@ export default {
                 .get("/api/sellqualitycategories")
                 .then(response => {
                     let allEntry = [{ text: this.$t('common.all'), value: "" }];
-                    let individualEntry = response.data.qualityCategories.map(
-                        category => {
-                            return {
-                                value: category.qualityCategoryId,
-                                text: category.qualityCategoryName
-                            };
-                        }
-                    );
+                    let individualEntry = response.data.qualityCategories.map(c => this.$categoryOption(c));
                     this.categoriesForFilter = allEntry.concat(individualEntry);
                 })
                 .catch(err => {
@@ -1169,12 +1162,7 @@ export default {
 
         loadQualityCategories() { // will load vcategories of product
             axios.get('../api/sellqualitycategories').then((response) => {
-                this.productCategories = response.data.qualityCategories.map(category => {
-                    return {
-                        value: category.qualityCategoryId,
-                        text: category.qualityCategoryName
-                    }
-                });
+                this.productCategories = response.data.qualityCategories.map(c => this.$categoryOption(c));
             }).catch(err => {
                 console.log(err);
                 toastr["error"](this.$t('common.somethingWrong'))

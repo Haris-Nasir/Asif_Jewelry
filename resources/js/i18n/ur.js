@@ -787,4 +787,18 @@ export default {
     'perm.laboratory_delete': 'لیبارٹری جابز حذف',
     'perm.karigar': 'کاریگر (آؤٹ ورڈ/اِن ورڈ)',
 
+
+    'data.goldItems': 'سونے کی اشیاء',
+    'data.silverItems': 'چاندی کی اشیاء',
+    'data.item.tops': 'ٹاپس',
+    'data.item.angothi': 'انگوٹھی',
+    'data.item.kanty': 'کانٹے',
+    'data.item.balian': 'بالیاں',
+    'data.item.kadySet': 'کڑے سیٹ',
+    'data.item.nail': 'نیل',
+    'data.item.daddy': 'ڈیڈی',
+    'data.item.pazeb': 'پازیب',
+    'data.item.tweeeez': 'ٹوییز',
+    'data.item.locketSet': 'لاکٹ سیٹ',
+
 };

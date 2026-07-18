@@ -143,8 +143,8 @@ NOTES
                                                     <td>{{ invoice.challan_no }}</td>
                                                     <td>{{ invoice.customer_company_name }}</td>
                                                     <td>{{ invoice.broker_name }}</td>
-                                                    <td>{{ invoice.quality_name }}</td>
-                                                    <td>{{ invoice.sell_category_name }}</td>
+                                                    <td>{{ $label(invoice.quality_name) }}</td>
+                                                    <td>{{ $label(invoice.sell_category_name) }}</td>
                                                     <td class="text-right">{{ invoice.weight_grams || '-' }}</td>
                                                     <td class="text-right">{{ invoice.sold_amount || invoice.netAmount }}</td>
                                                     <td class="text-right">{{ invoice.profit_amount != null ? invoice.profit_amount : '-' }}</td>
@@ -398,13 +398,13 @@ NOTES
                                             <label class="text-md mt-1">{{ $t('common.quality') }}</label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="text" class="form-control" v-model="invoiceToView.quality" disabled>
+                                            <input type="text" class="form-control" :value="$label(invoiceToView.quality)" disabled>
                                         </div>
                                         <div class="col-md-2">
                                             <label class="text-md mt-1">{{ $t('common.category') }}</label>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="text" class="form-control" v-model="invoiceToView.category" disabled>
+                                            <input type="text" class="form-control" :value="$label(invoiceToView.category)" disabled>
                                         </div>
                                     </div>
                                     <div class="row mt-3">
@@ -655,12 +655,7 @@ export default {
             axios
             .get('../api/sellqualitycategories').then((response) => {
                 let allEntry = [{text: this.$t('common.all'), value: ""}];
-                let individualEntry = response.data.qualityCategories.map(category => {
-                    return {
-                        value: category.qualityCategoryId,
-                        text: category.qualityCategoryName
-                    }
-                });
+                let individualEntry = response.data.qualityCategories.map(c => this.$categoryOption(c));
 
                 this.filters.options.categories = allEntry.concat(individualEntry);
             })
@@ -1171,12 +1166,7 @@ export default {
         loadCategories: function(){
             axios
             .get('../api/sellqualitycategories').then((response) => {
-                this.invoiceToEdit.categoriesOptions = response.data.qualityCategories.map(category => {
-                    return {
-                        value: category.qualityCategoryId,
-                        text: category.qualityCategoryName
-                    }
-                });
+                this.invoiceToEdit.categoriesOptions = response.data.qualityCategories.map(c => this.$categoryOption(c));
             })
             .catch(err => {
                 console.log(err);
