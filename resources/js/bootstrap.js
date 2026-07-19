@@ -23,7 +23,7 @@ window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-const token = localStorage.getItem('ayub_jewelry_token');
+const token = localStorage.getItem('ayyub_jewelry_token');
 if (token) {
     window.axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 }
@@ -32,8 +32,8 @@ window.axios.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            localStorage.removeItem('ayub_jewelry_token');
-            localStorage.removeItem('ayub_jewelry_user');
+            localStorage.removeItem('ayyub_jewelry_token');
+            localStorage.removeItem('ayyub_jewelry_user');
             if (window.location.hash !== '#/login') {
                 window.location.hash = '#/login';
             }

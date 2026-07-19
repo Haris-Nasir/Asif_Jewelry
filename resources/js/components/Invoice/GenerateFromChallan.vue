@@ -111,30 +111,45 @@
 
                                     <div class="form-group row">
                                         <div class="col-md-2">
-                                            <label for="productQuality" class="text-md col-form-label">{{ $t('common.productQuality') }}
-                                                <span class="required-mark" style="color: red;">*</span></label>
+                                            <label class="text-md col-form-label">{{ $t('invoice.products') }}</label>
                                         </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="text-md form-control" v-model="productQuality"
-                                                disabled>
-                                        </div>
-
-                                        <div class="col-md-2">
-                                            <label for="totalPieces" class="text-md col-form-label">{{ $t('common.totalPieces') }}
-                                                <span class="required-mark" style="color: red;">*</span></label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="text-md text-right form-control"
-                                                v-model="totalPieces" disabled>
-                                        </div>
-
-                                        <div class="col-md-2">
-                                            <label for="weightGrams" class="text-md col-form-label">{{ $t('common.weightG') }}
-                                                <span class="required-mark" style="color: red;">*</span></label>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="text-md text-right form-control"
-                                                v-model="weightGrams" disabled>
+                                        <div class="col-md-10">
+                                            <div class="table-responsive" v-if="lineItems.length">
+                                                <table class="table table-bordered table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>{{ $t('common.quality') }}</th>
+                                                            <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                            <th class="text-right">{{ $t('common.totalPieces') }}</th>
+                                                            <th class="text-right">{{ $t('common.ratePerG') }}</th>
+                                                            <th class="text-right">{{ $t('invoice.lineAmount') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(line, index) in lineItems" :key="index">
+                                                            <td>{{ $label(line.qualityName) }}</td>
+                                                            <td class="text-right">{{ Number(line.weightGrams || 0).toFixed(3) }}</td>
+                                                            <td class="text-right">{{ line.qty }}</td>
+                                                            <td>
+                                                                <input type="number" step="0.01" class="form-control form-control-sm text-right"
+                                                                    v-model="line.rate" @input="recalculateTotals">
+                                                            </td>
+                                                            <td class="text-right">{{ lineAmount(line) }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div v-else class="form-group row mb-0">
+                                                <div class="col-md-4">
+                                                    <input type="text" class="text-md form-control" v-model="productQuality" disabled>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <input type="text" class="text-md text-right form-control" v-model="totalPieces" disabled>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <input type="text" class="text-md text-right form-control" v-model="weightGrams" disabled>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -170,7 +185,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
+                                    <div class="form-group row" v-if="lineItems.length <= 1">
                                         <div class="col-md-2">
                                             <label for="rate" class="text-md col-form-label">{{ $t('common.ratePerG') }}
                                                 <span class="required-mark" style="color: red;">*</span></label>
@@ -178,7 +193,7 @@
                                         <div class="col-md-2">
                                             <input type="number" step="0.01" class="text-md text-right form-control"
                                                 v-model="rate" :placeholder="$t('invoice.phRate')"
-                                                @change="recalculateTotals">
+                                                @change="onSingleRateChange">
                                             <small class="text-muted">{{ $t('invoice.helperAmountWeight') }}</small>
                                         </div>
 
@@ -189,6 +204,15 @@
                                         <div class="col-md-2">
                                             <input type="number" class="text-md text-right form-control"
                                                 v-model="amount" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" v-else>
+                                        <div class="col-md-2">
+                                            <label class="text-md col-form-label">{{ $t('common.baseAmount') }}</label>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="number" class="text-md text-right form-control" v-model="amount" disabled>
                                         </div>
                                     </div>
 
@@ -216,7 +240,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="form-group row" v-if="metalType === 'gold'">
+                                    <div class="form-group row" v-if="hasGoldItem">
                                         <div class="col-md-2">
                                             <label class="text-md col-form-label">{{ $t('common.polishPerG') }}</label>
                                         </div>
@@ -375,6 +399,7 @@
                 productQuality: '',
                 totalPieces: '',
                 weightGrams: '',
+                lineItems: [],
 
                 invoiceDate: '',
                 dueDate: '',
@@ -402,20 +427,32 @@
         },
         computed: {
             polishCostTotal() {
-                if (this.metalType !== 'gold') {
+                if (!this.hasGoldItem) {
                     return '0.00';
                 }
                 const total = parseFloat(this.polishRatePerGram || 0) * parseFloat(this.weightGrams || 0);
                 return Number.isNaN(total) ? '0.00' : total.toFixed(2);
             },
+            hasGoldItem() {
+                if (this.lineItems.length) {
+                    return this.lineItems.some((line) => (line.metalType || 'gold') === 'gold');
+                }
+                return this.metalType === 'gold';
+            },
+            hasSilverItem() {
+                if (this.lineItems.length) {
+                    return this.lineItems.some((line) => (line.metalType || '') === 'silver');
+                }
+                return this.metalType === 'silver';
+            },
             totalProcessingCost() {
-                const polish = this.metalType === 'gold'
+                const polish = this.hasGoldItem
                     ? (parseFloat(this.polishCostTotal || 0) || 0)
                     : 0;
                 return (polish + this.appliedMazduriAmount).toFixed(2);
             },
             appliedMazduriAmount() {
-                if (this.metalType === 'silver') {
+                if (this.hasSilverItem) {
                     return parseFloat(this.mazduriCost || 0) || 0;
                 }
                 if (this.karigarJobId) {
@@ -424,7 +461,7 @@
                 return 0;
             },
             showMazduriField() {
-                return this.metalType === 'silver';
+                return this.hasSilverItem;
             },
             mazduriHelpText() {
                 if (this.karigarJobId) {
@@ -555,7 +592,25 @@
                         this.weightGrams = response.data[1]["weight_grams"] || '';
                         this.metalType = response.data[1]["metal_type"] || 'gold';
                         this.sellQualityId = response.data[1]["sell_quality_id"] || '';
+                        this.lineItems = (response.data[1]["items"] || []).map((item) => ({
+                            challanDetailsId: item.challanDetailsId,
+                            categoryId: item.categoryId,
+                            qualityId: item.qualityId,
+                            qualityName: item.qualityName,
+                            metalType: item.metalType || 'gold',
+                            qty: item.qty,
+                            weightGrams: item.weightGrams,
+                            unit: item.unit || 'pcs',
+                            rate: '',
+                        }));
+                        if (this.lineItems.length) {
+                            this.weightGrams = this.lineItems.reduce((sum, line) => sum + parseFloat(line.weightGrams || 0), 0).toFixed(3);
+                            this.totalPieces = this.lineItems.reduce((sum, line) => sum + parseFloat(line.qty || 0), 0);
+                            this.metalType = this.lineItems[0].metalType || 'gold';
+                            this.sellQualityId = this.lineItems[0].qualityId || this.sellQualityId;
+                        }
                         this.loadPendingKarigarJobs();
+                        this.recalculateTotals();
                     }
 
                 }).catch(err => {
@@ -579,6 +634,7 @@
                 this.productQuality = '';
                 this.totalPieces = '';
                 this.weightGrams = '';
+                this.lineItems = [];
 
                 this.rate = '';
                 this.amount = '';
@@ -611,7 +667,32 @@
                     });
             },
 
+            lineAmount(line) {
+                const amount = parseFloat(line.weightGrams || 0) * parseFloat(line.rate || 0);
+                return Number.isNaN(amount) ? '0.00' : amount.toFixed(2);
+            },
+            onSingleRateChange() {
+                if (this.lineItems.length === 1) {
+                    this.lineItems[0].rate = this.rate;
+                }
+                this.recalculateTotals();
+            },
             recalculateTotals() {
+                if (this.lineItems.length) {
+                    const totalAmount = this.lineItems.reduce(
+                        (sum, line) => sum + parseFloat(line.weightGrams || 0) * parseFloat(line.rate || 0),
+                        0
+                    );
+                    const gstAmount = totalAmount * parseFloat(this.gstPercentage || 0) * 0.01;
+                    this.amount = totalAmount.toFixed(2);
+                    this.gstAmount = gstAmount.toFixed(2);
+                    this.grandTotal = (totalAmount + gstAmount).toFixed(2);
+                    if (this.lineItems.length === 1) {
+                        this.rate = this.lineItems[0].rate;
+                    }
+                    return;
+                }
+
                 if (this.rate === '' || this.weightGrams === '') {
                     this.amount = '';
                     this.gstAmount = '0.00';
@@ -619,13 +700,11 @@
                     return;
                 }
 
-                const base = parseFloat(this.rate) * parseFloat(this.weightGrams);
-                const gstPct = parseFloat(this.gstPercentage) || 0;
-                const gst = base * gstPct * 0.01;
-
-                this.amount = base.toFixed(2);
-                this.gstAmount = gst.toFixed(2);
-                this.grandTotal = (base + gst).toFixed(2);
+                const totalAmount = parseFloat(this.weightGrams || 0) * parseFloat(this.rate || 0);
+                const gstAmount = totalAmount * parseFloat(this.gstPercentage || 0) * 0.01;
+                this.amount = totalAmount.toFixed(2);
+                this.gstAmount = gstAmount.toFixed(2);
+                this.grandTotal = (totalAmount + gstAmount).toFixed(2);
             },
 
             getBank() {
@@ -656,12 +735,28 @@
             },
 
             addInvoice() {
+                if (!this.salesBillNo || !this.challanMstId || !this.invoiceDate || !this.dueDate || !this.selectedFinancialYear) {
+                    toastr.error(this.$t('common.allFieldsRequired'));
+                    return;
+                }
+
+                if (this.lineItems.length) {
+                    for (let i = 0; i < this.lineItems.length; i++) {
+                        if (this.lineItems[i].rate === '' || parseFloat(this.lineItems[i].rate) < 0) {
+                            toastr.info(this.$t('invoice.lineN', { n: i + 1 }) + ': ' + this.$t('invoice.rateRequired'));
+                            return;
+                        }
+                    }
+                } else if (this.rate === '') {
+                    toastr.error(this.$t('common.allFieldsRequired'));
+                    return;
+                }
+
                 var addData = {};
                 addData["invoiceId"] = this.challanMstId;
                 addData["invoiceDate"] = this.invoiceDate;
-                addData["rate"] = this.rate;
                 addData["gstPercentage"] = this.gstPercentage;
-                addData["bankId"] = this.selectedBank;
+                addData["bankId"] = this.selectedBank || null;
                 addData["dueDate"] = this.dueDate;
 
                 let splitYear = this.selectedFinancialYear.split(" - ");
@@ -679,68 +774,44 @@
                     addData["karigarJobId"] = this.karigarJobId;
                 }
 
-                if (this.salesBillNo == '' || this.challanMstId == '' || this.invoiceDate == '' || this.dueDate == '' || this.rate == '' || this.selectedBank == '' || this.selectedBank == undefined || this.selectedFinancialYear == '' || this.selectedFinancialYear == undefined) {
-                    toastr["error"](this.$t('common.allFieldsRequired'));
+                if (this.lineItems.length) {
+                    addData["items"] = this.lineItems.map((line) => ({
+                        challanDetailsId: line.challanDetailsId,
+                        categoryId: line.categoryId,
+                        qualityId: line.qualityId,
+                        qty: line.qty,
+                        weightGrams: line.weightGrams,
+                        unit: line.unit,
+                        rate: line.rate,
+                    }));
                 } else {
-                    axios.get('../api/verifyinvoicedate/' + this.invoiceDate + '/' + fromDate + '/' + toDate).then(response => {
-                        if (response.data.status == 1) {
-                            axios.post('../api/invoice/insert', addData).then(response => {
-                                if (response.data.status == -1) {
-                                    toastr.error(response.data.message || this.$t('invoice.createInvoiceFail'));
-                                    var errormsg = response.data.errors;
-
-                                    try {
-                                        if (errormsg.invoiceId)
-                                            toastr["error"](errormsg.invoiceId)
-                                    } catch (err) { }
-
-                                    try {
-                                        if (errormsg.invoiceDate)
-                                            toastr["error"](errormsg.invoiceDate)
-                                    } catch (err) { }
-
-                                    try {
-                                        if (errormsg.rate)
-                                            toastr["error"](errormsg.rate)
-                                    } catch (err) { }
-
-                                    try {
-                                        if (errormsg.gstPercentage)
-                                            toastr["error"](errormsg.gstPercentage)
-                                    } catch (err) { }
-
-                                    try {
-                                        if (errormsg.bankId)
-                                            toastr["error"](errormsg.bankId)
-                                    } catch (err) { }
-
-                                    try {
-                                        if (errormsg.dueDate)
-                                            toastr["error"](errormsg.dueDate)
-                                    } catch (err) { }
-
-                                } else if (response.data.status == 0) {
-                                    toastr["warning"](response.data.message);
-                                } else if (response.data.status == 1) {
-                                    const profit = response.data.profit != null ? parseFloat(response.data.profit).toFixed(2) : '0.00';
-                                    swal.fire({
-                                        title: this.$t('common.success'),
-                                        html: "<h5 style='color:#9C9794'>" + this.$t('invoice.fromCreated') + "</h5><p>" + this.$t('invoice.profitRecorded', { profit }) + "</p>",
-                                        icon: 'success'
-                                    }).then((result) => {
-                                        this.resetFields();
-                                    });
-                                }
-
-                            }).catch(err => {
-                                console.log(err);
-                                toastr.error(err.response?.data?.message || this.$t('invoice.createInvoiceFailDetailed'));
-                            })
-                        }else if(response.data.status == 0){
-                            toastr["error"](response.data.message);
-                        }
-                    })
+                    addData["rate"] = this.rate;
                 }
+
+                axios.get('../api/verifyinvoicedate/' + this.invoiceDate + '/' + fromDate + '/' + toDate).then(response => {
+                    if (response.data.status == 1) {
+                        axios.post('../api/invoice/insert', addData).then(response => {
+                            if (response.data.status == -1) {
+                                toastr.error(response.data.message || this.$t('invoice.createInvoiceFail'));
+                            } else if (response.data.status == 0) {
+                                toastr.warning(response.data.message);
+                            } else if (response.data.status == 1) {
+                                const profit = response.data.profit != null ? parseFloat(response.data.profit).toFixed(2) : '0.00';
+                                swal.fire({
+                                    title: this.$t('common.success'),
+                                    html: "<h5 style='color:#9C9794'>" + this.$t('invoice.fromCreated') + "</h5><p>" + this.$t('invoice.profitRecorded', { profit }) + "</p>",
+                                    icon: 'success'
+                                }).then(() => {
+                                    this.resetFields();
+                                });
+                            }
+                        }).catch(err => {
+                            toastr.error(err.response?.data?.message || this.$t('invoice.createInvoiceFailDetailed'));
+                        });
+                    } else if (response.data.status == 0) {
+                        toastr.error(response.data.message);
+                    }
+                }).catch(() => toastr.error(this.$t('common.somethingWrong')));
             },
 
             resetFields() {

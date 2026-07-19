@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Ayub Jewelers</title>
+        <title>Ayyub Jewelers</title>
 
         <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">

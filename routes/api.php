@@ -23,6 +23,7 @@ use App\Http\Controllers\LabJobController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KarigarController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\AppSettingsController;
 
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
@@ -40,7 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users/workers', [UserController::class, 'storeWorker']);
         Route::put('/users/workers/{userId}/permissions', [UserController::class, 'updatePermissions']);
         Route::get('/audit-logs', [AuditLogController::class, 'index']);
+        Route::put('/settings', [AppSettingsController::class, 'update']);
     });
+
+    Route::get('/settings', [AppSettingsController::class, 'show'])->middleware('role:admin,worker');
 
     Route::get('/investor/summary', [InvestorController::class, 'summary'])->middleware('role:investor,admin');
     Route::get('/investor/transactions', [InvestorController::class, 'transactions'])->middleware('role:investor,admin');
@@ -175,6 +179,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/invoice', [InvoiceController::class, 'updateInvoiceForChallan']);
     });
     Route::delete('/directinvoice/{invoiceMstId}', [InvoiceController::class, 'deleteDirectInvoice'])
+        ->middleware(['role:admin,worker', 'permission:invoices_delete']);
+    Route::delete('/invoice/{invoiceMstId}', [InvoiceController::class, 'deleteChallanInvoice'])
         ->middleware(['role:admin,worker', 'permission:invoices_delete']);
 
     Route::middleware(['role:admin,worker', 'permission:expenses'])->group(function () {

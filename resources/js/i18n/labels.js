@@ -2,7 +2,7 @@ import en from './en';
 import ur from './ur';
 
 // Shared with index.js via same localStorage key — read live locale from DOM/body class
-const LOCALE_KEY = 'ayub_jewelry_locale';
+const LOCALE_KEY = 'ayyub_jewelry_locale';
 
 function currentLocale() {
     if (typeof document !== 'undefined' && document.body && document.body.classList.contains('locale-urdu')) {

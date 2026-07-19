@@ -4,7 +4,7 @@ import ur from './ur';
 import { label, categoryOption } from './labels';
 
 const messages = { en, ur };
-const LOCALE_KEY = 'ayub_jewelry_locale';
+const LOCALE_KEY = 'ayyub_jewelry_locale';
 
 function readSavedLocale() {
     const saved = localStorage.getItem(LOCALE_KEY);

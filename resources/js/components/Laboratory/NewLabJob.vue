@@ -11,16 +11,14 @@
                     </div>
                 </div>
                 <div class="card-body lab-job-form">
-                    <p class="text-muted small mb-3">
-                        {{ $t('lab.helperSelectInvestors') }}
-                    </p>
+                    <p class="text-muted small mb-3">{{ $t('lab.helperSelectInvestors') }}</p>
 
                     <div class="form-row">
                         <div class="form-group col-md-3">
                             <label class="lab-label">{{ $t('lab.jobDateTime') }} <span class="text-danger">*</span></label>
                             <input type="datetime-local" class="form-control" v-model="form.job_date">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <label class="lab-label">{{ $t('lab.investors') }} <span class="text-danger">*</span></label>
                             <investor-multi-select
                                 :investors="investors"
@@ -33,23 +31,48 @@
                             <label class="lab-label">{{ $t('common.reference') }}</label>
                             <input type="text" class="form-control" v-model="form.job_reference" :placeholder="$t('lab.phJobNo')">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-md-3">
                             <label class="lab-label">{{ $t('common.metal') }} <span class="text-danger">*</span></label>
                             <select class="form-control" v-model="form.metal_type">
                                 <option value="gold">{{ $t('common.gold') }}</option>
                                 <option value="silver">{{ $t('common.silver') }}</option>
                             </select>
                         </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group col-md-2">
                             <label class="lab-label">{{ $t('common.weightG') }} <span class="text-danger">*</span></label>
                             <input type="number" class="form-control text-right" v-model="form.weight_grams" min="0" step="0.001">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="lab-label">{{ $t('lab.basePrice') }} <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control text-right" v-model="form.base_price" min="0" step="0.01" @input="refreshSharePreview">
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="lab-label">{{ $t('lab.refineryCost') }}</label>
+                            <input type="number" class="form-control text-right" v-model="form.refinery_cost" min="0" step="0.01" @input="refreshSharePreview">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">{{ $t('lab.soldAmount') }}</label>
+                            <input type="number" class="form-control text-right" v-model="form.sold_amount" min="0" step="0.01" @input="refreshSharePreview">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label class="lab-label">{{ $t('lab.estProfit') }}</label>
+                            <input type="text" class="form-control text-right" :value="estimatedProfit" disabled>
                         </div>
                     </div>
 
                     <div v-if="sharePreview.participants.length" class="alert alert-light border mb-3">
                         <strong>{{ $t('lab.splitPreview') }}</strong>
                         <span class="text-muted small ml-2">
-                            {{ $t('lab.profitAllocated', { pct: sharePreview.total_profit_share_percentage }) }}
+                            {{ $t('lab.splitHintPerInvestor') }}
+                            · {{ $t('lab.shopCut', { pct: sharePreview.shop_profit_percentage }) }}
+                            <span v-if="estimatedProfit !== '-' && sharePreview.shop_profit_amount != null">
+                                ({{ formatAmount(sharePreview.shop_profit_amount) }})
+                            </span>
+                            · {{ $t('lab.investorPool', { pct: sharePreview.investor_pool_percentage }) }}
+                            · {{ $t('lab.profitAllocated', { pct: sharePreview.total_profit_share_percentage }) }}
                             <span v-if="sharePreview.unallocated_profit_percentage > 0">
                                 · {{ $t('lab.unallocated', { pct: sharePreview.unallocated_profit_percentage }) }}
                             </span>
@@ -69,7 +92,7 @@
                                     <td>{{ row.investor_name }}</td>
                                     <td class="text-right">{{ formatAmount(row.investment_basis) }}</td>
                                     <td class="text-right">{{ formatAmount(row.purchase_share) }}</td>
-                                    <td class="text-right">{{ row.share_percentage }}%</td>
+                                    <td class="text-right">{{ Number(row.share_percentage).toFixed(2) }}%</td>
                                     <td class="text-right" v-if="estimatedProfit !== '-'">
                                         {{ formatAmount(row.profit_share) }}
                                     </td>
@@ -78,24 +101,6 @@
                         </table>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group col-md-3">
-                            <label class="lab-label">{{ $t('lab.basePrice') }} <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control text-right" v-model="form.base_price" min="0" step="0.01" @input="refreshSharePreview">
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label class="lab-label">{{ $t('lab.refineryCost') }}</label>
-                            <input type="number" class="form-control text-right" v-model="form.refinery_cost" min="0" step="0.01" @input="refreshSharePreview">
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label class="lab-label">{{ $t('lab.soldAmount') }}</label>
-                            <input type="number" class="form-control text-right" v-model="form.sold_amount" min="0" step="0.01" @input="refreshSharePreview">
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label class="lab-label">{{ $t('lab.estProfit') }}</label>
-                            <input type="text" class="form-control text-right" :value="estimatedProfit" disabled>
-                        </div>
-                    </div>
                     <div class="form-group mb-0">
                         <label class="lab-label">{{ $t('common.notes') }}</label>
                         <textarea class="form-control" v-model="form.notes" rows="2"></textarea>
@@ -133,6 +138,10 @@ export default {
                 total_investment_basis: 0,
                 total_profit_share_percentage: 0,
                 unallocated_profit_percentage: 100,
+                split_mode: 'custom',
+                shop_profit_percentage: 0,
+                shop_profit_amount: null,
+                investor_pool_percentage: 100,
             },
             form: {
                 job_date: '',
@@ -166,10 +175,6 @@ export default {
         formatAmount(value) {
             return formatAmountValue(value);
         },
-        getTodaysDate() {
-            const d = new Date();
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        },
         normalizedInvestorIds() {
             return this.form.investor_ids.map((id) => parseInt(id, 10)).filter((id) => !Number.isNaN(id));
         },
@@ -183,10 +188,22 @@ export default {
                     toastr['error'](this.$t('lab.loadInvestorsFail'));
                 });
         },
+        emptyPreview() {
+            return {
+                participants: [],
+                total_investment_basis: 0,
+                total_profit_share_percentage: 0,
+                unallocated_profit_percentage: 100,
+                split_mode: 'custom',
+                shop_profit_percentage: 0,
+                shop_profit_amount: null,
+                investor_pool_percentage: 100,
+            };
+        },
         refreshSharePreview() {
             const investorIds = this.normalizedInvestorIds();
             if (!investorIds.length) {
-                this.sharePreview = { participants: [], total_investment_basis: 0, total_profit_share_percentage: 0, unallocated_profit_percentage: 100 };
+                this.sharePreview = this.emptyPreview();
                 return;
             }
 
@@ -203,7 +220,7 @@ export default {
                     this.sharePreview = res.data;
                 })
                 .catch((err) => {
-                    this.sharePreview = { participants: [], total_investment_basis: 0, total_profit_share_percentage: 0, unallocated_profit_percentage: 100 };
+                    this.sharePreview = this.emptyPreview();
                     if (err.response?.data?.message) {
                         toastr['error'](err.response.data.message);
                     }
@@ -248,7 +265,7 @@ export default {
                 sold_amount: '',
                 notes: '',
             };
-            this.sharePreview = { participants: [], total_investment_basis: 0, total_profit_share_percentage: 0, unallocated_profit_percentage: 100 };
+            this.sharePreview = this.emptyPreview();
         },
     },
 };

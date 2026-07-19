@@ -1,4 +1,4 @@
-# Ayub Jewelers — Implementation Phases
+# Ayyub Jewelers — Implementation Phases
 
 This project is being converted from a textile management system to a jewelry management system **phase by phase** (not in one go).
 
@@ -7,7 +7,7 @@ This project is being converted from a textile management system to a jewelry ma
 - User roles: `admin`, `worker`, `investor`
 - Login / logout (Laravel Sanctum token auth)
 - Role-based API protection and sidebar visibility
-- Rebrand: Ayub Jewelers
+- Rebrand: Ayyub Jewelers
 - Jewelry item types seeded (Gold + Silver categories)
 - Expense categories seeded (Electricity, Rent, Food, Salary, Refinery, Other)
 - New tables: `tbl_investors`, `tbl_metal_balances`, `tbl_stock_ledger`
@@ -18,9 +18,9 @@ This project is being converted from a textile management system to a jewelry ma
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@ayubjewelers.com | password |
-| Worker | worker@ayubjewelers.com | password |
-| Investor | investor@ayubjewelers.com | password |
+| Admin | admin@ayyubjewelers.com | password |
+| Worker | worker@ayyubjewelers.com | password |
+| Investor | *(create via Manage Investors)* | — |
 
 ### Setup after pull
 

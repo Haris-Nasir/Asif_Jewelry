@@ -87,10 +87,19 @@ class InvestorController extends Controller
             'investor_name' => 'required|string|max:100',
             'contact_no' => 'nullable|numeric|digits_between:10,11',
             'email' => 'nullable|email|max:255',
-            'profit_share_percentage' => 'required|numeric|min:0|max:100',
+            'profit_split_mode' => ['nullable', Rule::in(['investment', 'custom'])],
+            'profit_share_percentage' => 'nullable|numeric|min:0|max:100',
             'create_login' => 'nullable|boolean',
             'password' => 'nullable|string|min:6',
         ]);
+
+        $splitMode = ($validated['profit_split_mode'] ?? 'investment') === 'custom' ? 'custom' : 'investment';
+        if ($splitMode === 'custom' && !isset($validated['profit_share_percentage'])) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Profit % is required for Custom % investors.',
+            ], 422);
+        }
 
         DB::beginTransaction();
         try {
@@ -110,7 +119,10 @@ class InvestorController extends Controller
                 'investor_name' => $validated['investor_name'],
                 'contact_no' => $validated['contact_no'] ?? null,
                 'email' => $validated['email'] ?? null,
-                'profit_share_percentage' => $validated['profit_share_percentage'],
+                'profit_split_mode' => $splitMode,
+                'profit_share_percentage' => $splitMode === 'custom'
+                    ? ($validated['profit_share_percentage'] ?? 0)
+                    : 0,
                 'investor_status' => true,
             ]);
 
@@ -138,10 +150,27 @@ class InvestorController extends Controller
             'investor_name' => 'required|string|max:100',
             'contact_no' => 'nullable|numeric|digits_between:10,11',
             'email' => 'nullable|email|max:255',
-            'profit_share_percentage' => 'required|numeric|min:0|max:100',
+            'profit_split_mode' => ['required', Rule::in(['investment', 'custom'])],
+            'profit_share_percentage' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $investor->update($validated);
+        $splitMode = $validated['profit_split_mode'] === 'custom' ? 'custom' : 'investment';
+        if ($splitMode === 'custom' && !isset($validated['profit_share_percentage'])) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'Profit % is required for Custom % investors.',
+            ], 422);
+        }
+
+        $investor->update([
+            'investor_name' => $validated['investor_name'],
+            'contact_no' => $validated['contact_no'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'profit_split_mode' => $splitMode,
+            'profit_share_percentage' => $splitMode === 'custom'
+                ? ($validated['profit_share_percentage'] ?? 0)
+                : 0,
+        ]);
 
         return response()->json([
             'status' => 1,

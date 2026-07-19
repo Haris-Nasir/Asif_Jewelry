@@ -2,6 +2,38 @@
     <section class="content">
                 <div class="container-fluid">
                     <div class="row">
+                        <div class="col-12 mt-3">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">{{ $t('investor.profitSettingsTitle') }}</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted small mb-3">{{ $t('investor.profitSettingsHelper') }}</p>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4">
+                                            <label>{{ $t('investor.shopProfitPct') }}</label>
+                                            <input
+                                                type="number"
+                                                class="form-control"
+                                                v-model="settings.shop_profit_percentage"
+                                                min="0"
+                                                max="100"
+                                                step="0.01"
+                                            >
+                                            <small class="text-muted">{{ $t('investor.shopProfitHelper') }}</small>
+                                        </div>
+                                        <div class="form-group col-md-4 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary" @click="saveSettings">
+                                                {{ $t('investor.saveProfitSettings') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-5 mt-3">
                             <div class="card card-primary">
                                 <div class="card-header">
@@ -21,8 +53,17 @@
                                         <input type="text" class="form-control" v-model="investorForm.contact_no" maxlength="11">
                                     </div>
                                     <div class="form-group">
-                                        <label>{{ $t('investor.profitPct') }} <small class="text-muted">{{ $t('investor.helperLabSplit') }}</small></label>
+                                        <label>{{ $t('investor.profitSetting') }} *</label>
+                                        <select class="form-control" v-model="investorForm.profit_split_mode">
+                                            <option value="investment">{{ $t('lab.splitByInvestment') }}</option>
+                                            <option value="custom">{{ $t('lab.splitByCustom') }}</option>
+                                        </select>
+                                        <small class="text-muted">{{ $t('investor.perInvestorSplitHelper') }}</small>
+                                    </div>
+                                    <div class="form-group" v-if="investorForm.profit_split_mode === 'custom'">
+                                        <label>{{ $t('investor.profitPct') }} *</label>
                                         <input type="number" class="form-control" v-model="investorForm.profit_share_percentage" min="0" max="100" step="0.01">
+                                        <small class="text-muted">{{ $t('investor.helperLabSplit') }}</small>
                                     </div>
                                     <div class="form-check mb-3">
                                         <input type="checkbox" class="form-check-input" id="createLogin" v-model="investorForm.create_login">
@@ -52,7 +93,7 @@
                                         <select class="form-control" v-model="txnForm.investor_id">
                                             <option value="">{{ $t('common.selectInvestor') }}</option>
                                             <option v-for="inv in investors" :key="inv.investor_id" :value="inv.investor_id">
-                                                {{ inv.investor_name }} ({{ inv.profit_share_percentage }}%)
+                                                {{ formatInvestorOption(inv) }}
                                             </option>
                                         </select>
                                     </div>
@@ -118,8 +159,9 @@
                                                 <th>{{ $t('common.name') }}</th>
                                                 <th>{{ $t('common.email') }}</th>
                                                 <th>{{ $t('common.contact') }}</th>
-                                                <th class="text-right">{{ $t('investor.profitPct') }}</th>
-                                                <th width="20%">{{ $t('common.actions') }}</th>
+                                                <th class="text-right">{{ $t('investor.investment') }}</th>
+                                                <th class="text-right">{{ $t('investor.profitSetting') }}</th>
+                                                <th class="text-center" style="width: 6.5rem;">{{ $t('common.actions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -137,22 +179,49 @@
                                                     <span v-else>{{ inv.contact_no || '-' }}</span>
                                                 </td>
                                                 <td class="text-right">
-                                                    <input v-if="editingId === inv.investor_id" type="number" class="form-control form-control-sm text-right" v-model="editForm.profit_share_percentage" min="0" max="100" step="0.01">
-                                                    <span v-else>{{ inv.profit_share_percentage }}%</span>
+                                                    {{ formatAmount(inv.total_invested) }}
+                                                </td>
+                                                <td class="text-right">
+                                                    <template v-if="editingId === inv.investor_id">
+                                                        <select class="form-control form-control-sm mb-1" v-model="editForm.profit_split_mode">
+                                                            <option value="investment">{{ $t('lab.splitByInvestment') }}</option>
+                                                            <option value="custom">{{ $t('lab.splitByCustom') }}</option>
+                                                        </select>
+                                                        <input
+                                                            v-if="editForm.profit_split_mode === 'custom'"
+                                                            type="number"
+                                                            class="form-control form-control-sm text-right"
+                                                            v-model="editForm.profit_share_percentage"
+                                                            min="0"
+                                                            max="100"
+                                                            step="0.01"
+                                                        >
+                                                    </template>
+                                                    <span v-else>{{ formatProfitSetting(inv) }}</span>
                                                 </td>
                                                 <td class="text-center">
-                                                    <template v-if="editingId === inv.investor_id">
-                                                        <button class="btn btn-success btn-sm" @click="updateInvestor(inv.investor_id)"><i class="fas fa-check"></i></button>
-                                                        <button class="btn btn-secondary btn-sm" @click="cancelEdit"><i class="fas fa-times"></i></button>
-                                                    </template>
-                                                    <template v-else>
-                                                        <button class="btn btn-primary btn-sm" @click="startEdit(inv)"><i class="fas fa-pen"></i></button>
-                                                        <a :href="pdfUrl(inv.investor_id)" target="_blank" class="btn btn-danger btn-sm" :title="$t('investor.monthlyPdf')"><i class="fas fa-file-pdf"></i></a>
-                                                    </template>
+                                                    <div class="table-actions">
+                                                        <template v-if="editingId === inv.investor_id">
+                                                            <button type="button" class="btn btn-success btn-sm" @click="updateInvestor(inv.investor_id)" :title="$t('common.save')">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary btn-sm" @click="cancelEdit" :title="$t('common.cancel')">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </template>
+                                                        <template v-else>
+                                                            <button type="button" class="btn btn-primary btn-sm" @click="startEdit(inv)" :title="$t('common.edit')">
+                                                                <i class="fas fa-pen"></i>
+                                                            </button>
+                                                            <a :href="pdfUrl(inv.investor_id)" target="_blank" class="btn btn-danger btn-sm" :title="$t('investor.monthlyPdf')">
+                                                                <i class="fas fa-file-pdf"></i>
+                                                            </a>
+                                                        </template>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             <tr v-if="!investors.length">
-                                                <td colspan="5" class="text-center text-muted">{{ $t('investor.noFound') }}</td>
+                                                <td colspan="6" class="text-center text-muted">{{ $t('investor.noFound') }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -168,6 +237,7 @@
 import toastr from 'toastr';
 import swal from 'sweetalert2';
 import { pdfUrl } from '../../auth';
+import { formatAmount as formatAmountValue } from '../../currency';
 
 toastr.options = {
     closeButton: true,
@@ -184,10 +254,14 @@ export default {
             investors: [],
             editingId: null,
             editForm: {},
+            settings: {
+                shop_profit_percentage: 0,
+            },
             investorForm: {
                 investor_name: '',
                 email: '',
                 contact_no: '',
+                profit_split_mode: 'investment',
                 profit_share_percentage: 25,
                 create_login: false,
                 password: '',
@@ -211,17 +285,70 @@ export default {
     },
     mounted() {
         this.txnForm.transaction_date = this.getNowDateTime();
+        this.loadSettings();
         this.loadInvestors();
     },
     methods: {
+        formatAmount(value) {
+            return formatAmountValue(value);
+        },
+        isCustomInvestor(inv) {
+            return (inv.profit_split_mode || 'investment') === 'custom';
+        },
+        formatProfitSetting(inv) {
+            if (this.isCustomInvestor(inv)) {
+                return `${inv.profit_share_percentage}% · ${this.$t('lab.splitByCustom')}`;
+            }
+            return this.$t('lab.splitByInvestment');
+        },
+        formatInvestorOption(inv) {
+            const investment = `${this.$t('investor.investment')} ${this.formatAmount(inv.total_invested)}`;
+            if (this.isCustomInvestor(inv)) {
+                return `${inv.investor_name} (${inv.profit_share_percentage}% · ${investment})`;
+            }
+            return `${inv.investor_name} (${this.$t('lab.splitByInvestment')} · ${investment})`;
+        },
         getNowDateTime() {
             const d = new Date();
             const pad = (value) => String(value).padStart(2, '0');
 
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         },
-        getTodaysDate() {
-            return this.getNowDateTime();
+        loadSettings() {
+            axios.get('/api/settings')
+                .then((res) => {
+                    this.settings = {
+                        shop_profit_percentage: res.data.shop_profit_percentage,
+                    };
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toastr['error'](this.$t('investor.settingsLoadFail'));
+                });
+        },
+        saveSettings() {
+            if (this.settings.shop_profit_percentage === '' || this.settings.shop_profit_percentage === null) {
+                toastr['error'](this.$t('investor.shopProfitRequired'));
+                return;
+            }
+            axios.put('/api/settings', this.settings)
+                .then((res) => {
+                    if (res.data.status === 1) {
+                        this.settings = {
+                            shop_profit_percentage: res.data.data.shop_profit_percentage,
+                        };
+                        swal.fire({
+                            title: this.$t('common.success'),
+                            html: "<h5 style='color:#9C9794'>" + this.$t('investor.settingsSaved') + "</h5>",
+                            icon: 'success',
+                        });
+                    } else {
+                        toastr['error'](res.data.message || this.$t('investor.settingsSaveFail'));
+                    }
+                })
+                .catch((err) => {
+                    toastr['error'](err.response?.data?.message || this.$t('investor.settingsSaveFail'));
+                });
         },
         loadInvestors() {
             axios.get('/api/investor/list')
@@ -234,11 +361,19 @@ export default {
                 });
         },
         saveInvestor() {
-            if (!this.investorForm.investor_name || this.investorForm.profit_share_percentage === '') {
+            if (!this.investorForm.investor_name) {
+                toastr['error'](this.$t('investor.nameRequired'));
+                return;
+            }
+            if (this.investorForm.profit_split_mode === 'custom' && this.investorForm.profit_share_percentage === '') {
                 toastr['error'](this.$t('investor.nameProfitRequired'));
                 return;
             }
-            axios.post('/api/investor/create', this.investorForm)
+            const payload = { ...this.investorForm };
+            if (payload.profit_split_mode !== 'custom') {
+                payload.profit_share_percentage = 0;
+            }
+            axios.post('/api/investor/create', payload)
                 .then((res) => {
                     if (res.data.status === 1) {
                         swal.fire({
@@ -262,6 +397,7 @@ export default {
                 investor_name: '',
                 email: '',
                 contact_no: '',
+                profit_split_mode: 'investment',
                 profit_share_percentage: 25,
                 create_login: false,
                 password: '',
@@ -281,6 +417,7 @@ export default {
                             icon: 'success',
                         }).then(() => {
                             this.resetTxnForm();
+                            this.loadInvestors();
                         });
                     } else {
                         toastr['error'](res.data.message || this.$t('investor.txnFail'));
@@ -313,6 +450,7 @@ export default {
                 investor_name: inv.investor_name,
                 email: inv.email || '',
                 contact_no: inv.contact_no || '',
+                profit_split_mode: inv.profit_split_mode || 'investment',
                 profit_share_percentage: inv.profit_share_percentage,
             };
         },
@@ -321,7 +459,14 @@ export default {
             this.editForm = {};
         },
         updateInvestor(investorId) {
-            axios.put(`/api/investor/update/${investorId}`, this.editForm)
+            const payload = { ...this.editForm };
+            if (payload.profit_split_mode !== 'custom') {
+                payload.profit_share_percentage = 0;
+            } else if (payload.profit_share_percentage === '' || payload.profit_share_percentage === null) {
+                toastr['error'](this.$t('investor.nameProfitRequired'));
+                return;
+            }
+            axios.put(`/api/investor/update/${investorId}`, payload)
                 .then((res) => {
                     if (res.data.status === 1) {
                         swal.fire({

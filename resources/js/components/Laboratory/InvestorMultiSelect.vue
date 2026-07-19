@@ -36,7 +36,11 @@
                 >
                 <span>
                     {{ inv.investor_name }}
-                    <small class="text-muted d-block">{{ $t('investor.balanceRs') }} {{ formatBalance(inv.total_invested) }} · {{ $t('investor.profitShareLabel') }} {{ inv.profit_share_percentage }}%</small>
+                    <small class="text-muted d-block">
+                        <template v-if="isCustomInvestor(inv)">{{ $t('investor.profitShareLabel') }} {{ inv.profit_share_percentage }}% · </template>
+                        <template v-else>{{ $t('lab.splitByInvestment') }} · </template>
+                        {{ $t('lab.balance') }} {{ formatBalance(inv.total_invested) }}
+                    </small>
                 </span>
             </div>
             <p v-if="!investors.length" class="text-muted small mb-0 px-2 py-1">{{ $t('lab.noInvestors') }}</p>
@@ -83,6 +87,9 @@ export default {
         document.removeEventListener('click', this.handleOutsideClick);
     },
     methods: {
+        isCustomInvestor(inv) {
+            return (inv.profit_split_mode || 'investment') === 'custom';
+        },
         formatBalance(value) {
             return formatAmount(value || 0);
         },

@@ -21,6 +21,9 @@ class tbl_lab_job extends Model
         'profit_amount',
         'job_status',
         'notes',
+        'split_mode',
+        'shop_profit_percentage',
+        'shop_profit_amount',
         'created_by',
         'lab_job_status',
     ];
@@ -32,6 +35,8 @@ class tbl_lab_job extends Model
         'refinery_cost' => 'decimal:2',
         'sold_amount' => 'decimal:2',
         'profit_amount' => 'decimal:2',
+        'shop_profit_percentage' => 'decimal:2',
+        'shop_profit_amount' => 'decimal:2',
         'lab_job_status' => 'boolean',
     ];
 

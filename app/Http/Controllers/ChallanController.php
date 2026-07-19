@@ -50,7 +50,7 @@ class ChallanController extends Controller
             $sort_field = 'challan_date';
         }
 
-        $data = tbl_challan_mst::join('tbl_challan_details', 'tbl_challan_details.challan_mst_id', "=", 'tbl_challan_msts.challan_mst_id')
+        $query = tbl_challan_mst::join('tbl_challan_details', 'tbl_challan_details.challan_mst_id', "=", 'tbl_challan_msts.challan_mst_id')
         ->join('tbl_customers', 'tbl_customers.customer_id',"=", 'tbl_challan_msts.customer_id')
         ->join('tbl_brokers', 'tbl_brokers.broker_id', "=", 'tbl_challan_msts.broker_id')
         ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id',"=", 'tbl_challan_msts.sell_quality_id')
@@ -67,16 +67,38 @@ class ChallanController extends Controller
             $query->where('tbl_sell_qualities.sell_quality_category_id', $category);
         })
         ->when($quality, function($query) use ($quality){
-            $query->where('tbl_challan_msts.sell_quality_id', $quality);
+            $query->where(function ($q) use ($quality) {
+                $q->where('tbl_challan_msts.sell_quality_id', $quality)
+                    ->orWhere('tbl_challan_details.sell_quality_id', $quality);
+            });
         })
         ->when($broker, function($query) use ($broker){
             $query->where('tbl_challan_msts.broker_id', $broker);
         })
         ->orderBy($sort_field, $sort_direction)
         ->select('tbl_challan_msts.challan_mst_id', 'tbl_challan_msts.challan_no','tbl_challan_msts.challan_date','customer_company_name','tbl_brokers.broker_name',DB::raw("SUM(tbl_challan_details.qty) as totalqty"), 'tbl_challan_msts.weight_grams', 'tbl_sell_qualities.quality_name', 'tbl_sell_quality_categories.sell_category_name')
-        ->groupBy('tbl_challan_msts.challan_mst_id', 'tbl_customers.customer_company_name', 'tbl_brokers.broker_name', 'tbl_sell_qualities.quality_name', 'tbl_challan_msts.challan_date','tbl_challan_msts.challan_no', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.weight_grams')->paginate($paginate);
+        ->groupBy('tbl_challan_msts.challan_mst_id', 'tbl_customers.customer_company_name', 'tbl_brokers.broker_name', 'tbl_sell_qualities.quality_name', 'tbl_challan_msts.challan_date','tbl_challan_msts.challan_no', 'tbl_sell_quality_categories.sell_category_name', 'tbl_challan_msts.weight_grams');
 
-        return $data;
+        $paginator = $query->paginate($paginate);
+        $paginator->getCollection()->transform(function ($row) {
+            $names = tbl_challan_details::where('challan_mst_id', $row->challan_mst_id)
+                ->where('challan_details_status', true)
+                ->whereNotNull('sell_quality_id')
+                ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id', 'tbl_challan_details.sell_quality_id')
+                ->orderBy('tbl_challan_details.no')
+                ->pluck('quality_name')
+                ->unique()
+                ->values()
+                ->all();
+            if (count($names) > 1) {
+                $row->quality_name = implode(', ', $names);
+            } elseif (count($names) === 1) {
+                $row->quality_name = $names[0];
+            }
+            return $row;
+        });
+
+        return $paginator;
     }
 
     // will send challan data of requested challan
@@ -99,7 +121,12 @@ class ChallanController extends Controller
             return response()->json($res);
         }
         
-        $challanDataFetched = tbl_challan_mst::with("challan_details:challan_mst_id,challan_details_id,no,qty", "customer_relation:customer_id,customer_company_name", "broker:broker_id,broker_name", "quality:sell_quality_id,quality_name,sell_quality_category_id")
+        $challanDataFetched = tbl_challan_mst::with([
+            'challan_details',
+            'customer_relation:customer_id,customer_company_name',
+            'broker:broker_id,broker_name',
+            'quality:sell_quality_id,quality_name,sell_quality_category_id',
+        ])
         ->where("tbl_challan_msts.challan_mst_id", $challanId)
         ->first();
 
@@ -110,6 +137,21 @@ class ChallanController extends Controller
             ));
         }
 
+        $items = collect($challanDataFetched->challan_details)->map(function ($row) use ($challanDataFetched) {
+            return [
+                'challanDetailsId' => $row->challan_details_id,
+                'no' => $row->no,
+                'qty' => $row->qty,
+                'weightGrams' => $row->weight_grams,
+                'unit' => $row->qty_unit ?: $challanDataFetched->qty_unit,
+                'categoryId' => $row->sell_category_id ?: $challanDataFetched->challan_type,
+                'qualityId' => $row->sell_quality_id ?: $challanDataFetched->sell_quality_id,
+                'qualityName' => optional($row->quality)->quality_name
+                    ?: optional($challanDataFetched->quality)->quality_name,
+                'categoryName' => optional($row->category)->sell_category_name,
+            ];
+        })->values()->all();
+
         $challanData = array(
             "challanid" => (int)$challanId,
             "challanno" => $challanDataFetched->challan_no,
@@ -118,7 +160,11 @@ class ChallanController extends Controller
             "broker"=>$challanDataFetched->broker,
             "quality" => $challanDataFetched->quality,
             "unit" => $challanDataFetched->qty_unit,
-            "challandetails"=>$challanDataFetched->challan_details
+            "weight_grams" => $challanDataFetched->weight_grams,
+            "total_qty" => $challanDataFetched->total_qty,
+            "challandetails"=>$challanDataFetched->challan_details,
+            "items" => $items,
+            "quality_names" => collect($items)->pluck('qualityName')->filter()->unique()->values()->all(),
         );
 
         return response()->json($challanData);
@@ -205,55 +251,158 @@ class ChallanController extends Controller
 
     /* Will add new challan when requested with challan data from front-end */
     public function addNewChallan(Request $request){
-        $validated = validator($request->all(),[
-            'challanNo' => 'nullable | numeric',
-            'challanDate' => 'required | date',
-            'customerId' => 'required | numeric',
-            'sellCategoryId' => 'required | numeric',
-            'sellQualityId' => 'required | numeric',
-            'qtyUnit' => 'required |  max:10',
-            'totalQty' => 'required | numeric',
-            'weightGrams' => 'required | numeric | min:0.001',
-            'brokerId' => 'required | numeric',
-        ]);
+        $hasItems = is_array($request->input('items')) && count($request->input('items')) > 0;
 
-        if($validated->fails()){
-            $res = array(
-                "status" => -1,
-                "message" => "The given data was invalid.",
-                "errors" => $validated->errors()
-            );
-
-            return response()->json($res);
+        if ($hasItems) {
+            $validated = validator($request->all(), [
+                'challanDate' => 'required|date',
+                'customerId' => 'required|numeric',
+                'brokerId' => 'required|numeric',
+                'items' => 'required|array|min:1',
+                'items.*.categoryId' => 'required|numeric',
+                'items.*.qualityId' => 'required|numeric',
+                'items.*.qty' => 'required|numeric|min:0.001',
+                'items.*.unit' => 'required|max:20',
+                'items.*.weightGrams' => 'required|numeric|min:0.001',
+            ]);
+        } else {
+            $validated = validator($request->all(), [
+                'challanNo' => 'nullable|numeric',
+                'challanDate' => 'required|date',
+                'customerId' => 'required|numeric',
+                'sellCategoryId' => 'required|numeric',
+                'sellQualityId' => 'required|numeric',
+                'qtyUnit' => 'required|max:10',
+                'totalQty' => 'required|numeric',
+                'weightGrams' => 'required|numeric|min:0.001',
+                'brokerId' => 'required|numeric',
+            ]);
         }
 
-        $challanDate = $request->input("challanDate");
-        $customerId = $request->input("customerId");
-        $sellCategoryId = $request->input("sellCategoryId");
-        $sellQualityId = $request->input("sellQualityId");
-        $qtyUnit = $request->input("qtyUnit");
-        $totalQty = $request->input("totalQty");
-        $weightGrams = (float) $request->input("weightGrams");
-        $brokerId = $request->input("brokerId");
-        $fromDate = $request->input("fromDate");
-        $toDate = $request->input("toDate");
-        $allData = $request->input("allData");
+        if ($validated->fails()) {
+            return response()->json([
+                'status' => -1,
+                'message' => 'The given data was invalid.',
+                'errors' => $validated->errors(),
+            ]);
+        }
+
+        $challanDate = $request->input('challanDate');
+        $customerId = $request->input('customerId');
+        $brokerId = $request->input('brokerId');
         $financialYear = $this->getFinancialYearOfChallanDateInArray($challanDate);
         $challanNo = tbl_challan_mst::getNextChallanNo(
             $financialYear['fromDate'],
             $financialYear['toDate']
         );
 
-        if(count($allData) > 0){
-            for($i=0; $i<count($allData); $i++){
-                if(!is_numeric($allData[$i]['qty']) || (float) $allData[$i]['qty'] <= 0){
-                    $res = array(
-                        "status" => -1,
-                        "message" => 'Row '.($i + 1).' quantity is invalid.',
-                        "errors" => null
-                    );
+        if ($hasItems) {
+            $normalizedItems = [];
+            $totalWeightGrams = 0.0;
+            $totalQty = 0.0;
 
-                    return response()->json($res);
+            foreach ($request->input('items') as $index => $item) {
+                $qty = (float) $item['qty'];
+                $weightPerPiece = (float) $item['weightGrams'];
+                $lineWeight = round($weightPerPiece * $qty, 3);
+                $pieces = max(1, (int) round($qty));
+
+                if ($lineWeight <= 0) {
+                    return response()->json([
+                        'status' => -1,
+                        'message' => 'Line ' . ($index + 1) . ': total weight must be greater than zero (weight per piece × qty).',
+                    ], 422);
+                }
+
+                try {
+                    $this->stockService->assertSaleWeightMatchesStockRatio(
+                        (int) $item['qualityId'],
+                        $lineWeight,
+                        $pieces
+                    );
+                } catch (RuntimeException $e) {
+                    return response()->json([
+                        'status' => -1,
+                        'message' => 'Line ' . ($index + 1) . ': ' . $e->getMessage(),
+                    ]);
+                }
+
+                $normalizedItems[] = [
+                    'categoryId' => (int) $item['categoryId'],
+                    'qualityId' => (int) $item['qualityId'],
+                    'qty' => $qty,
+                    'unit' => $item['unit'],
+                    'lineWeight' => $lineWeight,
+                ];
+                $totalWeightGrams += $lineWeight;
+                $totalQty += $qty;
+            }
+
+            $first = $normalizedItems[0];
+            $totalWeightGrams = round($totalWeightGrams, 3);
+
+            DB::beginTransaction();
+            try {
+                $challanMst = new tbl_challan_mst();
+                $challanMst->challan_no = $challanNo;
+                $challanMst->challan_date = $challanDate;
+                $challanMst->customer_id = $customerId;
+                $challanMst->sell_quality_id = $first['qualityId'];
+                $challanMst->qty_unit = $first['unit'];
+                $challanMst->total_qty = $totalQty;
+                $challanMst->weight_grams = $totalWeightGrams;
+                $challanMst->broker_id = $brokerId;
+                $challanMst->challan_type = $first['categoryId'];
+                $challanMst->is_direct = 0;
+                $challanMst->save();
+
+                foreach ($normalizedItems as $i => $item) {
+                    tbl_challan_details::create([
+                        'no' => $i + 1,
+                        'qty' => $item['qty'],
+                        'weight_grams' => $item['lineWeight'],
+                        'qty_unit' => $item['unit'],
+                        'challan_mst_id' => $challanMst->challan_mst_id,
+                        'challan_type' => $item['categoryId'],
+                        'sell_quality_id' => $item['qualityId'],
+                        'sell_category_id' => $item['categoryId'],
+                        'challan_details_status' => true,
+                    ]);
+                }
+
+                DB::commit();
+            } catch (QueryException $e) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => -1,
+                    'message' => 'Server Error',
+                    'errors' => $e,
+                ], 500);
+            }
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Sales bill added successfully.',
+                'errors' => null,
+            ], 200);
+        }
+
+        // Legacy single-product payload
+        $sellCategoryId = $request->input('sellCategoryId');
+        $sellQualityId = $request->input('sellQualityId');
+        $qtyUnit = $request->input('qtyUnit');
+        $totalQty = $request->input('totalQty');
+        $weightGrams = (float) $request->input('weightGrams');
+        $allData = $request->input('allData') ?: [];
+
+        if (count($allData) > 0) {
+            for ($i = 0; $i < count($allData); $i++) {
+                if (!is_numeric($allData[$i]['qty']) || (float) $allData[$i]['qty'] <= 0) {
+                    return response()->json([
+                        'status' => -1,
+                        'message' => 'Row ' . ($i + 1) . ' quantity is invalid.',
+                        'errors' => null,
+                    ]);
                 }
             }
         }
@@ -272,7 +421,7 @@ class ChallanController extends Controller
         }
 
         DB::beginTransaction();
-        try{
+        try {
             $challanMst = new tbl_challan_mst();
             $challanMst->challan_no = $challanNo;
             $challanMst->challan_date = $challanDate;
@@ -284,40 +433,53 @@ class ChallanController extends Controller
             $challanMst->broker_id = $brokerId;
             $challanMst->challan_type = $sellCategoryId;
             $challanMst->is_direct = 0;
-
             $challanMst->save();
 
-            $challanMstId = tbl_challan_mst::select('challan_mst_id')->latest()->first();
-
-            for($i=0;$i<count($allData);$i++){
-                $challanDetails = new tbl_challan_details();
-                $challanDetails->no = $i + 1;
-                $challanDetails->qty = $allData[$i]['qty'];
-                $challanDetails->challan_mst_id = $challanMstId->challan_mst_id;
-                $challanDetails->challan_type = $sellCategoryId;
-
-                $challanDetails->save();
+            if (count($allData) === 0) {
+                $allData = [['qty' => $totalQty]];
             }
 
-        }catch(QueryException $e){
+            $detailCount = count($allData);
+            $allocated = 0.0;
+            for ($i = 0; $i < $detailCount; $i++) {
+                $qty = (float) $allData[$i]['qty'];
+                if ($i === $detailCount - 1) {
+                    $lineWeight = round($weightGrams - $allocated, 3);
+                } else {
+                    $lineWeight = (float) $totalQty > 0
+                        ? round($weightGrams * ($qty / (float) $totalQty), 3)
+                        : 0.0;
+                    $allocated += $lineWeight;
+                }
+
+                tbl_challan_details::create([
+                    'no' => $i + 1,
+                    'qty' => $qty,
+                    'weight_grams' => $lineWeight,
+                    'qty_unit' => $qtyUnit,
+                    'challan_mst_id' => $challanMst->challan_mst_id,
+                    'challan_type' => $sellCategoryId,
+                    'sell_quality_id' => $sellQualityId,
+                    'sell_category_id' => $sellCategoryId,
+                    'challan_details_status' => true,
+                ]);
+            }
+        } catch (QueryException $e) {
             DB::rollBack();
-            $res = array(
-                "status" => -1,
-                "message" => "Server Error",
-                "errors" => $e
-            );
-            return response()->json($res, 500);
+            return response()->json([
+                'status' => -1,
+                'message' => 'Server Error',
+                'errors' => $e,
+            ], 500);
         }
 
         DB::commit();
 
-        $res = array(
-            "status" => 1,
-            "message" => "Sales bill added successfully.",
-            "errors" => null
-        );
-
-        return response()->json($res, 200);
+        return response()->json([
+            'status' => 1,
+            'message' => 'Sales bill added successfully.',
+            'errors' => null,
+        ], 200);
     }
 
     /* updates challan according to data recieved */
