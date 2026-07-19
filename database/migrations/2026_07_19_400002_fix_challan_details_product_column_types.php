@@ -9,6 +9,10 @@ class FixChallanDetailsProductColumnTypes extends Migration
 {
     public function up()
     {
+        if (!Schema::hasColumn('tbl_challan_details', 'sell_quality_id')) {
+            return;
+        }
+
         // Drop FKs if partial apply left them; ignore errors.
         try {
             Schema::table('tbl_challan_details', function (Blueprint $table) {
@@ -24,8 +28,11 @@ class FixChallanDetailsProductColumnTypes extends Migration
         }
 
         // Match referenced PK types (int unsigned).
-        DB::statement('ALTER TABLE tbl_challan_details MODIFY sell_quality_id INT UNSIGNED NULL');
-        DB::statement('ALTER TABLE tbl_challan_details MODIFY sell_category_id INT UNSIGNED NULL');
+        try {
+            DB::statement('ALTER TABLE tbl_challan_details MODIFY sell_quality_id INT UNSIGNED NULL');
+            DB::statement('ALTER TABLE tbl_challan_details MODIFY sell_category_id INT UNSIGNED NULL');
+        } catch (\Throwable $e) {
+        }
 
         // Backfill any remaining nulls from master.
         $challans = DB::table('tbl_challan_msts')
@@ -74,16 +81,25 @@ class FixChallanDetailsProductColumnTypes extends Migration
             }
         }
 
-        Schema::table('tbl_challan_details', function (Blueprint $table) {
-            $table->foreign('sell_quality_id')
-                ->references('sell_quality_id')
-                ->on('tbl_sell_qualities')
-                ->restrictOnDelete();
-            $table->foreign('sell_category_id')
-                ->references('sell_quality_category_id')
-                ->on('tbl_sell_quality_categories')
-                ->restrictOnDelete();
-        });
+        try {
+            Schema::table('tbl_challan_details', function (Blueprint $table) {
+                $table->foreign('sell_quality_id')
+                    ->references('sell_quality_id')
+                    ->on('tbl_sell_qualities')
+                    ->restrictOnDelete();
+            });
+        } catch (\Throwable $e) {
+        }
+
+        try {
+            Schema::table('tbl_challan_details', function (Blueprint $table) {
+                $table->foreign('sell_category_id')
+                    ->references('sell_quality_category_id')
+                    ->on('tbl_sell_quality_categories')
+                    ->restrictOnDelete();
+            });
+        } catch (\Throwable $e) {
+        }
     }
 
     public function down()
