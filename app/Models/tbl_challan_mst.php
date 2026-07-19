@@ -25,7 +25,12 @@ class tbl_challan_mst extends Model
     }
 
     function challan_details(){
-        return $this->hasMany('App\Models\tbl_challan_details', 'challan_mst_id', 'challan_mst_id')->where('challan_details_status', true);
+        return $this->hasMany('App\Models\tbl_challan_details', 'challan_mst_id', 'challan_mst_id')
+            ->where('challan_details_status', true)
+            ->with([
+                'quality:sell_quality_id,quality_name,sell_quality_category_id',
+                'category:sell_quality_category_id,sell_category_name,metal_type',
+            ]);
     }
 
     function customer_relation(){

@@ -11557,6 +11557,17 @@
             </tr>
         </thead>
         <tbody>
+            @foreach(($invoice->lines ?? []) as $index => $line)
+            <tr style="font-size: x-small;">
+                <td class="text-center" style="border-style: dotted;">{{ $index + 1 }}</td>
+                <td class="text-center" style="border-style: dotted;">{{ $line->quality_name }}</td>
+                <td class="text-center" style="border-style: dotted;">{{ $line->pieces }}</td>
+                <td class="text-center" style="border-style: dotted;">{{ number_format($line->weight_grams ?? $line->qty, 3) }}</td>
+                <td class="text-center" style="border-style: dotted;">Rs.&nbsp;{{ number_format($line->rate, 2) }}</td>
+                <td class="text-center" style="border-style: dotted;">Rs.&nbsp;{{ number_format($line->base_amount, 2) }}</td>
+            </tr>
+            @endforeach
+            @if(empty($invoice->lines))
             <tr style="font-size: x-small;">
                 <td class="text-center" style="border-style: dotted;">1</td>
                 <td class="text-center" style="border-style: dotted;">{{$invoice->quality_name}}</td>
@@ -11565,6 +11576,7 @@
                 <td class="text-center" style="border-style: dotted;">Rs.&nbsp;{{number_format($invoice->rate, 2)}}</td>
                 <td class="text-center" style="border-style: dotted;">Rs.&nbsp;{{number_format((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate), 2)}}</td>
             </tr>
+            @endif
         </tbody>
     </table>
 
@@ -11600,19 +11612,19 @@
                     <table class="table table-sm" style="margin-bottom: -0.3rem; margin-top: -0.45rem;">
                         <tbody>
                             <tr>
-                                <td style="font-size: x-small; border-bottom: dotted; text-align: right; border-top: none;">Rs.&nbsp;{{number_format((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate), 2)}}</td>
+                                <td style="font-size: x-small; border-bottom: dotted; text-align: right; border-top: none;">Rs.&nbsp;{{ number_format($invoice->subtotal ?? (($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate), 2) }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: x-small; border-bottom: dotted; text-align: right;">Rs.&nbsp;{{number_format((((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)*(($invoice->gst_percentage)/2))) / 100, 2) }}</td>
+                                <td style="font-size: x-small; border-bottom: dotted; text-align: right;">Rs.&nbsp;{{ number_format(($invoice->gst_amount ?? ((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate) * ($invoice->gst_percentage / 100))) / 2, 2) }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: x-small; border-bottom: dotted; text-align: right;">Rs.&nbsp;{{number_format((((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)*(($invoice->gst_percentage)/2))) / 100, 2) }}</td>
+                                <td style="font-size: x-small; border-bottom: dotted; text-align: right;">Rs.&nbsp;{{ number_format(($invoice->gst_amount ?? ((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate) * ($invoice->gst_percentage / 100))) / 2, 2) }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: x-small; border-bottom: dotted; text-align: right;">Rs.&nbsp;{{number_format(round(((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)) + ((((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)*(($invoice->gst_percentage)))) / 100)) - (((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)) + ((((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)*(($invoice->gst_percentage)))) / 100)), 2)}}</td>
+                                <td style="font-size: x-small; border-bottom: dotted; text-align: right;">Rs.&nbsp;{{ number_format(0, 2) }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: x-small; text-align: right;">Rs.&nbsp;{{number_format(round(((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)) + ((((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate)*(($invoice->gst_percentage)))) / 100)), 2)}}</td>
+                                <td style="font-size: x-small; text-align: right;">Rs.&nbsp;{{ number_format($invoice->grand_total ?? round((($invoice->weight_grams ?? $invoice->total_qty) * $invoice->rate) * (1 + $invoice->gst_percentage / 100), 2), 2) }}</td>
                             </tr>
                         </tbody>
                     </table>

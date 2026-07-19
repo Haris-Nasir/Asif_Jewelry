@@ -11548,24 +11548,29 @@
     <table class="table table-sm" style="border-style: solid; margin-top: -0.3rem;">
         <thead>
             <tr>
-                <td class="text-center" style="border-style: solid; font-size: small; width: 20%;"><b>Sr. No.</b></td>
-                <td class="text-center" style="border-style: solid; font-size: small; width: 80%;"><b>Quantity (Pieces)</b></td>
+                <td class="text-center" style="border-style: solid; font-size: small; width: 12%;"><b>Sr. No.</b></td>
+                <td class="text-center" style="border-style: solid; font-size: small; width: 40%;"><b>Item</b></td>
+                <td class="text-center" style="border-style: solid; font-size: small; width: 24%;"><b>Quantity (Pieces)</b></td>
+                <td class="text-center" style="border-style: solid; font-size: small; width: 24%;"><b>Weight (g)</b></td>
             </tr>
         </thead>
         <tbody>
             @forelse ($challanData['line_items'] as $item)
                 <tr>
                     <td style="border-right: solid; text-align: center; font-size: 13px;">{{ $item['sr'] }}</td>
+                    <td style="border-right: solid; text-align: center; font-size: 13px;">{{ $item['quality_name'] ?? '-' }}</td>
                     <td style="border-right: solid; text-align: right; font-size: 13px;">{{ $item['qty'] }}</td>
+                    <td style="border-right: solid; text-align: right; font-size: 13px;">{{ $item['weight_grams'] ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="2" class="text-center" style="font-size: 13px;">No line items</td>
+                    <td colspan="4" class="text-center" style="font-size: 13px;">No line items</td>
                 </tr>
             @endforelse
             <tr>
-                <td style="border-right: solid; border-top: 1.5px solid black; text-align: right; font-size: 13px;"><b>Total Pieces</b></td>
+                <td colspan="2" style="border-right: solid; border-top: 1.5px solid black; text-align: right; font-size: 13px;"><b>Total Pieces</b></td>
                 <td style="border-right: solid; border-top: 1.5px solid black; text-align: right; font-size: 13px;"><b>{{ $challanData['total_pieces'] }}</b></td>
+                <td style="border-right: solid; border-top: 1.5px solid black; text-align: right; font-size: 13px;"><b>{{ $challanData['weight_grams'] }}</b></td>
             </tr>
         </tbody>
     </table>

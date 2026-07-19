@@ -393,7 +393,34 @@ NOTES
                                             <input type="text" class="form-control" v-model="invoiceToView.customerGSTNo" disabled>
                                         </div>
                                     </div>
-                                    <div class="row mt-3">
+                                    <div class="row mt-3" v-if="invoiceToView.lines && invoiceToView.lines.length">
+                                        <div class="col-12">
+                                            <label class="text-md">{{ $t('invoice.products') }}</label>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>{{ $t('common.quality') }}</th>
+                                                            <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                            <th class="text-right">{{ $t('invoice.qtyPieces') }}</th>
+                                                            <th class="text-right">{{ $t('common.ratePerG') }}</th>
+                                                            <th class="text-right">{{ $t('invoice.lineAmount') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(line, idx) in invoiceToView.lines" :key="idx">
+                                                            <td>{{ $label(line.quality_name) }}</td>
+                                                            <td class="text-right">{{ line.weight_grams }}</td>
+                                                            <td class="text-right">{{ line.qty }}</td>
+                                                            <td class="text-right">{{ line.rate }}</td>
+                                                            <td class="text-right">{{ line.base_amount }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3" v-else>
                                         <div class="col-md-2">
                                             <label class="text-md mt-1">{{ $t('common.quality') }}</label>
                                         </div>
@@ -527,7 +554,8 @@ export default {
                 gstPercentage: "",
                 totalAmount: "",
                 gstAmount: "",
-                netAmount: ""
+                netAmount: "",
+                lines: [],
             },
 
             invoiceToEdit: {
@@ -822,18 +850,31 @@ export default {
                         this.invoiceToView.broker = response.data.data.challan_mst_for_invoice.broker.broker_name;
                         this.invoiceToView.customerMobileNo = response.data.data.challan_mst_for_invoice.customer_relation.customer_contact_no;
                         this.invoiceToView.customerGSTNo = response.data.data.challan_mst_for_invoice.customer_relation.customer_gst_no;
-                        this.invoiceToView.quality = response.data.data.challan_mst_for_invoice.quality.quality_name;
-                        this.invoiceToView.category = response.data.data.challan_mst_for_invoice.quality.category.sell_category_name;
+                        this.invoiceToView.quality = (response.data.data.quality_names || []).join(', ')
+                            || response.data.data.challan_mst_for_invoice.quality.quality_name;
+                        this.invoiceToView.category = response.data.data.challan_mst_for_invoice.quality.category
+                            ? response.data.data.challan_mst_for_invoice.quality.category.sell_category_name
+                            : '';
                         this.invoiceToView.qty = response.data.data.challan_mst_for_invoice.total_qty;
                         this.invoiceToView.totalWeightGrams = parseFloat(response.data.data.weight_grams || 0).toFixed(3);
                         this.invoiceToView.unit = response.data.data.challan_mst_for_invoice.qty_unit;
                         this.invoiceToView.rate = response.data.data.rate;
                         this.invoiceToView.gstPercentage = response.data.data.gst_percentage;
+                        this.invoiceToView.lines = (response.data.data.details || []).map((row) => ({
+                            quality_name: row.quality ? row.quality.quality_name : '',
+                            weight_grams: parseFloat(row.weight_grams || 0).toFixed(3),
+                            qty: row.qty,
+                            rate: parseFloat(row.rate || 0).toFixed(2),
+                            base_amount: parseFloat(row.base_amount || 0).toFixed(2),
+                        }));
                         const totalWeight = parseFloat(response.data.data.weight_grams || 0);
                         const rate = parseFloat(response.data.data.rate || 0);
                         const gstPct = parseFloat(response.data.data.gst_percentage || 0);
                         const sold = parseFloat(response.data.data.sold_amount || 0);
                         let totalAmount = sold > 0 ? sold / (1 + gstPct * 0.01) : totalWeight * rate;
+                        if (this.invoiceToView.lines.length) {
+                            totalAmount = this.invoiceToView.lines.reduce((sum, line) => sum + parseFloat(line.base_amount || 0), 0);
+                        }
                         let gstAmount = totalAmount * gstPct * 0.01;
                         let netAmount = sold > 0 ? sold : totalAmount + gstAmount;
                         this.invoiceToView.totalAmount = totalAmount.toFixed(2);
@@ -860,6 +901,11 @@ export default {
                         toastr.info(response.data.message);
                     }
                     else if(response.data.status == 1){
+                        const details = response.data.data.details || [];
+                        if (details.length > 1) {
+                            toastr.info(this.$t('invoice.multiEditBlocked'));
+                            return;
+                        }
                         this.invoiceToEdit.invoiceDate = toInputDateTime(response.data.data.challan_mst_for_invoice.challan_date);
                         this.invoiceToEdit.oldInvoiceDate = this.invoiceToEdit.invoiceDate;
                         this.invoiceToEdit.invoiceNo = response.data.data.challan_mst_for_invoice.challan_no;
@@ -1123,6 +1169,7 @@ export default {
             this.invoiceToView.totalAmount = "";
             this.invoiceToView.gstAmount = "";
             this.invoiceToView.netAmount = "";
+            this.invoiceToView.lines = [];
             this.invoiceToView.invoiceId = -1;
         },
 

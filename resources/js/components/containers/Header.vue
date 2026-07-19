@@ -45,7 +45,7 @@
 import { clearAuth, getUser } from '../../auth';
 import { i18nState, setLocale } from '../../i18n';
 
-const THEME_KEY = 'ayub_jewelry_theme';
+const THEME_KEY = 'ayyub_jewelry_theme';
 
 export default {
     name: "Header",

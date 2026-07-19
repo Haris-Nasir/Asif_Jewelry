@@ -6,10 +6,10 @@ use App\Models\tbl_investor;
 use App\Models\tbl_lab_job;
 use App\Models\tbl_lab_job_investor;
 use App\Services\LabJobService;
+use App\Http\Controllers\Concerns\AuditsActions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\Concerns\AuditsActions;
 
 class LabJobController extends Controller
 {

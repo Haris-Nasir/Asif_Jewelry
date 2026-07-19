@@ -15,6 +15,7 @@ class tbl_investor extends Model
         'contact_no',
         'email',
         'profit_share_percentage',
+        'profit_split_mode',
         'investor_status',
     ];
 
@@ -22,6 +23,11 @@ class tbl_investor extends Model
         'profit_share_percentage' => 'decimal:2',
         'investor_status' => 'boolean',
     ];
+
+    public function usesCustomProfitSplit(): bool
+    {
+        return ($this->profit_split_mode ?? 'investment') === 'custom';
+    }
 
     public function user()
     {

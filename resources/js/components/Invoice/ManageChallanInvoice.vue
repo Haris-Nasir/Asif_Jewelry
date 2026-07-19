@@ -155,6 +155,9 @@
                                                             <button type="button" class="btn btn-primary btn-sm" :title="$t('common.edit')"
                                                                 @click="editInvoice(invoice.invoice_mst_id)"><i
                                                                     class="fas fa-pen"></i></button>
+                                                            <button type="button" class="btn btn-danger btn-sm" :title="$t('common.delete')"
+                                                                @click="confirmInvoiceDeletation(invoice.invoice_mst_id, invoice.challan_no)"><i
+                                                                    class="fas fa-trash"></i></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -910,7 +913,48 @@
                         console.log("Err In Updateing Invoice API Call");
                         toastr.error(this.$t('common.somethingWrong'));
                     })
-            }
+            },
+
+            confirmInvoiceDeletation(invoiceMstId, invoiceNo) {
+                swal.fire({
+                    title: `<h5 style='color:#9C9794'>${this.$t('invoice.deleteConfirmTitle', { no: invoiceNo })}</h5>`,
+                    html: `<h5 style='color:#9C9794'>${this.$t('invoice.deleteConfirm')}</h5>`,
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showDenyButton: true,
+                    confirmButtonText: this.$t('common.yesDelete'),
+                    denyButtonText: this.$t('common.no'),
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.deleteInvoice(invoiceMstId);
+                    } else if (result.isDenied) {
+                        toastr.info(this.$t('invoice.deleteCanceled'));
+                    }
+                });
+            },
+
+            deleteInvoice(invoiceMstId) {
+                axios.delete('/api/invoice/' + invoiceMstId)
+                    .then((res) => {
+                        if (res.data.status == 1) {
+                            swal.fire({
+                                title: this.$t('common.success'),
+                                html: `<h5 style='color:#9C9794'>${this.$t('invoice.deletedWithNo', { no: res.data.invoiceNo })}</h5>`,
+                                icon: 'success',
+                                allowOutsideClick: false,
+                            }).then(() => {
+                                this.getInvoices(this.filters.invoices.current_page);
+                            });
+                        } else if (res.data.status == -1) {
+                            toastr.error(res.data.message || this.$t('common.somethingWrong'));
+                        } else {
+                            toastr.error(this.$t('common.somethingWrong'));
+                        }
+                    })
+                    .catch(() => {
+                        toastr.error(this.$t('common.somethingWrong'));
+                    });
+            },
         },
     };
 </script>

@@ -3,10 +3,10 @@
         <a href="/" class="brand-link">
             <img
                 src="/images/logo-gold-jewelry.png"
-                alt="Ayub Jewelers Logo"
+                alt="Ayyub Jewelers Logo"
                 class="brand-image elevation-3"
             />
-            <span class="brand-text font-weight-light">Ayub Jewelers</span>
+            <span class="brand-text font-weight-light">Ayyub Jewelers</span>
         </a>
 
         <div ref="sidebarMenu" class="sidebar">
@@ -342,7 +342,7 @@
 <script>
 import { getUser, hasPermission } from '../../auth';
 
-const SECTION_KEY = 'ayub_jewelry_sidebar_sections';
+const SECTION_KEY = 'ayyub_jewelry_sidebar_sections';
 
 export default {
     name: "Sidebar",

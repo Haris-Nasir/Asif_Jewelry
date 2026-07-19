@@ -387,40 +387,42 @@ class StockService
         int $referenceId,
         ?int $userId = null
     ): void {
-        $entry = tbl_stock_ledger::where('reference_type', $referenceType)
+        $entries = tbl_stock_ledger::where('reference_type', $referenceType)
             ->where('reference_id', $referenceId)
             ->where('transaction_type', 'sale')
-            ->first();
+            ->get();
 
-        if (!$entry) {
+        if ($entries->isEmpty()) {
             return;
         }
 
-        DB::transaction(function () use ($entry, $referenceType, $referenceId, $userId) {
-            $weightGrams = (float) $entry->weight_grams;
-            $pieces = (int) $entry->quantity_pieces;
-            $balance = $this->getBalance($entry->metal_type);
+        DB::transaction(function () use ($entries, $referenceType, $referenceId, $userId) {
+            foreach ($entries as $entry) {
+                $weightGrams = (float) $entry->weight_grams;
+                $pieces = (int) $entry->quantity_pieces;
+                $balance = $this->getBalance($entry->metal_type);
 
-            $balance->total_weight_grams = round((float) $balance->total_weight_grams + $weightGrams, 3);
-            $balance->total_pieces = (int) $balance->total_pieces + $pieces;
-            $balance->save();
+                $balance->total_weight_grams = round((float) $balance->total_weight_grams + $weightGrams, 3);
+                $balance->total_pieces = (int) $balance->total_pieces + $pieces;
+                $balance->save();
 
-            tbl_stock_ledger::create([
-                'metal_type' => $entry->metal_type,
-                'sell_quality_id' => $entry->sell_quality_id,
-                'transaction_type' => 'adjustment',
-                'weight_grams' => $weightGrams,
-                'quantity_pieces' => $pieces,
-                'rate_per_gram' => $entry->rate_per_gram,
-                'amount' => $entry->amount ? -((float) $entry->amount) : null,
-                'balance_weight_after' => $balance->total_weight_grams,
-                'reference_type' => $referenceType . '_reversal',
-                'reference_id' => $referenceId,
-                'created_by' => $userId,
-                'notes' => 'Sale deleted — stock restored (' . $pieces . ' pcs, ' . $weightGrams . 'g)',
-            ]);
+                tbl_stock_ledger::create([
+                    'metal_type' => $entry->metal_type,
+                    'sell_quality_id' => $entry->sell_quality_id,
+                    'transaction_type' => 'adjustment',
+                    'weight_grams' => $weightGrams,
+                    'quantity_pieces' => $pieces,
+                    'rate_per_gram' => $entry->rate_per_gram,
+                    'amount' => $entry->amount ? -((float) $entry->amount) : null,
+                    'balance_weight_after' => $balance->total_weight_grams,
+                    'reference_type' => $referenceType . '_reversal',
+                    'reference_id' => $referenceId,
+                    'created_by' => $userId,
+                    'notes' => 'Sale deleted — stock restored (' . $pieces . ' pcs, ' . $weightGrams . 'g)',
+                ]);
 
-            $entry->delete();
+                $entry->delete();
+            }
         });
     }
 

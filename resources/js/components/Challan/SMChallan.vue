@@ -527,6 +527,31 @@ NOTES
                                             <input type="text" class="form-control" v-model="challanToView.unit" disabled>
                                         </div>
                                     </div>
+                                    <div class="row mt-3" v-if="challanToView.lines && challanToView.lines.length">
+                                        <div class="col-md-12">
+                                            <label class="text-md">{{ $t('invoice.products') }}</label>
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>{{ $t('common.quality') }}</th>
+                                                            <th class="text-right">{{ $t('common.quantity') }}</th>
+                                                            <th class="text-right">{{ $t('common.weightG') }}</th>
+                                                            <th>{{ $t('common.unit') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(line, idx) in challanToView.lines" :key="idx">
+                                                            <td>{{ $label(line.qualityName) }}</td>
+                                                            <td class="text-right">{{ line.qty }}</td>
+                                                            <td class="text-right">{{ line.weightGrams }}</td>
+                                                            <td>{{ line.unit }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row mt-3">
                                         <div class="col-md-4">
                                             <table class="table table-hover table-bordered table-striped table-sm">
@@ -700,6 +725,7 @@ export default {
                 quality: "", // quality
                 category: "", // category
                 unit: "", // unit
+                lines: [],
                 products: {
                     productPart1:[], // product in table 1
                     productPart2:[], // product in table 2
@@ -989,6 +1015,12 @@ export default {
                 .get("/api/challan/"+challan_id)
                 .then((response)=>{
                     let challan = response.data;
+                    const items = challan.items || [];
+                    const uniqueQualities = [...new Set(items.map((i) => String(i.qualityId)).filter(Boolean))];
+                    if (uniqueQualities.length > 1) {
+                        toastr.info(this.$t('challan.multiEditBlocked'));
+                        return;
+                    }
                     this.challanDate = toInputDateTime(challan.challandate);
                     this.oldChallanDate = this.challanDate;
                     this.challanNo = challan.challanno;
@@ -1504,9 +1536,20 @@ export default {
                     this.challanToView.challanNo = response.data.challanno;
                     this.challanToView.company = response.data.customer.customer_company_name;
                     this.challanToView.broker = response.data.broker.broker_name;
-                    this.challanToView.quality = response.data.quality.quality_name;
-                    this.challanToView.category = response.data.quality.category.sell_category_name;
+                    this.challanToView.quality = (response.data.quality_names || []).join(', ')
+                        || (response.data.quality && response.data.quality.quality_name)
+                        || '';
+                    this.challanToView.category = response.data.quality && response.data.quality.category
+                        ? response.data.quality.category.sell_category_name
+                        : '';
                     this.challanToView.unit = response.data.unit;
+                    this.challanToView.lines = (response.data.items || []).map((row) => ({
+                        qualityName: row.qualityName,
+                        categoryName: row.categoryName,
+                        qty: row.qty,
+                        weightGrams: row.weightGrams,
+                        unit: row.unit,
+                    }));
 
                     let products = response.data.challandetails;
                     
@@ -1566,6 +1609,7 @@ export default {
             this.challanToView.quality = "";
             this.challanToView.category = "";
             this.challanToView.unit = "";
+            this.challanToView.lines = [];
             this.resetProductsArrayAndTotalQty();
 
         },

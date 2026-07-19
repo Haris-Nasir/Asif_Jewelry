@@ -52,4 +52,14 @@ class tbl_invoice_mst extends Model
     public function bank(){
         return $this->hasOne('App\Models\tbl_bank_details', 'bank_details_id', 'bank_details_id');
     }
+
+    public function details()
+    {
+        return $this->hasMany(tbl_invoice_detail::class, 'invoice_mst_id', 'invoice_mst_id')
+            ->where('invoice_detail_status', true)
+            ->with([
+                'quality:sell_quality_id,quality_name,sell_quality_category_id',
+                'category:sell_quality_category_id,sell_category_name',
+            ]);
+    }
 }
