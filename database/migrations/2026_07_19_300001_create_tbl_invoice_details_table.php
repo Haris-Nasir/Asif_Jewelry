@@ -8,11 +8,17 @@ class CreateTblInvoiceDetailsTable extends Migration
 {
     public function up()
     {
+        // Table may already exist if created manually / prior deploy without a migrations row.
+        if (Schema::hasTable('tbl_invoice_details')) {
+            return;
+        }
+
         Schema::create('tbl_invoice_details', function (Blueprint $table) {
             $table->unsignedBigInteger('invoice_detail_id')->autoIncrement();
             $table->unsignedBigInteger('invoice_mst_id');
-            $table->unsignedBigInteger('sell_quality_id');
-            $table->unsignedBigInteger('sell_category_id');
+            // Match referenced PK types (int unsigned on sell quality tables).
+            $table->unsignedInteger('sell_quality_id');
+            $table->unsignedInteger('sell_category_id');
             $table->decimal('qty', 12, 3)->default(0);
             $table->string('qty_unit', 20)->default('pcs');
             $table->decimal('weight_grams', 12, 3)->default(0);
