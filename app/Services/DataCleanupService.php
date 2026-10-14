@@ -200,9 +200,12 @@ class DataCleanupService
             $report['tbl_expense_categories'] = "Reset to 6 standard seeded expense categories";
         }
 
-        // 6. Users table: DO NOT DELETE ANY LOGINS
-        $userCount = DB::table('users')->count();
-        $report['users'] = "Preserved all {$userCount} users/logins intact";
+        // 6. Users table: Clear worker and non-admin test accounts, preserving admin login(s)
+        if (Schema::hasTable('users')) {
+            $deletedWorkers = DB::table('users')->where('role', '!=', 'admin')->delete();
+            $adminCount = DB::table('users')->where('role', 'admin')->count();
+            $report['users'] = "Cleared {$deletedWorkers} worker/non-admin test account(s); preserved {$adminCount} admin login(s) intact";
+        }
 
         // 7. Re-enable Foreign Key Constraints
         if ($driver === 'sqlite') {
