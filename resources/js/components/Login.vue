@@ -12,10 +12,10 @@
             <div class="brand-mark">
                 <img
                     src="/images/logo-gold-jewelry.png"
-                    alt="Ayyub Jewelers"
+                    alt="Haris Nasir Jewellery"
                     class="brand-logo"
                 />
-                <span class="brand-name">Ayyub Jewelers</span>
+                <span class="brand-name">Haris Nasir Jewellery</span>
             </div>
 
             <div class="metal-tags" aria-hidden="true">
