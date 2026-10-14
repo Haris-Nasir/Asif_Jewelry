@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>{{ config('company.name', 'Haris Nasir Jewellery') }}</title>
+        <title>{{ config('company.name', 'Ayub Jewellers') }}</title>
 
         <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">

@@ -5,10 +5,10 @@
         <a href="/" class="brand-link">
             <img
                 src="/images/logo-gold-jewelry.png"
-                alt="Haris Nasir Jewellery Logo"
+                alt="Ayub Jewellers Logo"
                 class="brand-image elevation-3"
             />
-            <span class="brand-text font-weight-light">Haris Nasir Jewellery</span>
+            <span class="brand-text font-weight-light">Ayub Jewellers</span>
         </a>
 
         <div ref="sidebarMenu" class="sidebar">
