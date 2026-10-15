@@ -83,7 +83,7 @@ class ChallanController extends Controller
         $paginator->getCollection()->transform(function ($row) {
             $names = tbl_challan_details::where('challan_mst_id', $row->challan_mst_id)
                 ->where('challan_details_status', true)
-                ->whereNotNull('sell_quality_id')
+                ->whereNotNull('tbl_challan_details.sell_quality_id')
                 ->join('tbl_sell_qualities', 'tbl_sell_qualities.sell_quality_id', 'tbl_challan_details.sell_quality_id')
                 ->orderBy('tbl_challan_details.no')
                 ->pluck('quality_name')

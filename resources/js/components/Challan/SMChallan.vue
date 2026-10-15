@@ -157,7 +157,7 @@ NOTES
                                                             <a :href="pdfLink('/challan/pdf/' + challan.challan_mst_id)" target="_blank" class="btn btn-danger btn-sm" :title="$t('common.pdf')"><i class="fas fa-file-pdf"></i></a>
                                                             <button type="button" class="btn btn-info btn-sm" :title="$t('common.view')" @click="viewChallan(challan.challan_mst_id, challan.challan_no)"><i class="fas fa-eye"></i></button>
                                                             <button type="button" class="btn btn-primary btn-sm" :title="$t('common.edit')" @click="editChallan(challan.challan_mst_id)"><i class="fas fa-pen"></i></button>
-                                                            <button type="button" class="btn btn-danger btn-sm" :title="$t('common.delete')" @click="confirmChallandeletation(challan.challan_mst_id, challan.challan_no )"><i class="fas fa-trash"></i></button>
+                                                            <button v-if="hasPermission('sales_delete')" type="button" class="btn btn-danger btn-sm" :title="$t('common.delete')" @click="confirmChallandeletation(challan.challan_mst_id, challan.challan_no )"><i class="fas fa-trash"></i></button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -638,7 +638,7 @@ NOTES
 // importing required plugins
 import toastr from "toastr";
 import swal from "sweetalert2";
-import { pdfUrl } from "../../auth";
+import { hasPermission, pdfUrl } from "../../auth";
 import { formatDate, getNowDateTime, toInputDateTime, toDateOnly } from "../../currency";
 import { ModelSelect } from "vue-search-select"; // plugin for combobox-Searchable Select Menu
 
