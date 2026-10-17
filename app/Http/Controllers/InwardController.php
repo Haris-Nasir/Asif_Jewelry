@@ -142,7 +142,13 @@ class InwardController extends Controller
             $weights = $calc->decomposeWeights($gross, $stone, $purity);
 
             $inward_detail = new tbl_inward_details();
-            $inward_detail->inward_quality_id = (int) $request->input('inward_quality_id', $itemTypeId);
+            // Legacy column: only set it when a valid inward quality is explicitly sent.
+            // Never fall back to the item type id (that is a sell_quality id, a different table).
+            $inwardQualityId = $request->input('inward_quality_id');
+            $inward_detail->inward_quality_id = ($inwardQualityId && DB::table('tbl_inward_qualities')
+                ->where('inward_quality_id', (int) $inwardQualityId)->exists())
+                ? (int) $inwardQualityId
+                : null;
             $inward_detail->sell_quality_id = $itemTypeId;
             $inward_detail->metal_type = $metalType;
             $inward_detail->weight_grams = $weights['net_weight'];
